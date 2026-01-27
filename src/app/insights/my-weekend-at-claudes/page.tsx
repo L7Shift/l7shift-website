@@ -290,7 +290,7 @@ export default function MyWeekendAtClaudes() {
             Think Venom. Eddie Brock alone? Struggling journalist. The symbiote alone? Chaotic, directionless. Together? Something entirely new. Capabilities neither could access independently.
           </p>
           <p style={{ color: 'var(--clean-white)', margin: 0 }}>
-            <strong>That's what's happening right now with AI. Not replacement. SymbAIosis.</strong>
+            <strong>That's what's happening right now with AI. Not replacement. <span style={{ background: 'linear-gradient(90deg, var(--electric-cyan), var(--hot-magenta))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>SymbAIosis™</span>.</strong>
           </p>
         </div>
 
@@ -348,7 +348,7 @@ export default function MyWeekendAtClaudes() {
         </p>
 
         <p style={{ fontSize: '1.1rem', color: '#B0B0B0', marginBottom: '24px' }}>
-          This is the SymbAIotic Shift™. It's not coming. It's here.
+          This is the <span style={{ background: 'linear-gradient(90deg, var(--electric-cyan), var(--hot-magenta))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>SymbAIotic Shift™</span>. It's not coming. It's here.
         </p>
 
         <h2 style={{
@@ -487,7 +487,7 @@ export default function MyWeekendAtClaudes() {
                 textTransform: 'uppercase',
                 fontSize: '0.75rem',
                 letterSpacing: '1px',
-              }}>SymbAIotic</th>
+              }}><span style={{ background: 'linear-gradient(90deg, var(--electric-cyan), var(--hot-magenta))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>SymbAIotic™</span></th>
             </tr>
           </thead>
           <tbody>
@@ -498,6 +498,7 @@ export default function MyWeekendAtClaudes() {
               ['Crew mobile portal', '1-2 weeks', '4 hours'],
               ['Stripe integration', '1 week', '3 hours'],
               ['Email automation (8 templates)', '3-5 days', '2 hours'],
+              ['Security infrastructure', '2-3 days', '1 hour'],
             ].map(([component, traditional, symbiotic], i) => (
               <tr key={i}>
                 <td style={{
@@ -693,6 +694,21 @@ export default function MyWeekendAtClaudes() {
           </p>
         </div>
 
+        <div style={{
+          background: 'var(--carbon-gray)',
+          borderLeft: '3px solid',
+          borderImage: 'linear-gradient(180deg, var(--electric-cyan), var(--hot-magenta)) 1',
+          padding: '24px 28px',
+          margin: '32px 0',
+        }}>
+          <p style={{ color: 'var(--clean-white)', fontSize: '1rem', margin: 0, fontStyle: 'italic' }}>
+            "Production means security. Bot protection on every public form. Graceful degradation. No friction for real users."
+          </p>
+          <p style={{ color: 'var(--acid-lime)', marginTop: '12px', marginBottom: 0 }}>
+            <strong>One hour. Enterprise-grade protection. Four attack vectors closed.</strong>
+          </p>
+        </div>
+
         <p style={{ fontSize: '1.1rem', color: 'var(--clean-white)', marginBottom: '24px' }}>
           <strong>I wasn't learning to code. I was applying twenty years of business strategy directly to software — zero translation loss.</strong>
         </p>
@@ -781,7 +797,7 @@ export default function MyWeekendAtClaudes() {
         </p>
 
         <p style={{ fontSize: '1.1rem', color: '#B0B0B0', marginBottom: '24px' }}>
-          Here's the SymbAIotic development cycle:
+          Here's the <span style={{ background: 'linear-gradient(90deg, var(--electric-cyan), var(--hot-magenta))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>SymbAIotic™</span> development cycle:
         </p>
 
         <div style={{
@@ -792,7 +808,7 @@ export default function MyWeekendAtClaudes() {
           margin: '32px 0',
         }}>
           <p style={{ color: 'var(--clean-white)', fontSize: '1.1rem', margin: 0 }}>
-            <strong>We build systems in SymbAIosis with the people who will use them.</strong>
+            <strong>We build systems in <span style={{ background: 'linear-gradient(90deg, var(--electric-cyan), var(--hot-magenta))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>SymbAIosis™</span> with the people who will use them.</strong>
           </p>
           <p style={{ color: 'var(--acid-lime)', marginTop: '16px', marginBottom: 0, fontSize: '1rem' }}>
             The result? Dramatically higher <strong>adoption</strong>, <strong>utilization</strong>, and <strong>speed to value</strong>.
@@ -848,59 +864,31 @@ export default function MyWeekendAtClaudes() {
           Because you can.
         </p>
 
-        {/* Client Quote */}
+        {/* The Real Why */}
         <div style={{
           background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.05) 0%, rgba(255, 0, 170, 0.05) 100%)',
           border: '1px solid rgba(0, 240, 255, 0.2)',
           padding: '40px',
           margin: '72px 0',
-          position: 'relative',
         }}>
-          <div style={{
-            position: 'absolute',
-            top: '-20px',
-            left: '40px',
-            fontSize: '80px',
-            color: 'var(--electric-cyan)',
-            opacity: 0.3,
-            fontFamily: 'Georgia, serif',
-            lineHeight: 1,
-          }}>
-            "
-          </div>
-          <blockquote style={{
+          <h3 style={{
+            fontFamily: 'Helvetica Neue, sans-serif',
             fontSize: '1.25rem',
-            color: 'var(--clean-white)',
-            fontStyle: 'italic',
-            margin: '0 0 24px',
-            lineHeight: 1.6,
+            color: 'var(--electric-cyan)',
+            marginTop: 0,
+            marginBottom: '16px',
           }}>
-            I thought we'd be shopping for developers for months. Instead, I watched my entire business operations platform come to life in a weekend. The crew portal, the scheduling system, the billing — it's exactly what I described, not some compromised version.
-          </blockquote>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{
-              width: '48px',
-              height: '48px',
-              background: 'var(--carbon-gray)',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1rem',
-              fontWeight: 600,
-              color: 'var(--electric-cyan)',
-            }}>
-              EJ
-            </div>
-            <div>
-              <div style={{ color: 'var(--clean-white)', fontWeight: 600, fontSize: '0.95rem' }}>
-                Eric Johnson
-              </div>
-              <div style={{ color: '#888', fontSize: '0.85rem' }}>
-                Founder, Scat Pack CLT
-              </div>
-            </div>
-          </div>
+            Why I Actually Built This
+          </h3>
+          <p style={{ fontSize: '1.1rem', color: '#B0B0B0', marginBottom: '16px' }}>
+            Full disclosure: I'm the founder of both L7 Shift and Scat Pack CLT.
+          </p>
+          <p style={{ fontSize: '1.1rem', color: '#B0B0B0', marginBottom: '16px' }}>
+            I started Scat Pack to create a real business opportunity for my 13-year-old son. Not a lemonade stand. Not a theoretical exercise. A real company with real customers, real revenue, and real lessons about building something from nothing.
+          </p>
+          <p style={{ fontSize: '1.1rem', color: 'var(--clean-white)', margin: 0 }}>
+            <strong>The best way to teach entrepreneurship is to do it together.</strong> And now we have the tools to build at the speed of ambition — not the speed of budget constraints.
+          </p>
         </div>
 
         {/* Divider */}
@@ -936,16 +924,19 @@ export default function MyWeekendAtClaudes() {
         }}>
           {[
             {
-              title: 'SymbAIotic Strategy Sessions',
+              title: 'SymbAIotic™ Strategy Sessions',
               description: 'Half-day intensive. Map your "someday" projects to what\'s now possible.',
+              hasGradient: true,
             },
             {
-              title: 'Embedded SymbAIosis',
+              title: 'Embedded SymbAIosis™',
               description: 'We build alongside you. Your strategy, our execution layer.',
+              hasGradient: true,
             },
             {
-              title: 'SymbAIote Enablement',
+              title: 'SymbAIote™ Enablement',
               description: 'Develop your own AI-amplified capabilities. Hands-on apprenticeship.',
+              hasGradient: true,
             },
           ].map((service) => (
             <div key={service.title} style={{
@@ -957,8 +948,11 @@ export default function MyWeekendAtClaudes() {
                 fontFamily: 'Helvetica Neue, sans-serif',
                 fontSize: '1rem',
                 marginBottom: '12px',
-                color: 'var(--clean-white)',
                 marginTop: 0,
+                background: 'linear-gradient(90deg, var(--electric-cyan), var(--hot-magenta))',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
               }}>
                 {service.title}
               </h4>
