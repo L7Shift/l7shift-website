@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L7 Shift - Marketing Deck</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --void-black: #0A0A0A;
+            --clean-white: #FAFAFA;
+            --electric-cyan: #00F0FF;
+            --hot-magenta: #FF00AA;
+            --acid-lime: #BFFF00;
+            --carbon-gray: #2A2A2A;
+            --soft-gray: #E5E5E5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--void-black);
+            color: var(--clean-white);
+            line-height: 1.6;
+        }
+
+        /* Slide styles */
+        .slide {
+            min-height: 100vh;
+            padding: 60px 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media print {
+            .slide {
+                page-break-after: always;
+                height: 100vh;
+                padding: 40px 60px;
+            }
+        }
+
+        /* Typography */
+        h1 {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: clamp(48px, 8vw, 96px);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+        }
+
+        h2 {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: clamp(36px, 5vw, 64px);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        h3 {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: clamp(24px, 3vw, 36px);
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        p {
+            font-size: 18px;
+            color: var(--soft-gray);
+            max-width: 700px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--electric-cyan), var(--hot-magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cyan { color: var(--electric-cyan); }
+        .magenta { color: var(--hot-magenta); }
+        .lime { color: var(--acid-lime); }
+
+        /* Gradient bar */
+        .gradient-bar {
+            width: 200px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--electric-cyan), var(--hot-magenta), var(--acid-lime));
+            margin: 24px 0;
+        }
+
+        .gradient-bar-full {
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--electric-cyan), var(--hot-magenta), var(--acid-lime));
+        }
+
+        /* Logo */
+        .logo {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0;
+        }
+
+        .logo-text {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .logo-l7 {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 36px;
+            font-weight: 500;
+            color: var(--clean-white);
+            letter-spacing: -0.02em;
+        }
+
+        .logo-shift {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 24px;
+            font-weight: 300;
+            color: var(--soft-gray);
+            letter-spacing: 0.15em;
+        }
+
+        .logo-bar {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--electric-cyan), var(--hot-magenta), var(--acid-lime));
+            margin-top: 2px;
+        }
+
+        .logo-tagline {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.25em;
+            color: var(--soft-gray);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .logo.large .logo-l7 {
+            font-size: 72px;
+        }
+
+        .logo.large .logo-shift {
+            font-size: 48px;
+        }
+
+        .logo.large .logo-bar {
+            height: 4px;
+            margin-top: 4px;
+        }
+
+        .logo.large .logo-tagline {
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+            margin-top: 48px;
+        }
+
+        .card {
+            background: var(--carbon-gray);
+            padding: 32px;
+            border-left: 4px solid var(--electric-cyan);
+        }
+
+        .card.magenta-border { border-color: var(--hot-magenta); }
+        .card.lime-border { border-color: var(--acid-lime); }
+
+        .card h4 {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .card p {
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        .card ul {
+            list-style: none;
+            font-size: 14px;
+            color: var(--soft-gray);
+        }
+
+        .card ul li {
+            padding: 4px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .card ul li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--electric-cyan);
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 48px;
+            margin-top: 48px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 64px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--soft-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 8px;
+        }
+
+        /* Comparison table */
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            margin-top: 48px;
+        }
+
+        .comparison-col h4 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--soft-gray);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--carbon-gray);
+        }
+
+        .comparison-col ul {
+            list-style: none;
+        }
+
+        .comparison-col ul li {
+            padding: 12px 0;
+            font-size: 18px;
+            border-bottom: 1px solid var(--carbon-gray);
+        }
+
+        .comparison-col.old li { color: #666; }
+        .comparison-col.new li { color: var(--clean-white); }
+
+        /* Quote */
+        .quote {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: clamp(28px, 4vw, 48px);
+            font-weight: 500;
+            font-style: italic;
+            max-width: 900px;
+            line-height: 1.4;
+        }
+
+        .quote-author {
+            font-size: 16px;
+            color: var(--soft-gray);
+            margin-top: 24px;
+        }
+
+        /* SymbAIotic styling */
+        .symbaiotic {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-weight: 700;
+        }
+
+        .symbaiotic .ai {
+            background: linear-gradient(135deg, var(--electric-cyan), var(--hot-magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
+        }
+
+        /* Slide number */
+        .slide-number {
+            position: absolute;
+            bottom: 40px;
+            right: 60px;
+            font-size: 14px;
+            color: #444;
+        }
+
+        /* Background elements */
+        .bg-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(150px);
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        .bg-glow.cyan {
+            background: var(--electric-cyan);
+            top: -200px;
+            right: -200px;
+        }
+
+        .bg-glow.magenta {
+            background: var(--hot-magenta);
+            bottom: -200px;
+            left: -200px;
+        }
+
+        /* Pillars */
+        .pillar-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            margin-top: 48px;
+        }
+
+        .pillar {
+            padding: 40px;
+            background: linear-gradient(135deg, var(--carbon-gray) 0%, var(--void-black) 100%);
+            border-top: 4px solid;
+        }
+
+        .pillar.build { border-color: var(--electric-cyan); }
+        .pillar.brand { border-color: var(--hot-magenta); }
+        .pillar.shift { border-color: var(--acid-lime); }
+
+        .pillar-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .pillar h4 {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        /* Process */
+        .process-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 64px;
+        }
+
+        .process-step {
+            text-align: center;
+            flex: 1;
+        }
+
+        .process-number {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 64px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
+        .process-step h4 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .process-step p {
+            font-size: 14px;
+            max-width: 180px;
+            margin: 0 auto;
+        }
+
+        .process-arrow {
+            font-size: 32px;
+            color: var(--carbon-gray);
+        }
+
+        /* CTA */
+        .cta-section {
+            text-align: center;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 20px 48px;
+            background: linear-gradient(135deg, var(--electric-cyan), var(--hot-magenta));
+            color: var(--void-black);
+            font-weight: 700;
+            font-size: 18px;
+            text-decoration: none;
+            margin-top: 32px;
+        }
+
+        /* Footer */
+        .deck-footer {
+            font-size: 12px;
+            color: #444;
+            margin-top: auto;
+            padding-top: 48px;
+        }
+
+        /* Team */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 48px;
+            margin-top: 48px;
+        }
+
+        .team-member {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+        }
+
+        .team-avatar {
+            width: 80px;
+            height: 80px;
+            background: var(--carbon-gray);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--electric-cyan);
+        }
+
+        .team-info h4 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .team-info .role {
+            font-size: 14px;
+            color: var(--electric-cyan);
+            margin-bottom: 12px;
+        }
+
+        .team-info p {
+            font-size: 14px;
+        }
+
+        /* Pricing */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .price-card {
+            background: var(--carbon-gray);
+            padding: 32px;
+            text-align: center;
+        }
+
+        .price-card h4 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .price-range {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .price-card ul {
+            list-style: none;
+            font-size: 14px;
+            color: var(--soft-gray);
+            text-align: left;
+        }
+
+        .price-card ul li {
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 40px 24px;
+            }
+            .stats-grid,
+            .pillar-grid,
+            .comparison,
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+            .process-flow {
+                flex-direction: column;
+                gap: 32px;
+            }
+            .process-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- SLIDE 1: Cover -->
+<section class="slide" style="justify-content: center; align-items: center; text-align: center;">
+    <div class="bg-glow cyan"></div>
+    <div class="bg-glow magenta"></div>
+
+    <div class="logo large" style="align-items: center;">
+        <div class="logo-text">
+            <span class="logo-l7">L7</span>
+            <span class="logo-shift">SHIFT</span>
+        </div>
+        <div class="logo-bar" style="width: 280px;"></div>
+        <span class="logo-tagline">Break the Square</span>
+    </div>
+
+    <p style="font-size: 24px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--soft-gray); max-width: none; margin-top: 48px;">
+        Strategy &bull; Systems &bull; Solutions
+    </p>
+
+    <div class="deck-footer" style="position: absolute; bottom: 40px;">
+        l7shift.com &bull; January 2026
+    </div>
+</section>
+
+<!-- SLIDE 2: The Problem -->
+<section class="slide">
+    <span class="slide-number">02</span>
+
+    <h3 class="cyan" style="margin-bottom: 16px;">THE PROBLEM</h3>
+    <h2>
+        Fast <span class="magenta">or</span> good?
+    </h2>
+    <div class="gradient-bar"></div>
+
+    <p style="font-size: 24px; margin-top: 32px;">
+        That's the question every business faces when building digital products.
+    </p>
+
+    <div class="comparison">
+        <div class="comparison-col old">
+            <h4>Traditional Agencies</h4>
+            <ul>
+                <li>4-8 week timelines</li>
+                <li>$50-150K projects</li>
+                <li>Layers of account managers</li>
+                <li>Billable hours, not outcomes</li>
+                <li>"Synergy" and "transformation journeys"</li>
+            </ul>
+        </div>
+        <div class="comparison-col new">
+            <h4>What You Actually Need</h4>
+            <ul>
+                <li><span class="cyan">Days</span> to weeks</li>
+                <li><span class="cyan">$5-50K</span> projects</li>
+                <li><span class="cyan">Direct access</span> to the builder</li>
+                <li><span class="cyan">Outcomes</span>, period</li>
+                <li><span class="cyan">Less meetings. More making.</span></li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 3: The Answer -->
+<section class="slide" style="text-align: center; justify-content: center;">
+    <span class="slide-number">03</span>
+    <div class="bg-glow cyan" style="top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+
+    <h1 style="font-size: clamp(72px, 15vw, 200px);">
+        YES.
+    </h1>
+
+    <p style="font-size: 28px; margin: 32px auto; max-width: none; color: var(--clean-white);">
+        That's the <span class="symbaiotic" style="font-size: 32px;">Symb<span class="ai">AI</span>otic Shift</span><sup style="font-size: 14px;">™</sup>
+    </p>
+
+    <div class="gradient-bar-full" style="width: 300px; margin: 24px auto;"></div>
+
+    <p style="font-size: 20px; margin-top: 24px;">
+        Human strategy + AI execution = Fast <span class="cyan">AND</span> good.
+    </p>
+</section>
+
+<!-- SLIDE 4: What We Are -->
+<section class="slide">
+    <span class="slide-number">04</span>
+
+    <h3 class="cyan" style="margin-bottom: 16px;">WHAT WE ARE</h3>
+    <h2>
+        AI-Powered Digital Agency
+    </h2>
+    <div class="gradient-bar"></div>
+
+    <p style="font-size: 20px; margin-top: 24px;">
+        One human orchestrator + AI agents delivering what traditional agencies can't:
+        <strong style="color: var(--clean-white);">speed without the BS.</strong>
+    </p>
+
+    <div class="stats-grid">
+        <div class="stat">
+            <div class="stat-number gradient-text">24h</div>
+            <div class="stat-label">MVP to Production</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number gradient-text">90%</div>
+            <div class="stat-label">Cost Reduction vs Traditional</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number gradient-text">1</div>
+            <div class="stat-label">Point of Contact</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number gradient-text">0</div>
+            <div class="stat-label">Corporate Jargon</div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 5: The Three Pillars -->
+<section class="slide">
+    <span class="slide-number">05</span>
+
+    <h3 class="cyan" style="margin-bottom: 16px;">WHAT WE DO</h3>
+    <h2>Three Pillars</h2>
+    <div class="gradient-bar"></div>
+
+    <div class="pillar-grid">
+        <div class="pillar build">
+            <div class="pillar-icon">⚡</div>
+            <h4 class="cyan">BUILD</h4>
+            <p style="margin-bottom: 16px;">Custom apps & websites. From MVPs to full platforms.</p>
+            <ul style="list-style: none; font-size: 14px; color: var(--soft-gray);">
+                <li>→ Web Applications</li>
+                <li>→ SaaS Products</li>
+                <li>→ E-Commerce</li>
+                <li>→ AI Integration</li>
+            </ul>
+        </div>
+        <div class="pillar brand">
+            <div class="pillar-icon">◆</div>
+            <h4 class="magenta">BRAND</h4>
+            <p style="margin-bottom: 16px;">Identity & strategy. Logos that stick. Messaging that cuts.</p>
+            <ul style="list-style: none; font-size: 14px; color: var(--soft-gray);">
+                <li>→ Brand Strategy</li>
+                <li>→ Visual Identity</li>
+                <li>→ Pitch Decks</li>
+                <li>→ Marketing Collateral</li>
+            </ul>
+        </div>
+        <div class="pillar shift">
+            <div class="pillar-icon">↗</div>
+            <h4 class="lime">SHIFT</h4>
+            <p style="margin-bottom: 16px;">Business transformation. AI integration. Future-proofing.</p>
+            <ul style="list-style: none; font-size: 14px; color: var(--soft-gray);">
+                <li>→ AI Strategy</li>
+                <li>→ Process Automation</li>
+                <li>→ Digital Operations</li>
+                <li>→ Growth Systems</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 6: The SymbAIotic Shift -->
+<section class="slide">
+    <span class="slide-number">06</span>
+
+    <h3 class="cyan" style="margin-bottom: 16px;">OUR METHODOLOGY</h3>
+    <h2>
+        The <span class="symbaiotic">Symb<span class="ai">AI</span>otic Shift</span><sup style="font-size: 20px;">™</sup>
+    </h2>
+    <div class="gradient-bar"></div>
+
+    <p style="font-size: 20px; margin-top: 24px; margin-bottom: 48px;">
+        A new model for digital delivery. Human intelligence directing AI execution.
+    </p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 48px;">
+        <div>
+            <h4 style="font-size: 18px; margin-bottom: 24px; color: var(--soft-gray);">THE MODEL</h4>
+            <div style="background: var(--carbon-gray); padding: 32px; font-family: monospace; font-size: 14px; line-height: 2;">
+                <span style="color: var(--soft-gray);">┌─────────────────────────────┐</span><br>
+                <span style="color: var(--soft-gray);">│</span> <span class="cyan">HUMAN ORCHESTRATOR</span> <span style="color: var(--soft-gray);">│</span><br>
+                <span style="color: var(--soft-gray);">│</span> Strategy, Architecture, QC <span style="color: var(--soft-gray);">│</span><br>
+                <span style="color: var(--soft-gray);">├─────────────────────────────┤</span><br>
+                <span style="color: var(--soft-gray);">│</span> <span class="magenta">AI AGENTS</span> (Parallel) <span style="color: var(--soft-gray);">│</span><br>
+                <span style="color: var(--soft-gray);">│</span> Frontend │ Backend │ DevOps <span style="color: var(--soft-gray);">│</span><br>
+                <span style="color: var(--soft-gray);">└─────────────────────────────┘</span>
+            </div>
+        </div>
+        <div>
+            <h4 style="font-size: 18px; margin-bottom: 24px; color: var(--soft-gray);">WHY IT WORKS</h4>
+            <ul style="list-style: none; font-size: 16px;">
+                <li style="padding: 16px 0; border-bottom: 1px solid var(--carbon-gray);">
+                    <strong class="cyan">Parallel Execution</strong><br>
+                    <span style="color: var(--soft-gray);">Multiple AI agents working simultaneously</span>
+                </li>
+                <li style="padding: 16px 0; border-bottom: 1px solid var(--carbon-gray);">
+                    <strong class="magenta">Human Strategy</strong><br>
+                    <span style="color: var(--soft-gray);">Enterprise experience directing the work</span>
+                </li>
+                <li style="padding: 16px 0; border-bottom: 1px solid var(--carbon-gray);">
+                    <strong class="lime">Quality Control</strong><br>
+                    <span style="color: var(--soft-gray);">Every output reviewed by human expertise</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 7: Proof Point -->
+<section class="slide" style="background: linear-gradient(135deg, var(--carbon-gray) 0%, var(--void-black) 100%);">
+    <span class="slide-number">07</span>
+
+    <h3 class="cyan" style="margin-bottom: 16px;">CASE STUDY</h3>
+    <h2>Scat Pack CLT</h2>
+    <div class="gradient-bar"></div>
+
+    <p style="font-size: 18px; margin: 24px 0; max-width: none;">
+        Full-stack SaaS platform for dog waste removal. <strong class="cyan">90+ features shipped.</strong>
+    </p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 24px;">
+        <div style="background: var(--void-black); padding: 20px; border-top: 3px solid var(--electric-cyan);">
+            <h4 style="font-size: 12px; color: var(--electric-cyan); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Customer Platform</h4>
+            <ul style="list-style: none; font-size: 12px; color: var(--soft-gray);">
+                <li>→ Service booking flow</li>
+                <li>→ 31 ZIP code coverage</li>
+                <li>→ Subscription management</li>
+                <li>→ Referral program</li>
+                <li>→ SEO + JSON-LD</li>
+            </ul>
+        </div>
+        <div style="background: var(--void-black); padding: 20px; border-top: 3px solid var(--hot-magenta);">
+            <h4 style="font-size: 12px; color: var(--hot-magenta); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Admin Dashboard</h4>
+            <ul style="list-style: none; font-size: 12px; color: var(--soft-gray);">
+                <li>→ Customer management</li>
+                <li>→ Territory & scheduling</li>
+                <li>→ Crew management</li>
+                <li>→ Earnings & commissions</li>
+                <li>→ Route optimization</li>
+            </ul>
+        </div>
+        <div style="background: var(--void-black); padding: 20px; border-top: 3px solid var(--acid-lime);">
+            <h4 style="font-size: 12px; color: var(--acid-lime); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Crew Mobile Portal</h4>
+            <ul style="list-style: none; font-size: 12px; color: var(--soft-gray);">
+                <li>→ PIN authentication</li>
+                <li>→ Daily job queue</li>
+                <li>→ Job completion flow</li>
+                <li>→ Skip/reschedule</li>
+                <li>→ GPS integration</li>
+            </ul>
+        </div>
+        <div style="background: var(--void-black); padding: 20px; border-top: 3px solid var(--clean-white);">
+            <h4 style="font-size: 12px; color: var(--clean-white); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Integrations</h4>
+            <ul style="list-style: none; font-size: 12px; color: var(--soft-gray);">
+                <li>→ Stripe subscriptions</li>
+                <li>→ Resend email flows</li>
+                <li>→ Google Ads campaigns</li>
+                <li>→ Google Business Profile</li>
+                <li>→ Webhook APIs</li>
+            </ul>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px; margin-top: 32px;">
+        <div style="text-align: center;">
+            <p style="font-size: 48px; font-weight: 700; margin: 0;" class="gradient-text">90+</p>
+            <p style="font-size: 12px; color: var(--soft-gray); text-transform: uppercase; letter-spacing: 0.1em;">Features Shipped</p>
+        </div>
+        <div style="text-align: center;">
+            <p style="font-size: 48px; font-weight: 700; margin: 0; color: var(--electric-cyan);">24h</p>
+            <p style="font-size: 12px; color: var(--soft-gray); text-transform: uppercase; letter-spacing: 0.1em;">To Production</p>
+        </div>
+        <div style="text-align: center;">
+            <p style="font-size: 48px; font-weight: 700; margin: 0; color: var(--acid-lime);">12</p>
+            <p style="font-size: 12px; color: var(--soft-gray); text-transform: uppercase; letter-spacing: 0.1em;">Database Tables</p>
+        </div>
+    </div>
+
+    <div style="margin-top: 24px; padding: 16px 24px; background: var(--void-black); display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+        <span style="font-size: 11px; color: var(--soft-gray); text-transform: uppercase; letter-spacing: 0.1em;">Stack:</span>
+        <span style="font-size: 12px; padding: 4px 12px; background: var(--carbon-gray); color: var(--clean-white);">Next.js 14</span>
+        <span style="font-size: 12px; padding: 4px 12px; background: var(--carbon-gray); color: var(--clean-white);">TypeScript</span>
+        <span style="font-size: 12px; padding: 4px 12px; background: var(--carbon-gray); color: var(--clean-white);">Supabase</span>
+        <span style="font-size: 12px; padding: 4px 12px; background: var(--carbon-gray); color: var(--clean-white);">Stripe</span>
+        <span style="font-size: 12px; padding: 4px 12px; background: var(--carbon-gray); color: var(--clean-white);">Resend</span>
+        <span style="font-size: 12px; padding: 4px 12px; background: var(--carbon-gray); color: var(--clean-white);">Vercel</span>
+        <span style="font-size: 12px; padding: 4px 12px; background: var(--carbon-gray); color: var(--clean-white);">Cloudflare</span>
+        <span style="font-size: 12px; padding: 4px 12px; background: var(--carbon-gray); color: var(--clean-white);">Tailwind</span>
+    </div>
+</section>
+
+<!-- SLIDE 8: The Team -->
+<section class="slide">
+    <span class="slide-number">08</span>
+
+    <h3 class="cyan" style="margin-bottom: 16px;">THE TEAM</h3>
+    <h2>Human + AI</h2>
+    <div class="gradient-bar"></div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 64px; margin-top: 48px;">
+        <div>
+            <div class="team-member" style="margin-bottom: 48px;">
+                <div class="team-avatar" style="width: 100px; height: 100px; font-size: 40px;">KL</div>
+                <div class="team-info">
+                    <h4 style="font-size: 24px;">Ken Leftwich</h4>
+                    <div class="role">Founder & Lead Orchestrator</div>
+                    <p style="margin-top: 12px;">
+                        SVP Strategy Execution @ Treadsy/Tirebuyer.com. Former Gartner, Lowe's, Logility, Verizon, T-Mobile, Spectrum.
+                        Cornell Project Management Certificate. MSU Supply Chain Management. Johnson C. Smith University (HBCU). 15+ years enterprise digital transformation.
+                    </p>
+                </div>
+            </div>
+            <div class="team-member">
+                <div class="team-avatar" style="width: 100px; height: 100px; font-size: 40px; color: var(--acid-lime);">AI</div>
+                <div class="team-info">
+                    <h4 style="font-size: 24px;">Claude Code Agents</h4>
+                    <div class="role" style="color: var(--acid-lime);">Parallel Execution Engine</div>
+                    <p style="margin-top: 12px;">
+                        Multiple AI agents running simultaneously. Frontend, backend, DevOps.
+                        Shared context. Coordinated delivery. 24/7 capacity.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div style="background: var(--carbon-gray); padding: 40px; border-left: 4px solid var(--hot-magenta);">
+            <h4 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--hot-magenta); margin-bottom: 24px;">Now Recruiting</h4>
+            <h3 style="margin-bottom: 16px;">Technical Co-Founder</h3>
+            <p style="margin-bottom: 24px;">
+                Seeking a technical leader who gets the AI-native approach.
+                Someone who sees Claude Code and thinks "this changes everything."
+            </p>
+            <ul style="list-style: none; font-size: 14px; color: var(--soft-gray);">
+                <li style="padding: 8px 0;">→ Software engineering leadership</li>
+                <li style="padding: 8px 0;">→ AI/ML product delivery experience</li>
+                <li style="padding: 8px 0;">→ Equity partnership opportunity</li>
+                <li style="padding: 8px 0;">→ Build the future of digital agencies</li>
+            </ul>
+            <p style="margin-top: 24px; font-size: 14px; color: var(--electric-cyan);">
+                ken@l7shift.com
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 9: Investment / Pricing -->
+<section class="slide">
+    <span class="slide-number">09</span>
+
+    <h3 class="cyan" style="margin-bottom: 16px;">ENGAGEMENT MODELS</h3>
+    <h2>How We Work</h2>
+    <div class="gradient-bar"></div>
+
+    <div class="pricing-grid">
+        <div class="price-card" style="border-top: 4px solid var(--electric-cyan);">
+            <h4 class="cyan">PROJECT</h4>
+            <p style="font-size: 14px; color: var(--soft-gray); margin-bottom: 16px;">Fixed-scope, fixed-price delivery</p>
+            <ul>
+                <li>Landing pages & marketing sites</li>
+                <li>SaaS MVPs & full platforms</li>
+                <li>E-commerce builds</li>
+                <li>Brand identity & collateral</li>
+                <li>AI integration & automation</li>
+            </ul>
+        </div>
+        <div class="price-card" style="border-top: 4px solid var(--hot-magenta);">
+            <h4 class="magenta">RETAINER</h4>
+            <p style="font-size: 14px; color: var(--soft-gray); margin-bottom: 16px;">Ongoing partnership & support</p>
+            <ul>
+                <li>Dedicated monthly capacity</li>
+                <li>Continuous feature development</li>
+                <li>Bug fixes & maintenance</li>
+                <li>Priority response times</li>
+                <li>Strategic guidance included</li>
+            </ul>
+        </div>
+        <div class="price-card" style="border-top: 4px solid var(--acid-lime);">
+            <h4 class="lime">EQUITY</h4>
+            <p style="font-size: 14px; color: var(--soft-gray); margin-bottom: 16px;">Skin in the game partnerships</p>
+            <ul>
+                <li>Reduced cash investment</li>
+                <li>Equity stake in your company</li>
+                <li>Aligned incentives</li>
+                <li>Long-term commitment</li>
+                <li>Ideal for early-stage startups</li>
+            </ul>
+        </div>
+    </div>
+
+    <div style="margin-top: 48px; padding: 24px; background: var(--carbon-gray); text-align: center;">
+        <p style="font-size: 18px; color: var(--clean-white); max-width: none;">
+            Every engagement starts with a discovery call. <strong class="cyan">We'll scope it together.</strong>
+        </p>
+    </div>
+</section>
+
+<!-- SLIDE 10: CTA -->
+<section class="slide cta-section" style="justify-content: center;">
+    <span class="slide-number">10</span>
+    <div class="bg-glow cyan"></div>
+    <div class="bg-glow magenta"></div>
+
+    <h2 style="margin-bottom: 16px;">
+        Ready to <span class="gradient-text">Shift</span>?
+    </h2>
+
+    <p style="font-size: 24px; margin: 0 auto 48px; text-align: center;">
+        Stop being square. Start shipping.
+    </p>
+
+    <div style="display: flex; gap: 24px; justify-content: center; flex-wrap: wrap;">
+        <a href="https://l7shift.com/start" class="cta-button">Start a Project</a>
+    </div>
+
+    <div style="margin-top: 64px;">
+        <div class="logo" style="align-items: center; margin: 0 auto;">
+            <div class="logo-text">
+                <span class="logo-l7">L7</span>
+                <span class="logo-shift">SHIFT</span>
+            </div>
+            <div class="logo-bar" style="width: 140px;"></div>
+            <span class="logo-tagline">Break the Square</span>
+        </div>
+        <p style="text-align: center; font-size: 14px; color: #666; max-width: none; margin-top: 16px;">
+            l7shift.com &bull; @l7shift &bull; Charlotte, NC
+        </p>
+    </div>
+
+    <div class="gradient-bar-full" style="position: absolute; bottom: 0; left: 0;"></div>
+</section>
+
+</body>
+</html>

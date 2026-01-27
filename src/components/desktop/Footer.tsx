@@ -1,0 +1,72 @@
+'use client'
+
+import React from 'react'
+
+interface FooterProps {
+  onHoverStart: () => void
+  onHoverEnd: () => void
+}
+
+export function Footer({ onHoverStart, onHoverEnd }: FooterProps) {
+  return (
+    <footer
+      style={{
+        padding: '48px 60px',
+        borderTop: '1px solid var(--carbon-gray)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+        <span
+          style={{
+            fontFamily: 'Helvetica Neue, sans-serif',
+            fontSize: '28px',
+            fontWeight: 300,
+          }}
+        >
+          L7
+        </span>
+        <span
+          style={{
+            fontFamily: 'Helvetica Neue, sans-serif',
+            fontSize: '18px',
+            fontWeight: 300,
+            color: 'var(--soft-gray)',
+            marginLeft: '4px',
+            letterSpacing: '0.1em',
+          }}
+        >
+          SHIFT
+        </span>
+      </div>
+
+      <p
+        style={{
+          fontSize: '13px',
+          color: 'var(--carbon-gray)',
+          letterSpacing: '0.05em',
+        }}
+      >
+        © 2026 L7 Shift. Break the square.
+      </p>
+
+      <div style={{ display: 'flex', gap: '32px' }}>
+        <a
+          href="https://twitter.com/l7shift"
+          onMouseEnter={onHoverStart}
+          onMouseLeave={onHoverEnd}
+          style={{
+            color: 'var(--soft-gray)',
+            textDecoration: 'none',
+            fontSize: '13px',
+            letterSpacing: '0.1em',
+          }}
+        >
+          @l7shift
+        </a>
+      </div>
+    </footer>
+  )
+}

@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pretty Paid Closet - Brand Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blush-pink: #FFB6C1;
+      --rose-gold: #B76E79;
+      --hot-pink: #FF69B4;
+      --gold: #D4AF37;
+      --champagne: #F7E7CE;
+      --soft-cream: #FFF8F0;
+      --charcoal: #2D2D2D;
+      --warm-black: #0D0D0D;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--soft-cream);
+      color: var(--charcoal);
+      font-weight: 300;
+      line-height: 1.6;
+    }
+
+    /* Navigation */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 20px 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,248,240,0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      z-index: 100;
+    }
+
+    .nav-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 40px;
+    }
+
+    .nav-links a {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(45,45,45,0.5);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--gold);
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 120px 60px;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(255,182,193,0.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-overline {
+      font-size: 11px;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 30px;
+    }
+
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 80px;
+      font-weight: 300;
+      letter-spacing: -2px;
+      line-height: 1;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--rose-gold);
+    }
+
+    .hero-tagline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.5);
+      font-style: italic;
+      margin-bottom: 60px;
+    }
+
+    .hero-logo svg {
+      width: 500px;
+      max-width: 90vw;
+      height: auto;
+    }
+
+    /* Section Styles */
+    .section {
+      padding: 120px 60px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    .section-number {
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 48px;
+      font-weight: 300;
+      letter-spacing: 1px;
+    }
+
+    .section-subtitle {
+      font-size: 16px;
+      color: rgba(45,45,45,0.5);
+      margin-top: 15px;
+      font-style: italic;
+    }
+
+    /* Divider */
+    .divider {
+      width: 1px;
+      height: 100px;
+      background: linear-gradient(to bottom, transparent, var(--rose-gold), transparent);
+      margin: 0 auto;
+    }
+
+    /* Brand Personality Section */
+    .personality-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+    }
+
+    .personality-card {
+      border: 1px solid rgba(0,0,0,0.08);
+      padding: 50px 40px;
+      text-align: center;
+      transition: all 0.4s ease;
+      background: white;
+    }
+
+    .personality-card:hover {
+      border-color: var(--rose-gold);
+      background: rgba(255,182,193,0.1);
+    }
+
+    .personality-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      font-weight: 400;
+      margin-bottom: 20px;
+      color: var(--rose-gold);
+    }
+
+    .personality-card p {
+      font-size: 15px;
+      color: rgba(45,45,45,0.7);
+      line-height: 1.8;
+    }
+
+    /* Tone of Voice Section */
+    .tone-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2px;
+      background: rgba(0,0,0,0.06);
+    }
+
+    .tone-card {
+      background: white;
+      padding: 50px;
+    }
+
+    .tone-card h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 300;
+      margin-bottom: 15px;
+      color: var(--rose-gold);
+    }
+
+    .tone-card p {
+      font-size: 15px;
+      color: rgba(45,45,45,0.7);
+      line-height: 1.8;
+    }
+
+    /* Messaging Examples */
+    .messaging-section {
+      background: linear-gradient(180deg, transparent 0%, rgba(255,182,193,0.1) 50%, transparent 100%);
+    }
+
+    .tagline-display {
+      text-align: center;
+      padding: 80px;
+      border: 1px solid rgba(0,0,0,0.08);
+      margin-bottom: 60px;
+      background: white;
+    }
+
+    .tagline-display h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 56px;
+      font-weight: 300;
+      letter-spacing: 2px;
+    }
+
+    .tagline-display .pretty { color: var(--rose-gold); }
+    .tagline-display .paid { color: var(--gold); }
+
+    .messaging-examples {
+      display: grid;
+      gap: 30px;
+    }
+
+    .message-card {
+      border: 1px solid rgba(0,0,0,0.08);
+      padding: 40px;
+      position: relative;
+      background: white;
+    }
+
+    .message-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(to bottom, var(--hot-pink), var(--rose-gold));
+    }
+
+    .message-label {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--rose-gold);
+      margin-bottom: 20px;
+    }
+
+    .message-card blockquote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-style: italic;
+      color: var(--charcoal);
+      line-height: 1.6;
+    }
+
+    /* Language Guidelines */
+    .language-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 40px;
+    }
+
+    .language-column h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .language-column.do h4 { color: var(--gold); }
+    .language-column.dont h4 { color: var(--hot-pink); }
+
+    .language-column ul {
+      list-style: none;
+    }
+
+    .language-column li {
+      padding: 15px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      font-size: 15px;
+      color: rgba(45,45,45,0.8);
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+    }
+
+    .language-column li::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+
+    .language-column.do li::before { background: var(--gold); }
+    .language-column.dont li::before { background: var(--hot-pink); }
+
+    /* Color Palette */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .color-card {
+      border: 1px solid rgba(0,0,0,0.08);
+      overflow: hidden;
+      background: white;
+    }
+
+    .color-swatch {
+      height: 120px;
+    }
+
+    .color-info {
+      padding: 25px;
+      background: white;
+    }
+
+    .color-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: var(--charcoal);
+    }
+
+    .color-hex {
+      font-size: 13px;
+      font-family: monospace;
+      color: rgba(45,45,45,0.5);
+    }
+
+    .color-usage {
+      font-size: 12px;
+      color: rgba(45,45,45,0.5);
+      margin-top: 10px;
+    }
+
+    /* Typography */
+    .typography-display {
+      display: grid;
+      gap: 60px;
+    }
+
+    .type-specimen {
+      border: 1px solid rgba(0,0,0,0.08);
+      padding: 60px;
+      background: white;
+    }
+
+    .type-label {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--rose-gold);
+      margin-bottom: 30px;
+    }
+
+    .type-sample-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 64px;
+      font-weight: 300;
+      font-style: italic;
+      margin-bottom: 20px;
+      color: var(--charcoal);
+    }
+
+    .type-sample-body {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 18px;
+      font-weight: 300;
+      color: rgba(45,45,45,0.7);
+      line-height: 1.8;
+      max-width: 600px;
+    }
+
+    .type-info {
+      margin-top: 40px;
+      padding-top: 30px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      display: flex;
+      gap: 60px;
+    }
+
+    .type-detail {
+      font-size: 13px;
+      color: rgba(45,45,45,0.5);
+    }
+
+    .type-detail strong {
+      display: block;
+      color: var(--charcoal);
+      margin-bottom: 5px;
+    }
+
+    /* Platform Guidelines */
+    .platform-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 30px;
+    }
+
+    .platform-card {
+      border: 1px solid rgba(0,0,0,0.08);
+      padding: 40px;
+      background: white;
+    }
+
+    .platform-card h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: var(--rose-gold);
+    }
+
+    .platform-card ul {
+      list-style: none;
+    }
+
+    .platform-card li {
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      font-size: 14px;
+      color: rgba(45,45,45,0.7);
+    }
+
+    .platform-card li:last-child {
+      border-bottom: none;
+    }
+
+    /* Photography */
+    .photo-guidelines {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+
+    .photo-column h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      margin-bottom: 25px;
+      color: var(--rose-gold);
+    }
+
+    .photo-column ul {
+      list-style: none;
+    }
+
+    .photo-column li {
+      padding: 12px 0;
+      font-size: 15px;
+      color: rgba(45,45,45,0.7);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* Logo Section */
+    .logo-display {
+      border: 1px solid rgba(0,0,0,0.08);
+      padding: 80px;
+      text-align: center;
+      margin-bottom: 40px;
+      background: white;
+    }
+
+    .logo-display svg {
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .logo-variations {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: rgba(0,0,0,0.06);
+    }
+
+    .logo-var {
+      padding: 60px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-var.light { background: white; }
+    .logo-var.dark { background: var(--charcoal); }
+    .logo-var.gold { background: linear-gradient(135deg, var(--hot-pink), var(--rose-gold)); }
+
+    .logo-var svg {
+      max-width: 200px;
+      width: 100%;
+    }
+
+    /* Movement Statement */
+    .movement {
+      text-align: center;
+      padding: 120px 60px;
+      background: linear-gradient(180deg, transparent 0%, rgba(255,182,193,0.15) 50%, transparent 100%);
+    }
+
+    .movement h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 56px;
+      font-weight: 300;
+      line-height: 1.3;
+      margin-bottom: 40px;
+      color: var(--charcoal);
+    }
+
+    .movement h2 em {
+      font-style: italic;
+      color: var(--rose-gold);
+    }
+
+    .movement p {
+      font-size: 18px;
+      color: rgba(45,45,45,0.6);
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.9;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 60px;
+      text-align: center;
+      border-top: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .footer-brand {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(45,45,45,0.4);
+    }
+
+    .footer-brand span {
+      color: var(--rose-gold);
+    }
+
+    /* L7 Shift Watermark */
+    .l7-watermark {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(45,45,45,0.15);
+      font-weight: 600;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .nav { padding: 15px 30px; }
+      .nav-links { display: none; }
+      .section { padding: 80px 30px; }
+      .hero { padding: 100px 30px; }
+      .hero h1 { font-size: 48px; }
+      .personality-grid,
+      .tone-grid,
+      .color-grid,
+      .language-grid,
+      .platform-grid,
+      .photo-guidelines,
+      .logo-variations { grid-template-columns: 1fr; }
+      .section-title { font-size: 36px; }
+      .movement h2 { font-size: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-brand">Pretty Paid Closet</div>
+    <div class="nav-links">
+      <a href="#personality">Personality</a>
+      <a href="#voice">Voice</a>
+      <a href="#messaging">Messaging</a>
+      <a href="#visual">Visual</a>
+      <a href="#platforms">Platforms</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <p class="hero-overline">Brand Guide 2026</p>
+    <h1>Pretty Paid <em>Closet</em></h1>
+    <p class="hero-tagline">Where elegance meets empowerment</p>
+
+    <!-- Logo - Clean Typography -->
+    <div class="hero-logo">
+      <svg viewBox="0 0 420 120" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="heroGold" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#D4AF37"/>
+            <stop offset="50%" stop-color="#E8C872"/>
+            <stop offset="100%" stop-color="#D4AF37"/>
+          </linearGradient>
+          <linearGradient id="heroRose" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#B76E79"/>
+            <stop offset="100%" stop-color="#FF69B4"/>
+          </linearGradient>
+        </defs>
+        <!-- Wordmark only - clean and elegant -->
+        <text x="210" y="55" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="56" font-weight="300" font-style="italic" fill="#2D2D2D">Pretty Paid</text>
+        <text x="210" y="95" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="20" font-weight="300" letter-spacing="14" fill="url(#heroRose)">CLOSET</text>
+      </svg>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Section 1: Brand Personality -->
+  <section id="personality" class="section">
+    <div class="section-header">
+      <p class="section-number">01</p>
+      <h2 class="section-title">Brand Personality</h2>
+      <p class="section-subtitle">The core traits that define who we are</p>
+    </div>
+
+    <div class="personality-grid">
+      <div class="personality-card">
+        <h3>Empowering</h3>
+        <p>We believe every woman deserves to feel confident in her style. Pretty Paid Closet isn't just about clothes—it's about helping women own their look and know their worth.</p>
+      </div>
+      <div class="personality-card">
+        <h3>Curated</h3>
+        <p>Not a thrift store. Not fast fashion. Every piece is hand-selected with intention. We bring an experienced eye to sourcing—quality over quantity, always.</p>
+      </div>
+      <div class="personality-card">
+        <h3>Accessible</h3>
+        <p>Premium style shouldn't require a premium budget. We make elevated fashion attainable for style-forward women who shop smart, not just cheap.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Section 2: Tone of Voice -->
+  <section id="voice" class="section">
+    <div class="section-header">
+      <p class="section-number">02</p>
+      <h2 class="section-title">Tone of Voice</h2>
+      <p class="section-subtitle">How we speak to our community</p>
+    </div>
+
+    <div class="tone-grid">
+      <div class="tone-card">
+        <h4>Confident, Not Cocky</h4>
+        <p>We speak with assurance about our curation and style expertise. We celebrate bold choices without being arrogant. There's a difference between knowing your worth and being boastful.</p>
+      </div>
+      <div class="tone-card">
+        <h4>Warm, Not Casual</h4>
+        <p>Our voice is approachable and friendly—like shopping with your stylish friend who always knows where to find the best pieces. But we maintain polish and professionalism.</p>
+      </div>
+      <div class="tone-card">
+        <h4>Empowering, Not Preachy</h4>
+        <p>We lift women up without lecturing them. Our messaging inspires confidence and self-worth naturally, through the way we present our brand and products.</p>
+      </div>
+      <div class="tone-card">
+        <h4>Real, Not Performative</h4>
+        <p>Authenticity over trends. We're not chasing what's viral—we're building a brand with substance. Our voice reflects genuine expertise and real connection.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Section 3: Key Messaging -->
+  <section id="messaging" class="section messaging-section">
+    <div class="section-header">
+      <p class="section-number">03</p>
+      <h2 class="section-title">Key Messaging</h2>
+      <p class="section-subtitle">Words that capture our essence</p>
+    </div>
+
+    <!-- Primary Tagline -->
+    <div class="tagline-display">
+      <h3>Get <span class="pretty">Pretty.</span> Get <span class="paid">Paid.</span></h3>
+    </div>
+
+    <!-- Messaging Examples -->
+    <div class="messaging-examples">
+      <div class="message-card">
+        <p class="message-label">Website Introduction</p>
+        <blockquote>"Welcome to Pretty Paid Closet—where curated style meets confident women. Every piece in our collection is hand-selected for quality, fit, and that undeniable 'she looks good' factor. This isn't fast fashion. This is smart fashion."</blockquote>
+      </div>
+
+      <div class="message-card">
+        <p class="message-label">Social Media Post</p>
+        <blockquote>"New arrivals just dropped. These pieces aren't going to last—because good taste never does. Shop the drop before she does."</blockquote>
+      </div>
+
+      <div class="message-card">
+        <p class="message-label">Product Description</p>
+        <blockquote>"This isn't just a dress—it's the reason she asked 'where'd you get that?' Fitted where it matters, elevated details, ready for wherever the night takes you."</blockquote>
+      </div>
+
+      <div class="message-card">
+        <p class="message-label">Email Subject Lines</p>
+        <blockquote>"Your closet called. It needs an upgrade." / "She shops smart. Do you?" / "The drop is live. Don't sleep."</blockquote>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Section 4: Language Guidelines -->
+  <section class="section">
+    <div class="section-header">
+      <p class="section-number">04</p>
+      <h2 class="section-title">Language Guidelines</h2>
+      <p class="section-subtitle">Words we use and words we avoid</p>
+    </div>
+
+    <div class="language-grid">
+      <div class="language-column do">
+        <h4>We Say</h4>
+        <ul>
+          <li>Curated, hand-selected, intentional</li>
+          <li>Confident, empowered, elevated</li>
+          <li>Smart shopping, style-forward</li>
+          <li>Premium quality, designer-inspired</li>
+          <li>"She knows her worth"</li>
+          <li>"Elegance, earned"</li>
+          <li>Investment pieces, wardrobe staples</li>
+          <li>Clean lines, flattering fit</li>
+        </ul>
+      </div>
+      <div class="language-column dont">
+        <h4>We Don't Say</h4>
+        <ul>
+          <li>Cheap, bargain, discount bin</li>
+          <li>Thrifted, secondhand, used</li>
+          <li>OMG, slay queen, sis (casual slang)</li>
+          <li>Fast fashion, trendy, viral</li>
+          <li>Limited time only! Act now!</li>
+          <li>Excessive emojis or exclamation marks</li>
+          <li>Price-focused messaging as primary hook</li>
+          <li>Desperation or urgency tactics</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Section 5: Visual Identity - Colors -->
+  <section id="visual" class="section">
+    <div class="section-header">
+      <p class="section-number">05</p>
+      <h2 class="section-title">Color Palette</h2>
+      <p class="section-subtitle">The visual foundation of our brand</p>
+    </div>
+
+    <div class="color-grid">
+      <div class="color-card">
+        <div class="color-swatch" style="background: #D4AF37;"></div>
+        <div class="color-info">
+          <p class="color-name">Gold</p>
+          <p class="color-hex">#D4AF37</p>
+          <p class="color-usage">Primary accent, CTAs, premium elements</p>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #B76E79;"></div>
+        <div class="color-info">
+          <p class="color-name">Rose Gold</p>
+          <p class="color-hex">#B76E79</p>
+          <p class="color-usage">Secondary accent, hover states, highlights</p>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #FF69B4;"></div>
+        <div class="color-info">
+          <p class="color-name">Hot Pink</p>
+          <p class="color-hex">#FF69B4</p>
+          <p class="color-usage">Accent only, sale tags, energy moments</p>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #FFB6C1;"></div>
+        <div class="color-info">
+          <p class="color-name">Blush Pink</p>
+          <p class="color-hex">#FFB6C1</p>
+          <p class="color-usage">Soft backgrounds, feminine touches</p>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #FFF8F0;"></div>
+        <div class="color-info">
+          <p class="color-name">Soft Cream</p>
+          <p class="color-hex">#FFF8F0</p>
+          <p class="color-usage">Light backgrounds, clean space</p>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #2D2D2D;"></div>
+        <div class="color-info">
+          <p class="color-name">Charcoal</p>
+          <p class="color-hex">#2D2D2D</p>
+          <p class="color-usage">Primary text, dark backgrounds</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Section 6: Typography -->
+  <section class="section">
+    <div class="section-header">
+      <p class="section-number">06</p>
+      <h2 class="section-title">Typography</h2>
+      <p class="section-subtitle">Fonts that speak our language</p>
+    </div>
+
+    <div class="typography-display">
+      <div class="type-specimen">
+        <p class="type-label">Headlines & Display</p>
+        <p class="type-sample-heading">Pretty Paid Closet</p>
+        <div class="type-info">
+          <div class="type-detail">
+            <strong>Font</strong>
+            Cormorant Garamond
+          </div>
+          <div class="type-detail">
+            <strong>Weight</strong>
+            Light (300), Italic
+          </div>
+          <div class="type-detail">
+            <strong>Usage</strong>
+            Headlines, hero text, feature titles
+          </div>
+        </div>
+      </div>
+
+      <div class="type-specimen">
+        <p class="type-label">Body & UI</p>
+        <p class="type-sample-body">Every piece in our collection is hand-selected with intention. We bring an experienced eye to sourcing—quality over quantity, style over trends. This is fashion with substance.</p>
+        <div class="type-info">
+          <div class="type-detail">
+            <strong>Font</strong>
+            DM Sans
+          </div>
+          <div class="type-detail">
+            <strong>Weight</strong>
+            Light (300), Regular (400), Medium (500)
+          </div>
+          <div class="type-detail">
+            <strong>Usage</strong>
+            Body copy, buttons, navigation, labels
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Section 7: Logo Usage -->
+  <section class="section">
+    <div class="section-header">
+      <p class="section-number">07</p>
+      <h2 class="section-title">Logo System</h2>
+      <p class="section-subtitle">Our mark across all touchpoints</p>
+    </div>
+
+    <div class="logo-display">
+      <svg viewBox="0 0 420 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="logoRose2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#B76E79"/>
+            <stop offset="100%" stop-color="#FF69B4"/>
+          </linearGradient>
+        </defs>
+        <text x="210" y="45" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="48" font-weight="300" font-style="italic" fill="#2D2D2D">Pretty Paid</text>
+        <text x="210" y="80" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="18" font-weight="300" letter-spacing="12" fill="url(#logoRose2)">CLOSET</text>
+      </svg>
+    </div>
+
+    <div class="logo-variations">
+      <div class="logo-var light">
+        <svg viewBox="0 0 220 70" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="varRose1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#B76E79"/>
+              <stop offset="100%" stop-color="#FF69B4"/>
+            </linearGradient>
+          </defs>
+          <text x="110" y="32" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="28" font-weight="300" font-style="italic" fill="#2D2D2D">Pretty Paid</text>
+          <text x="110" y="55" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" font-weight="300" letter-spacing="6" fill="url(#varRose1)">CLOSET</text>
+        </svg>
+      </div>
+      <div class="logo-var dark">
+        <svg viewBox="0 0 220 70" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="varRose2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FFB6C1"/>
+              <stop offset="100%" stop-color="#FF69B4"/>
+            </linearGradient>
+          </defs>
+          <text x="110" y="32" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="28" font-weight="300" font-style="italic" fill="white">Pretty Paid</text>
+          <text x="110" y="55" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" font-weight="300" letter-spacing="6" fill="url(#varRose2)">CLOSET</text>
+        </svg>
+      </div>
+      <div class="logo-var gold">
+        <svg viewBox="0 0 220 70" xmlns="http://www.w3.org/2000/svg">
+          <text x="110" y="32" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="28" font-weight="300" font-style="italic" fill="white">Pretty Paid</text>
+          <text x="110" y="55" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" font-weight="300" letter-spacing="6" fill="rgba(255,255,255,0.9)">CLOSET</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Section 8: Platform Consistency -->
+  <section id="platforms" class="section">
+    <div class="section-header">
+      <p class="section-number">08</p>
+      <h2 class="section-title">Platform Guidelines</h2>
+      <p class="section-subtitle">Consistency across every touchpoint</p>
+    </div>
+
+    <div class="platform-grid">
+      <div class="platform-card">
+        <h4>Poshmark</h4>
+        <ul>
+          <li>Profile banner uses brand colors and logo</li>
+          <li>Closet descriptions reflect brand voice</li>
+          <li>Listing titles: Clean, descriptive (no ALL CAPS)</li>
+          <li>Photos: Bright, well-lit, consistent backgrounds</li>
+          <li>Comments: Warm but professional responses</li>
+        </ul>
+      </div>
+      <div class="platform-card">
+        <h4>Instagram</h4>
+        <ul>
+          <li>Feed aesthetic: Cohesive color palette</li>
+          <li>Stories: Behind-the-scenes, new arrivals</li>
+          <li>Reels: Styling tips, outfit inspiration</li>
+          <li>Captions: Brand voice, no excessive hashtags</li>
+          <li>Bio: Tagline + clear value proposition</li>
+        </ul>
+      </div>
+      <div class="platform-card">
+        <h4>Website</h4>
+        <ul>
+          <li>Homepage: Brand story, curated selections</li>
+          <li>Product pages: Detailed descriptions in brand voice</li>
+          <li>About: Jazz's story, brand values</li>
+          <li>Checkout: Clean, trustworthy, gold accents</li>
+          <li>Email capture: Value-driven, not discount-focused</li>
+        </ul>
+      </div>
+      <div class="platform-card">
+        <h4>Email Marketing</h4>
+        <ul>
+          <li>Welcome email: Warm introduction, brand story</li>
+          <li>New arrivals: Curated picks, styled inspiration</li>
+          <li>Abandoned cart: Encouraging, not desperate</li>
+          <li>Subject lines: Intriguing, confident tone</li>
+          <li>Design: Minimal, gold accents, clear CTAs</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Section 9: Photography -->
+  <section class="section">
+    <div class="section-header">
+      <p class="section-number">09</p>
+      <h2 class="section-title">Photography Style</h2>
+      <p class="section-subtitle">Visual standards for all imagery</p>
+    </div>
+
+    <div class="photo-guidelines">
+      <div class="photo-column">
+        <h4>Product Photography</h4>
+        <ul>
+          <li>Bright, natural lighting preferred</li>
+          <li>Clean backgrounds (white, cream, soft pink)</li>
+          <li>Show garment details and quality</li>
+          <li>Flat lays styled with intention</li>
+          <li>On-body shots where possible</li>
+          <li>Consistent editing style across all images</li>
+        </ul>
+      </div>
+      <div class="photo-column">
+        <h4>Lifestyle & Brand</h4>
+        <ul>
+          <li>Diverse representation of women</li>
+          <li>Confident, natural poses</li>
+          <li>Real moments, not overly staged</li>
+          <li>Warm color grading, soft contrast</li>
+          <li>Settings that reflect the customer lifestyle</li>
+          <li>Behind-the-scenes of curation process</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Movement Statement -->
+  <section class="movement">
+    <h2>Pretty girls <em>get paid.</em><br>All shapes. All sizes. All beautiful.</h2>
+    <p>This isn't just a brand. It's a movement. An invitation for every woman to step into her power, own her style, and know her worth. Elegance without apology. Confidence without compromise. Welcome to Pretty Paid Closet.</p>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p class="footer-brand">Prepared by <span>L7 Shift</span> | January 2026</p>
+    <p style="margin-top: 15px; font-size: 12px; color: rgba(45,45,45,0.4);">
+      <a href="mailto:hello@l7shift.com" style="color: var(--rose-gold); text-decoration: none;">hello@l7shift.com</a>
+      <span style="margin: 0 10px; color: rgba(45,45,45,0.2);">|</span>
+      <a href="https://l7shift.com" style="color: rgba(45,45,45,0.4); text-decoration: none;">l7shift.com</a>
+    </p>
+  </footer>
+
+  <!-- L7 Shift Watermark -->
+  <div class="l7-watermark">L7 Shift</div>
+
+</body>
+</html>

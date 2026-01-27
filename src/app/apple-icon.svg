@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+  <defs>
+    <linearGradient id="l7grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00F0FF"/>
+      <stop offset="100%" style="stop-color:#FF00AA"/>
+    </linearGradient>
+  </defs>
+  <rect width="180" height="180" fill="#0A0A0A"/>
+  <text x="18" y="130" font-family="Helvetica Neue, Arial, sans-serif" font-size="120" font-weight="700" fill="url(#l7grad)">L7</text>
+</svg>

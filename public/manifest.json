@@ -1,0 +1,21 @@
+{
+  "name": "L7 Shift",
+  "short_name": "L7",
+  "description": "Digital transformation for the non-conformist. Strategy. Systems. Solutions.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0A0A",
+  "theme_color": "#00F0FF",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/apple-icon",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="glitchGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00F0FF"/>
+      <stop offset="100%" style="stop-color:#FF00AA"/>
+    </linearGradient>
+    <linearGradient id="glitchGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF00AA"/>
+      <stop offset="100%" style="stop-color:#BFFF00"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="32" height="32" fill="#0A0A0A"/>
+  <!-- Glitch layer 1 - cyan shifted left -->
+  <rect x="3" y="6" width="20" height="20" fill="none" stroke="#00F0FF" stroke-width="2" opacity="0.6"/>
+  <!-- Glitch layer 2 - magenta shifted right -->
+  <rect x="9" y="6" width="20" height="20" fill="none" stroke="#FF00AA" stroke-width="2" opacity="0.6"/>
+  <!-- Main gradient square -->
+  <rect x="6" y="6" width="20" height="20" fill="none" stroke="url(#glitchGrad1)" stroke-width="2.5"/>
+</svg>
