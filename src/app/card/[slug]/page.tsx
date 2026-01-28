@@ -278,6 +278,68 @@ const GitHubIcon = () => (
   </svg>
 )
 
+// Apple Wallet icon
+const AppleWalletIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M21.25 5H2.75C1.23 5 0 6.23 0 7.75v8.5C0 17.77 1.23 19 2.75 19h18.5c1.52 0 2.75-1.23 2.75-2.75v-8.5C24 6.23 22.77 5 21.25 5zM2.75 6.5h18.5c.69 0 1.25.56 1.25 1.25v1.5H1.5v-1.5c0-.69.56-1.25 1.25-1.25zm18.5 11H2.75c-.69 0-1.25-.56-1.25-1.25v-5.5h21v5.5c0 .69-.56 1.25-1.25 1.25z"/>
+    <path d="M4 14h5v1.5H4zm7 0h5v1.5h-5z"/>
+  </svg>
+)
+
+// Google Wallet icon
+const GoogleWalletIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+  </svg>
+)
+
+// Wallet functions
+async function addToAppleWallet(holderId: string) {
+  try {
+    const response = await fetch(`/api/wallet/apple?id=${holderId}`)
+    const data = await response.json()
+
+    if (!data.configured) {
+      // Apple Wallet not configured yet - show message
+      alert('Apple Wallet integration coming soon! Use "Save Contact" for now.')
+      console.log('Apple Wallet setup needed:', data.setupInstructions)
+      return
+    }
+
+    // If configured, the response is a .pkpass file
+    // Create download link
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${holderId}.pkpass`
+    a.click()
+    URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('Apple Wallet error:', error)
+    alert('Apple Wallet integration coming soon!')
+  }
+}
+
+async function addToGoogleWallet(holderId: string) {
+  try {
+    const response = await fetch(`/api/wallet/google?id=${holderId}`)
+    const data = await response.json()
+
+    if (data.saveUrl) {
+      // Open Google Wallet save URL
+      window.open(data.saveUrl, '_blank')
+    } else {
+      // Not configured
+      alert('Google Wallet integration coming soon! Use "Save Contact" for now.')
+      console.log('Google Wallet pass data:', data.passData)
+    }
+  } catch (error) {
+    console.error('Google Wallet error:', error)
+    alert('Google Wallet integration coming soon!')
+  }
+}
+
 export default function DigitalCard() {
   const params = useParams()
   const slug = params.slug as string
@@ -414,17 +476,31 @@ export default function DigitalCard() {
             Save Contact
           </button>
 
-          {holder.calendly && (
-            <a href={holder.calendly} target="_blank" rel="noopener noreferrer" className="btn-secondary">
-              Schedule a Call
-            </a>
-          )}
+          {/* Wallet Buttons */}
+          <div className="wallet-buttons">
+            <button
+              onClick={() => addToAppleWallet(slug)}
+              className="wallet-btn apple"
+              title="Add to Apple Wallet"
+            >
+              <AppleWalletIcon />
+              <span>Apple Wallet</span>
+            </button>
+            <button
+              onClick={() => addToGoogleWallet(slug)}
+              className="wallet-btn google"
+              title="Add to Google Wallet"
+            >
+              <GoogleWalletIcon />
+              <span>Google Wallet</span>
+            </button>
+          </div>
         </div>
 
         {/* Footer */}
         <div className="footer">
-          <span>Break the</span>
-          <span className="footer-gradient">Square</span>
+          <span>Powered by</span>
+          <span className="footer-gradient">ShiftCards™</span>
         </div>
       </div>
 
@@ -713,6 +789,47 @@ export default function DigitalCard() {
         .btn-secondary:hover {
           border-color: ${brandColors.electricCyan};
           color: ${brandColors.electricCyan};
+        }
+
+        .wallet-buttons {
+          display: flex;
+          gap: 10px;
+          width: 100%;
+        }
+
+        .wallet-btn {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 12px 16px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
+          color: ${brandColors.white};
+          font-size: 12px;
+          font-weight: 500;
+          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+          transition: all 0.2s ease;
+        }
+
+        .wallet-btn:hover {
+          background: rgba(255, 255, 255, 0.06);
+          border-color: rgba(255, 255, 255, 0.2);
+          transform: translateY(-1px);
+        }
+
+        .wallet-btn.apple:hover {
+          border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .wallet-btn.google:hover {
+          border-color: rgba(66, 133, 244, 0.6);
+        }
+
+        .wallet-btn svg {
+          opacity: 0.8;
         }
 
         .footer {
