@@ -39,6 +39,7 @@ export default function ProjectDetailPage() {
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban')
   const [loading, setLoading] = useState(true)
   const [showAddTaskModal, setShowAddTaskModal] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
 
   useEffect(() => {
     if (projectId) {
@@ -357,7 +358,10 @@ export default function ProjectDetailPage() {
             title={`${reviewTasks} item${reviewTasks > 1 ? 's' : ''} ready for review`}
             message="These tasks are complete and waiting for client feedback or approval."
             actionLabel="Send Review Request"
-            onAction={() => {}}
+            onAction={() => {
+              // TODO: Implement review request email/notification
+              alert(`Review request would be sent for ${reviewTasks} task(s). Feature coming soon!`)
+            }}
           />
         </div>
       )}
@@ -406,7 +410,10 @@ export default function ProjectDetailPage() {
             <KanbanBoard
               tasks={kanbanTasks}
               onTaskMove={handleTaskMove}
-              onTaskClick={(task) => console.log('Clicked task:', task)}
+              onTaskClick={(task) => {
+                const fullTask = tasks.find(t => t.id === task.id)
+                if (fullTask) setSelectedTask(fullTask)
+              }}
             />
           )}
         </div>
@@ -527,6 +534,18 @@ export default function ProjectDetailPage() {
           onClose={() => setShowAddTaskModal(false)}
           onSuccess={() => {
             setShowAddTaskModal(false)
+            fetchProjectData()
+          }}
+        />
+      )}
+
+      {/* Task Detail Modal */}
+      {selectedTask && (
+        <TaskDetailModal
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+          onUpdate={() => {
+            setSelectedTask(null)
             fetchProjectData()
           }}
         />
@@ -748,6 +767,203 @@ function AddTaskModal({
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  )
+}
+
+// Task Detail Modal Component
+function TaskDetailModal({
+  task,
+  onClose,
+  onUpdate,
+}: {
+  task: Task
+  onClose: () => void
+  onUpdate: () => void
+}) {
+  const priorityColors = {
+    low: '#666',
+    medium: '#888',
+    high: '#FFAA00',
+    urgent: '#FF4444',
+  }
+
+  const statusLabels = {
+    backlog: 'Backlog',
+    active: 'Active',
+    review: 'In Review',
+    shipped: 'Shipped',
+  }
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0, 0, 0, 0.8)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: '#1A1A1A',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: 16,
+          padding: 32,
+          width: '100%',
+          maxWidth: 520,
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+          <div>
+            <h2 style={{ margin: '0 0 8px', fontSize: 20, color: '#FAFAFA' }}>{task.title}</h2>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span
+                style={{
+                  padding: '4px 12px',
+                  background: `${priorityColors[task.priority]}22`,
+                  color: priorityColors[task.priority],
+                  borderRadius: 12,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                }}
+              >
+                {task.priority}
+              </span>
+              <span style={{ fontSize: 12, color: '#888' }}>•</span>
+              <span style={{ fontSize: 12, color: '#00F0FF' }}>{statusLabels[task.status]}</span>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#666',
+              fontSize: 24,
+              cursor: 'pointer',
+              padding: 0,
+              lineHeight: 1,
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        {/* Description */}
+        {task.description && (
+          <div style={{ marginBottom: 24 }}>
+            <label style={{ display: 'block', fontSize: 12, color: '#666', marginBottom: 8 }}>Description</label>
+            <p style={{ margin: 0, fontSize: 14, color: '#FAFAFA', lineHeight: 1.6 }}>{task.description}</p>
+          </div>
+        )}
+
+        {/* Hours comparison */}
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ display: 'block', fontSize: 12, color: '#666', marginBottom: 12 }}>Hours Comparison</label>
+          <div style={{ display: 'flex', gap: 24 }}>
+            <div>
+              <div style={{ fontSize: 24, fontWeight: 700, color: '#00F0FF' }}>{task.shift_hours}h</div>
+              <div style={{ fontSize: 11, color: '#666' }}>Shift Hours</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 24, fontWeight: 700, color: '#FF00AA' }}>{task.traditional_hours_estimate}h</div>
+              <div style={{ fontSize: 11, color: '#666' }}>Traditional Est.</div>
+            </div>
+            {task.traditional_hours_estimate > 0 && (
+              <div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#BFFF00' }}>
+                  {Math.round(((task.traditional_hours_estimate - task.shift_hours) / task.traditional_hours_estimate) * 100)}%
+                </div>
+                <div style={{ fontSize: 11, color: '#666' }}>Time Saved</div>
+              </div>
+            )}
+          </div>
+
+          {/* Progress bar */}
+          {task.traditional_hours_estimate > 0 && (
+            <div style={{ marginTop: 16 }}>
+              <div
+                style={{
+                  height: 8,
+                  background: '#FF00AA33',
+                  borderRadius: 4,
+                  overflow: 'hidden',
+                  position: 'relative',
+                }}
+              >
+                <div
+                  style={{
+                    height: '100%',
+                    width: `${Math.min((task.shift_hours / task.traditional_hours_estimate) * 100, 100)}%`,
+                    background: 'linear-gradient(90deg, #00F0FF, #00F0FFCC)',
+                    borderRadius: 4,
+                    boxShadow: '0 0 8px rgba(0, 240, 255, 0.4)',
+                  }}
+                />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+                <span style={{ fontSize: 10, color: '#00F0FF' }}>Shift: {task.shift_hours}h</span>
+                <span style={{ fontSize: 10, color: '#FF00AA' }}>Traditional: {task.traditional_hours_estimate}h</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Metadata */}
+        <div
+          style={{
+            padding: 16,
+            background: 'rgba(255, 255, 255, 0.03)',
+            borderRadius: 8,
+            marginBottom: 24,
+          }}
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, fontSize: 13 }}>
+            <div>
+              <span style={{ color: '#666' }}>Created: </span>
+              <span style={{ color: '#FAFAFA' }}>{new Date(task.created_at).toLocaleDateString()}</span>
+            </div>
+            {task.shipped_at && (
+              <div>
+                <span style={{ color: '#666' }}>Shipped: </span>
+                <span style={{ color: '#BFFF00' }}>{new Date(task.shipped_at).toLocaleDateString()}</span>
+              </div>
+            )}
+            {task.assigned_to && (
+              <div>
+                <span style={{ color: '#666' }}>Assigned: </span>
+                <span style={{ color: '#FAFAFA' }}>{task.assigned_to}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button
+            onClick={onClose}
+            style={{
+              padding: '10px 20px',
+              background: 'transparent',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: 8,
+              color: '#888',
+              fontSize: 14,
+              cursor: 'pointer',
+            }}
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   )

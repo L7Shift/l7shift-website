@@ -26,6 +26,15 @@ const sizes = {
   lg: { height: 14, fontSize: 14, gap: 8 },
 }
 
+function formatDate(dateString: string): string {
+  try {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  } catch {
+    return dateString
+  }
+}
+
 export function TimelineBar({
   phases,
   currentPhase,
@@ -51,8 +60,8 @@ export function TimelineBar({
             color: '#888',
           }}
         >
-          {startDate && <span>Start: {startDate}</span>}
-          {endDate && <span>Target: {endDate}</span>}
+          {startDate && <span>Start: {formatDate(startDate)}</span>}
+          {endDate && <span>Target: {formatDate(endDate)}</span>}
         </div>
       )}
 

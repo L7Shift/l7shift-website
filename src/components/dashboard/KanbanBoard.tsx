@@ -203,13 +203,36 @@ export function KanbanBoard({ tasks, onTaskMove, onTaskClick }: KanbanBoardProps
                     </p>
                   )}
 
+                  {/* Hours bar */}
+                  {task.traditionalEstimate > 0 && (
+                    <div style={{ marginTop: 10 }}>
+                      <div
+                        style={{
+                          height: 4,
+                          background: '#FF00AA33',
+                          borderRadius: 2,
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: '100%',
+                            width: `${Math.min((task.shiftHours / task.traditionalEstimate) * 100, 100)}%`,
+                            background: '#00F0FF',
+                            borderRadius: 2,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {/* Footer */}
                   <div
                     style={{
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
-                      marginTop: 10,
+                      marginTop: 8,
                       paddingTop: 8,
                       borderTop: '1px solid rgba(255, 255, 255, 0.05)',
                     }}
@@ -220,7 +243,7 @@ export function KanbanBoard({ tasks, onTaskMove, onTaskClick }: KanbanBoardProps
                         {task.shiftHours}h
                       </span>
                       <span style={{ fontSize: 10, color: '#444' }}>/</span>
-                      <span style={{ fontSize: 10, color: '#666' }}>
+                      <span style={{ fontSize: 10, color: '#FF00AA' }}>
                         {task.traditionalEstimate}h
                       </span>
                     </div>

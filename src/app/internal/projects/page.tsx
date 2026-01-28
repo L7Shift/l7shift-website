@@ -382,6 +382,57 @@ export default function ProjectsPage() {
                     </div>
                   </div>
 
+                  {/* Hours comparison bar */}
+                  {project.total_traditional_estimate > 0 && (
+                    <div style={{ marginBottom: 16 }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          marginBottom: 6,
+                        }}
+                      >
+                        <span style={{ fontSize: 11, color: '#888' }}>Hours: Shift vs Traditional</span>
+                        <span style={{ fontSize: 11, color: '#888' }}>
+                          {project.total_shift_hours.toFixed(1)}h / {project.total_traditional_estimate}h
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          height: 8,
+                          background: '#FF00AA33',
+                          borderRadius: 4,
+                          overflow: 'hidden',
+                          position: 'relative',
+                        }}
+                      >
+                        {/* Traditional estimate background (magenta) */}
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            height: '100%',
+                            width: '100%',
+                            background: 'linear-gradient(90deg, #FF00AA44, #FF00AA22)',
+                            borderRadius: 4,
+                          }}
+                        />
+                        {/* Shift hours fill (cyan) */}
+                        <div
+                          style={{
+                            position: 'relative',
+                            height: '100%',
+                            width: `${Math.min((project.total_shift_hours / project.total_traditional_estimate) * 100, 100)}%`,
+                            background: 'linear-gradient(90deg, #00F0FF, #00F0FFCC)',
+                            borderRadius: 4,
+                            boxShadow: '0 0 8px rgba(0, 240, 255, 0.4)',
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {/* Footer metrics */}
                   <div
                     style={{

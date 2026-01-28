@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { supabase, getSupabaseClient } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 import type { Project, ActivityLogEntry } from '@/lib/database.types'
 import {
   ProgressRing,
@@ -24,6 +25,7 @@ interface ProjectWithMetrics extends Project {
 }
 
 export default function InternalDashboard() {
+  const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [projects, setProjects] = useState<ProjectWithMetrics[]>([])
   const [activity, setActivity] = useState<ActivityLogEntry[]>([])
@@ -282,7 +284,7 @@ export default function InternalDashboard() {
                 title="Client Actions Needed"
                 message={`${totalPendingActions} items are waiting for client review or approval. Clearing these will keep projects moving.`}
                 actionLabel="View Pending Items"
-                onAction={() => {}}
+                onAction={() => router.push('/internal/projects')}
               />
             </div>
           )}
@@ -454,6 +456,7 @@ export default function InternalDashboard() {
                   subtitle="Deliverables"
                   badge={totalPendingActions}
                   badgeColor="magenta"
+                  href="/internal/projects"
                 />
                 <ActionCard
                   icon="✅"
@@ -461,6 +464,7 @@ export default function InternalDashboard() {
                   subtitle="Requirements"
                   badge={0}
                   badgeColor="cyan"
+                  href="/internal/requirements"
                 />
                 <ActionCard
                   icon="💬"
@@ -468,11 +472,13 @@ export default function InternalDashboard() {
                   subtitle="New comments"
                   badge={0}
                   badgeColor="orange"
+                  href="/internal/projects"
                 />
                 <ActionCard
                   icon="📄"
                   title="Reports"
                   subtitle="Generate"
+                  href="/internal/metrics"
                 />
               </div>
 
