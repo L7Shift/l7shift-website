@@ -14,10 +14,11 @@ interface ProjectWithMetrics extends Project {
 }
 
 type ViewMode = 'grid' | 'list'
+type FilterOption = 'all' | 'active' | 'on_hold' | 'completed'
 
 export default function ProjectsPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
-  const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all')
+  const [filter, setFilter] = useState<FilterOption>('all')
   const [projects, setProjects] = useState<ProjectWithMetrics[]>([])
   const [loading, setLoading] = useState(true)
   const [showNewProjectModal, setShowNewProjectModal] = useState(false)
@@ -75,9 +76,7 @@ export default function ProjectsPage() {
 
   const filteredProjects = projects.filter((p) => {
     if (filter === 'all') return true
-    if (filter === 'active') return p.status === 'active'
-    if (filter === 'completed') return p.status === 'completed'
-    return true
+    return p.status === filter
   })
 
   if (loading) {
@@ -185,23 +184,27 @@ export default function ProjectsPage() {
           paddingBottom: 16,
         }}
       >
-        {(['all', 'active', 'completed'] as const).map((f) => (
+        {([
+          { key: 'all', label: 'All' },
+          { key: 'active', label: 'Active' },
+          { key: 'on_hold', label: 'On Hold' },
+          { key: 'completed', label: 'Completed' },
+        ] as const).map((f) => (
           <button
-            key={f}
-            onClick={() => setFilter(f)}
+            key={f.key}
+            onClick={() => setFilter(f.key)}
             style={{
               padding: '8px 16px',
-              background: filter === f ? 'rgba(0, 240, 255, 0.1)' : 'transparent',
-              border: filter === f ? '1px solid rgba(0, 240, 255, 0.3)' : '1px solid transparent',
+              background: filter === f.key ? 'rgba(0, 240, 255, 0.1)' : 'transparent',
+              border: filter === f.key ? '1px solid rgba(0, 240, 255, 0.3)' : '1px solid transparent',
               borderRadius: 6,
-              color: filter === f ? '#00F0FF' : '#888',
+              color: filter === f.key ? '#00F0FF' : '#888',
               cursor: 'pointer',
               fontSize: 13,
               fontWeight: 500,
-              textTransform: 'capitalize',
             }}
           >
-            {f}
+            {f.label}
           </button>
         ))}
       </div>

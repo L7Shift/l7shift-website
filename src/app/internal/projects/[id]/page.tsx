@@ -40,6 +40,7 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true)
   const [showAddTaskModal, setShowAddTaskModal] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [showEditProjectModal, setShowEditProjectModal] = useState(false)
 
   useEffect(() => {
     if (projectId) {
@@ -224,7 +225,32 @@ export default function ProjectDetailPage() {
             >
               {project.name}
             </h1>
-            <StatusPill status={project.status} />
+            <button
+              onClick={() => setShowEditProjectModal(true)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+              }}
+              title="Click to edit project"
+            >
+              <StatusPill status={project.status} />
+            </button>
+            <button
+              onClick={() => setShowEditProjectModal(true)}
+              style={{
+                padding: '6px 12px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: 6,
+                color: '#888',
+                fontSize: 12,
+                cursor: 'pointer',
+              }}
+            >
+              Edit
+            </button>
           </div>
           {project.description && (
             <p style={{ margin: '8px 0 0', color: '#888', fontSize: 14, maxWidth: 600 }}>
@@ -546,6 +572,18 @@ export default function ProjectDetailPage() {
           onClose={() => setSelectedTask(null)}
           onUpdate={() => {
             setSelectedTask(null)
+            fetchProjectData()
+          }}
+        />
+      )}
+
+      {/* Edit Project Modal */}
+      {showEditProjectModal && project && (
+        <EditProjectModal
+          project={project}
+          onClose={() => setShowEditProjectModal(false)}
+          onSuccess={() => {
+            setShowEditProjectModal(false)
             fetchProjectData()
           }}
         />
@@ -964,6 +1002,216 @@ function TaskDetailModal({
             Close
           </button>
         </div>
+      </div>
+    </div>
+  )
+}
+
+// Edit Project Modal Component
+function EditProjectModal({
+  project,
+  onClose,
+  onSuccess,
+}: {
+  project: Project
+  onClose: () => void
+  onSuccess: () => void
+}) {
+  const [name, setName] = useState(project.name)
+  const [clientName, setClientName] = useState(project.client_name)
+  const [description, setDescription] = useState(project.description || '')
+  const [status, setStatus] = useState(project.status)
+  const [saving, setSaving] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!name || !clientName || !supabase) return
+    const db = supabase!
+
+    setSaving(true)
+    try {
+      const { error } = await (db as any)
+        .from('projects')
+        .update({
+          name,
+          client_name: clientName,
+          description: description || null,
+          status,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', project.id)
+
+      if (error) throw error
+      onSuccess()
+    } catch (error) {
+      console.error('Error updating project:', error)
+      alert('Failed to update project')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const statusOptions = [
+    { value: 'active', label: 'Active' },
+    { value: 'on_hold', label: 'On Hold' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'cancelled', label: 'Cancelled' },
+  ]
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0, 0, 0, 0.8)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: '#1A1A1A',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: 16,
+          padding: 32,
+          width: '100%',
+          maxWidth: 480,
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 style={{ margin: '0 0 24px', fontSize: 20, color: '#FAFAFA' }}>Edit Project</h2>
+
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: 'block', fontSize: 13, color: '#888', marginBottom: 8 }}>
+              Project Name *
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: 8,
+                color: '#FAFAFA',
+                fontSize: 14,
+                outline: 'none',
+              }}
+            />
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: 'block', fontSize: 13, color: '#888', marginBottom: 8 }}>
+              Client Name *
+            </label>
+            <input
+              type="text"
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: 8,
+                color: '#FAFAFA',
+                fontSize: 14,
+                outline: 'none',
+              }}
+            />
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: 'block', fontSize: 13, color: '#888', marginBottom: 8 }}>
+              Status
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as Project['status'])}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: 8,
+                color: '#FAFAFA',
+                fontSize: 14,
+                outline: 'none',
+              }}
+            >
+              {statusOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ marginBottom: 24 }}>
+            <label style={{ display: 'block', fontSize: 13, color: '#888', marginBottom: 8 }}>
+              Description
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: 8,
+                color: '#FAFAFA',
+                fontSize: 14,
+                outline: 'none',
+                resize: 'vertical',
+              }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                padding: '10px 20px',
+                background: 'transparent',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: 8,
+                color: '#888',
+                fontSize: 14,
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving || !name || !clientName}
+              style={{
+                padding: '10px 20px',
+                background: 'linear-gradient(135deg, #00F0FF, #FF00AA)',
+                border: 'none',
+                borderRadius: 8,
+                color: '#0A0A0A',
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: saving ? 'not-allowed' : 'pointer',
+                opacity: saving || !name || !clientName ? 0.5 : 1,
+              }}
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )
