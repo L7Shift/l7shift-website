@@ -392,6 +392,52 @@ export interface Database {
         }
       }
 
+      // Clients - Client management
+      clients: {
+        Row: {
+          id: string
+          name: string
+          company: string
+          email: string
+          phone: string | null
+          status: 'active' | 'completed' | 'prospect' | 'churned'
+          total_value: number
+          joined_at: string
+          last_active: string
+          avatar_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          company: string
+          email: string
+          phone?: string | null
+          status?: 'active' | 'completed' | 'prospect' | 'churned'
+          total_value?: number
+          joined_at?: string
+          last_active?: string
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          company?: string
+          email?: string
+          phone?: string | null
+          status?: 'active' | 'completed' | 'prospect' | 'churned'
+          total_value?: number
+          joined_at?: string
+          last_active?: string
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+
       // Contact Submissions - Website contact form
       contact_submissions: {
         Row: {
@@ -492,6 +538,9 @@ export type TaskInsert = Database['public']['Tables']['tasks']['Insert']
 export type TaskUpdate = Database['public']['Tables']['tasks']['Update']
 
 export type Sprint = Database['public']['Tables']['sprints']['Row']
+export type Client = Database['public']['Tables']['clients']['Row']
+export type ClientInsert = Database['public']['Tables']['clients']['Insert']
+export type ClientUpdate = Database['public']['Tables']['clients']['Update']
 export type Deliverable = Database['public']['Tables']['deliverables']['Row']
 export type RequirementDoc = Database['public']['Tables']['requirements_docs']['Row']
 export type ActivityLogEntry = Database['public']['Tables']['activity_log']['Row']

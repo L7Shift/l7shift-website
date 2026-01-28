@@ -1,70 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { StatusPill } from '@/components/dashboard'
+import { supabase } from '@/lib/supabase'
+import type { Client as DbClient } from '@/lib/database.types'
 
-interface Client {
-  id: string
-  name: string
-  company: string
-  email: string
-  phone?: string
-  status: 'active' | 'completed' | 'prospect' | 'churned'
-  projectCount: number
-  totalValue: number
-  joinedAt: Date
-  lastActive: Date
-  avatar?: string
+interface ClientWithMetrics extends DbClient {
+  project_count: number
 }
 
-// Mock clients data
-const mockClients: Client[] = [
-  {
-    id: '1',
-    name: 'Eric Johnson',
-    company: 'Scat Pack CLT',
-    email: 'eric@scatpackclt.com',
-    phone: '(704) 555-0123',
-    status: 'active',
-    projectCount: 1,
-    totalValue: 5000,
-    joinedAt: new Date('2026-01-01'),
-    lastActive: new Date(Date.now() - 1000 * 60 * 60 * 2),
-  },
-  {
-    id: '2',
-    name: 'Jazz',
-    company: 'Pretty Paid Closet',
-    email: 'jazz@prettypaidcloset.com',
-    status: 'active',
-    projectCount: 1,
-    totalValue: 4500,
-    joinedAt: new Date('2026-01-20'),
-    lastActive: new Date(Date.now() - 1000 * 60 * 60 * 24),
-  },
-  {
-    id: '3',
-    name: 'Nicole Walker',
-    company: 'Stitchwichs',
-    email: 'nicole@stitchwichs.com',
-    phone: '(704) 555-0456',
-    status: 'prospect',
-    projectCount: 1,
-    totalValue: 3500,
-    joinedAt: new Date('2026-01-15'),
-    lastActive: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
-  },
-]
+type ClientStatus = 'active' | 'completed' | 'prospect' | 'churned'
 
-const statusConfig: Record<Client['status'], { label: string; color: string; bgColor: string }> = {
+const statusConfig: Record<ClientStatus, { label: string; color: string; bgColor: string }> = {
   active: { label: 'Active', color: '#BFFF00', bgColor: 'rgba(191, 255, 0, 0.1)' },
   completed: { label: 'Completed', color: '#00F0FF', bgColor: 'rgba(0, 240, 255, 0.1)' },
   prospect: { label: 'Prospect', color: '#FF00AA', bgColor: 'rgba(255, 0, 170, 0.1)' },
   churned: { label: 'Churned', color: '#888', bgColor: 'rgba(136, 136, 136, 0.1)' },
 }
 
-function formatDate(date: Date): string {
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr)
   const now = new Date()
   const diffMs = now.getTime() - date.getTime()
   const diffHours = Math.floor(diffMs / 3600000)
@@ -85,10 +40,57 @@ function formatCurrency(amount: number): string {
 }
 
 export default function ClientsPage() {
-  const [filter, setFilter] = useState<'all' | Client['status']>('all')
+  const [filter, setFilter] = useState<'all' | ClientStatus>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [clients, setClients] = useState<ClientWithMetrics[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showAddClientModal, setShowAddClientModal] = useState(false)
 
-  const filteredClients = mockClients.filter((client) => {
+  useEffect(() => {
+    fetchClients()
+  }, [])
+
+  async function fetchClients() {
+    if (!supabase) {
+      console.error('Supabase client not initialized')
+      setLoading(false)
+      return
+    }
+
+    const db = supabase as any
+
+    try {
+      const { data: clientsData, error: clientsError } = await db
+        .from('clients')
+        .select('*')
+        .order('last_active', { ascending: false })
+
+      if (clientsError) throw clientsError
+
+      // Fetch project counts for each client
+      const clientsWithMetrics: ClientWithMetrics[] = await Promise.all(
+        (clientsData || []).map(async (client: DbClient) => {
+          const { data: projects, error: projectsError } = await db
+            .from('projects')
+            .select('id')
+            .eq('client_name', client.company)
+
+          return {
+            ...client,
+            project_count: projectsError ? 0 : (projects || []).length,
+          }
+        })
+      )
+
+      setClients(clientsWithMetrics)
+    } catch (error) {
+      console.error('Error fetching clients:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filteredClients = clients.filter((client) => {
     if (filter !== 'all' && client.status !== filter) return false
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
@@ -102,9 +104,17 @@ export default function ClientsPage() {
   })
 
   const stats = {
-    total: mockClients.length,
-    active: mockClients.filter((c) => c.status === 'active').length,
-    totalValue: mockClients.reduce((sum, c) => sum + c.totalValue, 0),
+    total: clients.length,
+    active: clients.filter((c) => c.status === 'active').length,
+    totalValue: clients.reduce((sum, c) => sum + (c.total_value || 0), 0),
+  }
+
+  if (loading) {
+    return (
+      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '40px 20px', textAlign: 'center' }}>
+        <div style={{ color: '#888' }}>Loading clients...</div>
+      </div>
+    )
   }
 
   return (
@@ -136,6 +146,7 @@ export default function ClientsPage() {
         </div>
 
         <button
+          onClick={() => setShowAddClientModal(true)}
           style={{
             padding: '12px 24px',
             background: 'linear-gradient(135deg, #00F0FF, #FF00AA)',
@@ -351,16 +362,16 @@ export default function ClientsPage() {
             {/* Projects */}
             <div>
               <div style={{ fontSize: 14, fontWeight: 600, color: '#FAFAFA' }}>
-                {client.projectCount} project{client.projectCount !== 1 ? 's' : ''}
+                {client.project_count} project{client.project_count !== 1 ? 's' : ''}
               </div>
               <div style={{ fontSize: 12, color: '#00F0FF' }}>
-                {formatCurrency(client.totalValue)}
+                {formatCurrency(client.total_value || 0)}
               </div>
             </div>
 
             {/* Last Active */}
             <div style={{ fontSize: 13, color: '#888' }}>
-              {formatDate(client.lastActive)}
+              {formatDate(client.last_active)}
             </div>
 
             {/* Actions */}
@@ -396,17 +407,266 @@ export default function ClientsPage() {
             <span style={{ fontSize: 48, display: 'block', marginBottom: 16 }}>👥</span>
             <p style={{ fontSize: 15, margin: 0 }}>No clients found</p>
             <p style={{ fontSize: 13, color: '#555', marginTop: 8 }}>
-              Try adjusting your filters or add a new client
+              {clients.length === 0 ? 'Add your first client to get started' : 'Try adjusting your filters'}
             </p>
+            {clients.length === 0 && (
+              <button
+                onClick={() => setShowAddClientModal(true)}
+                style={{
+                  marginTop: 16,
+                  padding: '12px 24px',
+                  background: 'linear-gradient(135deg, #00F0FF, #FF00AA)',
+                  color: '#0A0A0A',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                + Add Client
+              </button>
+            )}
           </div>
         )}
       </div>
+
+      {/* Add Client Modal */}
+      {showAddClientModal && (
+        <AddClientModal
+          onClose={() => setShowAddClientModal(false)}
+          onSuccess={() => {
+            setShowAddClientModal(false)
+            fetchClients()
+          }}
+        />
+      )}
 
       <style jsx>{`
         .client-row:hover {
           background: rgba(0, 240, 255, 0.03) !important;
         }
       `}</style>
+    </div>
+  )
+}
+
+// Add Client Modal Component
+function AddClientModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+  const [name, setName] = useState('')
+  const [company, setCompany] = useState('')
+  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
+  const [status, setStatus] = useState<ClientStatus>('prospect')
+  const [saving, setSaving] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!name || !company || !email || !supabase) return
+    const db = supabase as any
+
+    setSaving(true)
+    try {
+      const { error } = await db.from('clients').insert({
+        name,
+        company,
+        email,
+        phone: phone || null,
+        status,
+        total_value: 0,
+        joined_at: new Date().toISOString(),
+        last_active: new Date().toISOString(),
+      })
+
+      if (error) throw error
+      onSuccess()
+    } catch (error) {
+      console.error('Error creating client:', error)
+      alert('Failed to create client')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0, 0, 0, 0.8)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: '#1A1A1A',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: 16,
+          padding: 32,
+          width: '100%',
+          maxWidth: 480,
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 style={{ margin: '0 0 24px', fontSize: 20, color: '#FAFAFA' }}>Add Client</h2>
+
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: 'block', fontSize: 13, color: '#888', marginBottom: 8 }}>
+              Contact Name *
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: 8,
+                color: '#FAFAFA',
+                fontSize: 14,
+                outline: 'none',
+              }}
+              placeholder="e.g., John Smith"
+            />
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: 'block', fontSize: 13, color: '#888', marginBottom: 8 }}>
+              Company Name *
+            </label>
+            <input
+              type="text"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: 8,
+                color: '#FAFAFA',
+                fontSize: 14,
+                outline: 'none',
+              }}
+              placeholder="e.g., Acme Corp"
+            />
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: 'block', fontSize: 13, color: '#888', marginBottom: 8 }}>
+              Email *
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: 8,
+                color: '#FAFAFA',
+                fontSize: 14,
+                outline: 'none',
+              }}
+              placeholder="e.g., john@acme.com"
+            />
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: 'block', fontSize: 13, color: '#888', marginBottom: 8 }}>
+              Phone
+            </label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: 8,
+                color: '#FAFAFA',
+                fontSize: 14,
+                outline: 'none',
+              }}
+              placeholder="e.g., (704) 555-0123"
+            />
+          </div>
+
+          <div style={{ marginBottom: 24 }}>
+            <label style={{ display: 'block', fontSize: 13, color: '#888', marginBottom: 8 }}>
+              Status
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as ClientStatus)}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: 8,
+                color: '#FAFAFA',
+                fontSize: 14,
+                outline: 'none',
+              }}
+            >
+              <option value="prospect">Prospect</option>
+              <option value="active">Active</option>
+              <option value="completed">Completed</option>
+              <option value="churned">Churned</option>
+            </select>
+          </div>
+
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                padding: '10px 20px',
+                background: 'transparent',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: 8,
+                color: '#888',
+                fontSize: 14,
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving || !name || !company || !email}
+              style={{
+                padding: '10px 20px',
+                background: 'linear-gradient(135deg, #00F0FF, #FF00AA)',
+                border: 'none',
+                borderRadius: 8,
+                color: '#0A0A0A',
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: saving ? 'not-allowed' : 'pointer',
+                opacity: saving || !name || !company || !email ? 0.5 : 1,
+              }}
+            >
+              {saving ? 'Creating...' : 'Add Client'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }
