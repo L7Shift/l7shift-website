@@ -37,18 +37,34 @@ interface CardHolder {
   }
 }
 
-// Generate vCard for download
+// Generate vCard for download with all proper fields
 function downloadVCard(holder: CardHolder) {
-  const vcard = `BEGIN:VCARD
-VERSION:3.0
-FN:${holder.name}
-ORG:${holder.company}
-TITLE:${holder.title}
-EMAIL:${holder.email}
-TEL:${holder.phone}
-URL:${holder.website}
-END:VCARD`
-  const blob = new Blob([vcard], { type: 'text/vcard' })
+  // Split name into parts for N field
+  const nameParts = holder.name.split(' ')
+  const lastName = nameParts.pop() || ''
+  const firstName = nameParts.join(' ')
+
+  // Format phone for TEL field (remove formatting)
+  const phoneClean = holder.phone.replace(/[^\d+]/g, '')
+
+  const vcard = [
+    'BEGIN:VCARD',
+    'VERSION:3.0',
+    `N:${lastName};${firstName};;;`,
+    `FN:${holder.name}`,
+    `ORG:${holder.company}`,
+    `TITLE:${holder.title}`,
+    `TEL;TYPE=WORK,VOICE:${phoneClean}`,
+    `EMAIL;TYPE=WORK,INTERNET:${holder.email}`,
+    `URL;TYPE=WORK:${holder.website}`,
+    holder.socials.linkedin ? `X-SOCIALPROFILE;TYPE=linkedin:${holder.socials.linkedin}` : '',
+    holder.socials.twitter ? `X-SOCIALPROFILE;TYPE=twitter:${holder.socials.twitter}` : '',
+    holder.socials.github ? `URL;TYPE=github:${holder.socials.github}` : '',
+    `NOTE:${holder.tagline}`,
+    'END:VCARD'
+  ].filter(Boolean).join('\r\n')
+
+  const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
@@ -56,6 +72,13 @@ END:VCARD`
   a.click()
   URL.revokeObjectURL(url)
 }
+
+// Google Wallet icon
+const WalletIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M21 18v1a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v1h-9a2 2 0 00-2 2v8a2 2 0 002 2h9zm-9-2h10V8H12v8zm4-2.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
+  </svg>
+)
 
 // Icons
 const LinkedInIcon = () => (
@@ -224,11 +247,20 @@ export default function DigitalCard() {
             </a>
           </div>
 
-          {/* Save Contact Button */}
-          <button onClick={() => downloadVCard(holder)} className="save-btn">
-            <span className="btn-text">Save Contact</span>
-            <span className="btn-glow" />
-          </button>
+          {/* Action Buttons */}
+          <div className="action-buttons">
+            <button onClick={() => downloadVCard(holder)} className="save-btn">
+              <span className="btn-text">Save Contact</span>
+              <span className="btn-glow" />
+            </button>
+            <button
+              onClick={() => window.open(`/api/wallet/google?id=${slug}`, '_blank')}
+              className="wallet-btn"
+            >
+              <WalletIcon />
+              <span>Add to Google Wallet</span>
+            </button>
+          </div>
 
           {/* Footer */}
           <div className="footer">

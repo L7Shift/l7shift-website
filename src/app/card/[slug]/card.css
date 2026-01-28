@@ -538,6 +538,51 @@
   opacity: 1;
 }
 
+/* Action Buttons Container */
+.action-buttons {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Google Wallet Button */
+.wallet-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 24px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.wallet-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--acid-lime);
+  color: var(--acid-lime);
+  transform: translateY(-2px);
+}
+
+.wallet-btn:active {
+  transform: translateY(0);
+}
+
+.wallet-btn svg {
+  opacity: 0.8;
+}
+
+.wallet-btn:hover svg {
+  opacity: 1;
+}
+
 /* Footer */
 .footer {
   margin-top: 24px;
