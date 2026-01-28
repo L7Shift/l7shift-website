@@ -220,8 +220,16 @@ export default function DigitalCard() {
             {holder.name}
           </h1>
 
-          {/* Title */}
-          <p className="title" data-text={holder.title}>{holder.title}</p>
+          {/* Title - highlight AI in SymbAIote */}
+          <p className="title" data-text={holder.title}>
+            {holder.title.includes('SymbAIote') ? (
+              <>
+                {holder.title.split('SymbAIote')[0]}
+                Symb<span className="title-ai">AI</span>ote
+                {holder.title.split('SymbAIote')[1]}
+              </>
+            ) : holder.title}
+          </p>
 
           {/* Company */}
           <p className="company">{holder.company}</p>

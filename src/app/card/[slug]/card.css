@@ -423,6 +423,15 @@
   95% { opacity: 0; transform: translate(0); }
 }
 
+/* AI highlight in title */
+.title-ai {
+  background: linear-gradient(90deg, var(--electric-cyan), var(--hot-magenta));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
 /* Company */
 .company {
   font-size: 13px;
