@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+import './card.css'
 
 // Card holder data
 const cardHolders: Record<string, CardHolder> = {
@@ -109,14 +110,7 @@ export default function DigitalCard() {
 
   if (!mounted) {
     return (
-      <div style={{
-        minHeight: '100dvh',
-        background: '#FFFFFF',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'system-ui, sans-serif',
-      }}>
+      <div className="card-page">
         <div style={{ color: '#888' }}>Loading...</div>
       </div>
     )
@@ -124,317 +118,117 @@ export default function DigitalCard() {
 
   if (!holder) {
     return (
-      <div style={{
-        minHeight: '100dvh',
-        background: '#FFFFFF',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 16,
-        fontFamily: 'system-ui, sans-serif',
-      }}>
+      <div className="card-page">
         <h1 style={{ fontSize: 24, fontWeight: 700, color: '#111' }}>Card not found</h1>
-        <p style={{ color: '#666' }}>The requested digital card does not exist.</p>
       </div>
     )
   }
 
   return (
-    <div style={{
-      minHeight: '100dvh',
-      background: '#FFFFFF',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 20,
-      fontFamily: "'Inter', system-ui, sans-serif",
-    }}>
-      {/* Card */}
-      <div style={{
-        width: '100%',
-        maxWidth: 400,
-        background: '#0A0A0A',
-        borderRadius: 20,
-        padding: '40px 32px',
-        position: 'relative',
-        overflow: 'hidden',
-        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
-      }}>
+    <div className="card-page">
+      <div className="shift-card">
         {/* Top gradient bar */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 4,
-          background: 'linear-gradient(90deg, #00F0FF, #FF00AA, #BFFF00)',
-        }} />
+        <div className="gradient-bar" />
 
         {/* Corner accents */}
-        <div style={{ position: 'absolute', top: 16, left: 16, width: 24, height: 24, borderTop: '2px solid #00F0FF', borderLeft: '2px solid #00F0FF', opacity: 0.5 }} />
-        <div style={{ position: 'absolute', top: 16, right: 16, width: 24, height: 24, borderTop: '2px solid #00F0FF', borderRight: '2px solid #00F0FF', opacity: 0.5 }} />
-        <div style={{ position: 'absolute', bottom: 16, left: 16, width: 24, height: 24, borderBottom: '2px solid #00F0FF', borderLeft: '2px solid #00F0FF', opacity: 0.5 }} />
-        <div style={{ position: 'absolute', bottom: 16, right: 16, width: 24, height: 24, borderBottom: '2px solid #00F0FF', borderRight: '2px solid #00F0FF', opacity: 0.5 }} />
+        <div className="corner corner-tl" />
+        <div className="corner corner-tr" />
+        <div className="corner corner-bl" />
+        <div className="corner corner-br" />
 
-        {/* L7 Logo */}
-        <div style={{
-          textAlign: 'center',
-          marginBottom: 28,
-          fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-          fontSize: 12,
-          fontWeight: 700,
-          letterSpacing: 4,
-          color: '#666',
-        }}>
-          L7 <span style={{ fontWeight: 300 }}>SHIFT</span>
+        {/* Broken square watermark */}
+        <div className="broken-square">
+          <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.8">
+            <path d="M10 10 L90 10 L90 35" />
+            <path d="M90 65 L90 90 L10 90 L10 10" />
+          </svg>
         </div>
 
-        {/* Avatar */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
-          <div style={{
-            width: 100,
-            height: 100,
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #00F0FF, #FF00AA)',
-            padding: 3,
-            boxShadow: '0 0 40px rgba(0, 240, 255, 0.3)',
-          }}>
-            <div style={{
-              width: '100%',
-              height: '100%',
-              borderRadius: '50%',
-              background: '#1A1A1A',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 32,
-              fontWeight: 700,
-              color: '#FAFAFA',
-              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-            }}>
-              {holder.name.split(' ').map(n => n[0]).join('')}
+        {/* Scanline */}
+        <div className="scanline" />
+
+        {/* Noise overlay */}
+        <div className="noise" />
+
+        {/* Content */}
+        <div className="card-content">
+          {/* L7 Logo */}
+          <div className="logo">
+            L7 <span className="logo-light">SHIFT</span>
+          </div>
+
+          {/* Avatar */}
+          <div className="avatar-wrapper">
+            <div className="avatar-glow" />
+            <div className="avatar-ring">
+              <div className="avatar-inner">
+                {holder.name.split(' ').map(n => n[0]).join('')}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Name */}
-        <h1 style={{
-          margin: 0,
-          fontSize: 28,
-          fontWeight: 700,
-          color: '#FAFAFA',
-          textAlign: 'center',
-          fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-          letterSpacing: -0.5,
-        }}>
-          {holder.name}
-        </h1>
+          {/* Name with glitch */}
+          <h1 className="name" data-text={holder.name}>
+            {holder.name}
+          </h1>
 
-        {/* Title */}
-        <p style={{
-          margin: '10px 0 4px',
-          fontSize: 11,
-          fontWeight: 700,
-          color: '#00F0FF',
-          textAlign: 'center',
-          letterSpacing: 2,
-          textTransform: 'uppercase',
-        }}>
-          {holder.title}
-        </p>
+          {/* Title */}
+          <p className="title">{holder.title}</p>
 
-        {/* Company */}
-        <p style={{
-          margin: 0,
-          fontSize: 13,
-          color: '#888',
-          textAlign: 'center',
-        }}>
-          {holder.company}
-        </p>
+          {/* Company */}
+          <p className="company">{holder.company}</p>
 
-        {/* Tagline */}
-        <p style={{
-          margin: '16px 0 0',
-          fontSize: 13,
-          color: 'rgba(255,255,255,0.4)',
-          textAlign: 'center',
-          fontStyle: 'italic',
-        }}>
-          "{holder.tagline}"
-        </p>
+          {/* Tagline */}
+          <p className="tagline">"{holder.tagline}"</p>
 
-        {/* Divider */}
-        <div style={{
-          margin: '28px auto',
-          width: '50%',
-          height: 1,
-          background: 'linear-gradient(90deg, transparent, rgba(0,240,255,0.3), rgba(255,0,170,0.3), transparent)',
-        }} />
+          {/* Divider */}
+          <div className="divider" />
 
-        {/* Social Icons */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 14, marginBottom: 28 }}>
-          {holder.socials.linkedin && (
-            <a
-              href={holder.socials.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#FAFAFA',
-                textDecoration: 'none',
-              }}
-            >
-              <LinkedInIcon />
+          {/* Social Icons */}
+          <div className="socials">
+            {holder.socials.linkedin && (
+              <a href={holder.socials.linkedin} target="_blank" rel="noopener noreferrer" className="social-icon">
+                <LinkedInIcon />
+              </a>
+            )}
+            {holder.socials.twitter && (
+              <a href={holder.socials.twitter} target="_blank" rel="noopener noreferrer" className="social-icon">
+                <XIcon />
+              </a>
+            )}
+            {holder.socials.github && (
+              <a href={holder.socials.github} target="_blank" rel="noopener noreferrer" className="social-icon">
+                <GitHubIcon />
+              </a>
+            )}
+          </div>
+
+          {/* Contact Links */}
+          <div className="contacts">
+            <a href={`mailto:${holder.email}`} className="contact-link">
+              <span className="contact-icon cyan"><EmailIcon /></span>
+              <span>{holder.email}</span>
             </a>
-          )}
-          {holder.socials.twitter && (
-            <a
-              href={holder.socials.twitter}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#FAFAFA',
-                textDecoration: 'none',
-              }}
-            >
-              <XIcon />
+            <a href={`tel:${holder.phone}`} className="contact-link">
+              <span className="contact-icon magenta"><PhoneIcon /></span>
+              <span>{holder.phone}</span>
             </a>
-          )}
-          {holder.socials.github && (
-            <a
-              href={holder.socials.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#FAFAFA',
-                textDecoration: 'none',
-              }}
-            >
-              <GitHubIcon />
+            <a href={holder.website} target="_blank" rel="noopener noreferrer" className="contact-link">
+              <span className="contact-icon lime"><WebIcon /></span>
+              <span>{holder.website.replace('https://', '')}</span>
             </a>
-          )}
-        </div>
+          </div>
 
-        {/* Contact Links */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
-          <a
-            href={`mailto:${holder.email}`}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 14,
-              padding: '14px 18px',
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 12,
-              color: '#FAFAFA',
-              textDecoration: 'none',
-              fontSize: 14,
-            }}
-          >
-            <span style={{ color: '#00F0FF' }}><EmailIcon /></span>
-            <span>{holder.email}</span>
-          </a>
-          <a
-            href={`tel:${holder.phone}`}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 14,
-              padding: '14px 18px',
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 12,
-              color: '#FAFAFA',
-              textDecoration: 'none',
-              fontSize: 14,
-            }}
-          >
-            <span style={{ color: '#FF00AA' }}><PhoneIcon /></span>
-            <span>{holder.phone}</span>
-          </a>
-          <a
-            href={holder.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 14,
-              padding: '14px 18px',
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 12,
-              color: '#FAFAFA',
-              textDecoration: 'none',
-              fontSize: 14,
-            }}
-          >
-            <span style={{ color: '#BFFF00' }}><WebIcon /></span>
-            <span>{holder.website.replace('https://', '')}</span>
-          </a>
-        </div>
+          {/* Save Contact Button */}
+          <button onClick={() => downloadVCard(holder)} className="save-btn">
+            <span className="btn-text">Save Contact</span>
+            <span className="btn-glow" />
+          </button>
 
-        {/* Save Contact Button */}
-        <button
-          onClick={() => downloadVCard(holder)}
-          style={{
-            width: '100%',
-            padding: '18px 24px',
-            background: 'linear-gradient(135deg, #00F0FF, #FF00AA)',
-            border: 'none',
-            borderRadius: 12,
-            color: '#0A0A0A',
-            fontSize: 15,
-            fontWeight: 700,
-            fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-            cursor: 'pointer',
-          }}
-        >
-          Save Contact
-        </button>
-
-        {/* Footer */}
-        <div style={{
-          marginTop: 24,
-          textAlign: 'center',
-          fontSize: 11,
-          color: 'rgba(255,255,255,0.25)',
-        }}>
-          Powered by{' '}
-          <span style={{
-            background: 'linear-gradient(90deg, #00F0FF, #FF00AA)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            fontWeight: 600,
-          }}>
-            ShiftCards™
-          </span>
+          {/* Footer */}
+          <div className="footer">
+            Powered by <span className="footer-brand">ShiftCards™</span>
+          </div>
         </div>
       </div>
     </div>
