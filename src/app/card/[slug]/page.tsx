@@ -180,10 +180,24 @@ export default function DigitalCard() {
         <div className="corner corner-br" />
 
         {/* Broken square watermark */}
+        {/* Broken Square - Animated Gradient Marquee */}
         <div className="broken-square">
-          <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.8">
-            <path d="M10 10 L90 10 L90 35" />
-            <path d="M90 65 L90 90 L10 90 L10 10" />
+          <svg viewBox="0 0 100 100" fill="none">
+            <defs>
+              <linearGradient id="brokenSquareGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#00F0FF">
+                  <animate attributeName="stop-color" values="#00F0FF;#FF00AA;#BFFF00;#00F0FF" dur="4s" repeatCount="indefinite" />
+                </stop>
+                <stop offset="50%" stopColor="#FF00AA">
+                  <animate attributeName="stop-color" values="#FF00AA;#BFFF00;#00F0FF;#FF00AA" dur="4s" repeatCount="indefinite" />
+                </stop>
+                <stop offset="100%" stopColor="#BFFF00">
+                  <animate attributeName="stop-color" values="#BFFF00;#00F0FF;#FF00AA;#BFFF00" dur="4s" repeatCount="indefinite" />
+                </stop>
+              </linearGradient>
+            </defs>
+            <path d="M10 10 L90 10 L90 35" stroke="url(#brokenSquareGradient)" strokeWidth="2" strokeLinecap="square" />
+            <path d="M90 65 L90 90 L10 90 L10 10" stroke="url(#brokenSquareGradient)" strokeWidth="2" strokeLinecap="square" />
           </svg>
         </div>
 
