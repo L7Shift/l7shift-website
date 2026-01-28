@@ -17,7 +17,6 @@ const cardHolders: Record<string, CardHolder> = {
     socials: {
       linkedin: 'https://linkedin.com/in/kenleftwich',
       twitter: 'https://x.com/CharlotteAgency',
-      github: 'https://github.com/ScatPackCLT',
     },
   },
 }
