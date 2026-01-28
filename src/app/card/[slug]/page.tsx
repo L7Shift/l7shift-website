@@ -152,9 +152,14 @@ export default function DigitalCard() {
 
         {/* Content */}
         <div className="card-content">
-          {/* L7 Logo */}
-          <div className="logo">
-            L7 <span className="logo-light">SHIFT</span>
+          {/* L7 Logo - Animated */}
+          <div className="logo-container">
+            <div className="logo">
+              <span className="logo-l7" data-text="L7">L7</span>
+              <span className="logo-shift">SHIFT</span>
+            </div>
+            <div className="logo-bar" />
+            <span className="logo-tagline">Break the Square</span>
           </div>
 
           {/* Avatar */}
