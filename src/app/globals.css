@@ -461,6 +461,14 @@ a, button, input, textarea, select, label,
   cursor: grabbing !important;
 }
 
+/* Restore normal cursor for brand guide page */
+.brand-guide-page, .brand-guide-page * {
+  cursor: auto !important;
+}
+.brand-guide-page button {
+  cursor: pointer !important;
+}
+
 /* Accessibility: Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

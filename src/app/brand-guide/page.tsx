@@ -1667,6 +1667,7 @@ export default function BrandGuidePage() {
 
   return (
     <div
+      className="brand-guide-page"
       style={{
         width: '100%',
         minHeight: '100vh',
