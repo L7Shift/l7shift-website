@@ -1,11 +1,15 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from './database.types'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
 // Client-side Supabase client (uses anon key)
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
+// Returns null if environment variables are not configured
+export const supabase: SupabaseClient<Database> | null =
+  supabaseUrl && supabaseAnonKey
+    ? createClient<Database>(supabaseUrl, supabaseAnonKey)
+    : null
 
 // Server-side client with service role key (for admin operations)
 export function createServerClient() {
@@ -23,6 +27,14 @@ export interface ContactSubmission {
   name: string
   email: string
   message: string
+}
+
+// Helper to get a non-null client (throws if not configured)
+export function getSupabaseClient(): SupabaseClient<Database> {
+  if (!supabase) {
+    throw new Error('Supabase client not initialized - check environment variables')
+  }
+  return supabase
 }
 
 // Re-export database types for convenience

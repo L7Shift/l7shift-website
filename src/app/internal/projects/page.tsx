@@ -1,67 +1,92 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
+import type { Project } from '@/lib/database.types'
 import { ProgressRing, StatusPill, MetricCard } from '@/components/dashboard'
 
-// Mock data - will be replaced with Supabase queries
-const mockProjects = [
-  {
-    id: '1',
-    name: 'Scat Pack CLT',
-    client: 'Eric Johnson',
-    description: 'Dog waste removal SaaS platform',
-    status: 'active' as const,
-    completion: 78,
-    shiftHours: 12.5,
-    traditionalEstimate: 120,
-    tasksTotal: 45,
-    tasksShipped: 35,
-    startDate: '2026-01-01',
-    targetEnd: '2026-02-15',
-  },
-  {
-    id: '2',
-    name: 'Pretty Paid Closet',
-    client: 'Jazz',
-    description: 'Consignment + services platform',
-    status: 'active' as const,
-    completion: 35,
-    shiftHours: 6,
-    traditionalEstimate: 80,
-    tasksTotal: 28,
-    tasksShipped: 10,
-    startDate: '2026-01-20',
-    targetEnd: '2026-03-01',
-  },
-  {
-    id: '3',
-    name: 'Stitchwichs',
-    client: 'Nicole Walker',
-    description: 'Shopify optimization',
-    status: 'backlog' as const,
-    completion: 0,
-    shiftHours: 0,
-    traditionalEstimate: 60,
-    tasksTotal: 0,
-    tasksShipped: 0,
-    startDate: '2026-01-15',
-    targetEnd: '2026-03-15',
-  },
-]
+interface ProjectWithMetrics extends Project {
+  total_tasks: number
+  shipped_tasks: number
+  total_shift_hours: number
+  total_traditional_estimate: number
+}
 
 type ViewMode = 'grid' | 'list'
 
 export default function ProjectsPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all')
+  const [projects, setProjects] = useState<ProjectWithMetrics[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false)
 
-  const filteredProjects = mockProjects.filter((p) => {
+  useEffect(() => {
+    fetchProjects()
+  }, [])
+
+  async function fetchProjects() {
+    if (!supabase) {
+      console.error('Supabase client not initialized')
+      setLoading(false)
+      return
+    }
+
+    const db = supabase as any // Type assertion for Supabase queries
+
+    try {
+      const { data: projectsData, error: projectsError } = await db
+        .from('projects')
+        .select('*')
+        .order('updated_at', { ascending: false })
+
+      if (projectsError) throw projectsError
+
+      // Fetch task counts for each project
+      const projectsWithMetrics: ProjectWithMetrics[] = await Promise.all(
+        (projectsData || []).map(async (project: Project) => {
+          const { data: tasks } = await db
+            .from('tasks')
+            .select('status, shift_hours, traditional_hours_estimate')
+            .eq('project_id', project.id)
+
+          type TaskRow = { status: string; shift_hours: number | null; traditional_hours_estimate: number | null }
+          const taskList: TaskRow[] = tasks || []
+          const shippedTasks = taskList.filter((t: TaskRow) => t.status === 'shipped')
+
+          return {
+            ...project,
+            total_tasks: taskList.length,
+            shipped_tasks: shippedTasks.length,
+            total_shift_hours: taskList.reduce((sum: number, t: TaskRow) => sum + (t.shift_hours || 0), 0),
+            total_traditional_estimate: taskList.reduce((sum: number, t: TaskRow) => sum + (t.traditional_hours_estimate || 0), 0),
+          }
+        })
+      )
+
+      setProjects(projectsWithMetrics)
+    } catch (error) {
+      console.error('Error fetching projects:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filteredProjects = projects.filter((p) => {
     if (filter === 'all') return true
     if (filter === 'active') return p.status === 'active'
-    if (filter === 'completed') return p.completion === 100
+    if (filter === 'completed') return p.status === 'completed'
     return true
   })
+
+  if (loading) {
+    return (
+      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '40px 20px', textAlign: 'center' }}>
+        <div style={{ color: '#888' }}>Loading projects...</div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ maxWidth: 1400, margin: '0 auto' }}>
@@ -87,7 +112,7 @@ export default function ProjectsPage() {
             Projects
           </h1>
           <p style={{ margin: '8px 0 0', color: '#888', fontSize: 14 }}>
-            {mockProjects.length} total projects
+            {projects.length} total projects
           </p>
         </div>
 
@@ -113,7 +138,7 @@ export default function ProjectsPage() {
                 fontSize: 16,
               }}
             >
-              \u2588\u2588
+              ▦
             </button>
             <button
               onClick={() => setViewMode('list')}
@@ -127,12 +152,13 @@ export default function ProjectsPage() {
                 fontSize: 16,
               }}
             >
-              \u2261
+              ≡
             </button>
           </div>
 
           {/* New project button */}
           <button
+            onClick={() => setShowNewProjectModal(true)}
             style={{
               padding: '10px 20px',
               background: 'linear-gradient(135deg, #00F0FF, #FF00AA)',
@@ -180,8 +206,45 @@ export default function ProjectsPage() {
         ))}
       </div>
 
-      {/* Projects grid */}
-      {viewMode === 'grid' ? (
+      {/* Empty state */}
+      {filteredProjects.length === 0 ? (
+        <div
+          style={{
+            padding: 60,
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: 16,
+            textAlign: 'center',
+          }}
+        >
+          <div style={{ fontSize: 48, marginBottom: 16 }}>📁</div>
+          <h2 style={{ margin: '0 0 8px', fontSize: 20, color: '#FAFAFA' }}>
+            {filter === 'all' ? 'No projects yet' : `No ${filter} projects`}
+          </h2>
+          <p style={{ margin: '0 0 24px', color: '#888', fontSize: 14 }}>
+            {filter === 'all'
+              ? 'Create your first project to get started'
+              : 'No projects match this filter'}
+          </p>
+          {filter === 'all' && (
+            <button
+              onClick={() => setShowNewProjectModal(true)}
+              style={{
+                padding: '12px 24px',
+                background: 'linear-gradient(135deg, #00F0FF, #FF00AA)',
+                color: '#0A0A0A',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              + Create Project
+            </button>
+          )}
+        </div>
+      ) : viewMode === 'grid' ? (
         <div
           style={{
             display: 'grid',
@@ -189,162 +252,172 @@ export default function ProjectsPage() {
             gap: 20,
           }}
         >
-          {filteredProjects.map((project) => (
-            <Link
-              key={project.id}
-              href={`/internal/projects/${project.id}`}
-              style={{ textDecoration: 'none' }}
-            >
-              <div
-                className="project-card"
-                style={{
-                  padding: 24,
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: 16,
-                  transition: 'all 0.2s ease',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}
+          {filteredProjects.map((project) => {
+            const completion = project.total_tasks > 0
+              ? Math.round((project.shipped_tasks / project.total_tasks) * 100)
+              : 0
+
+            return (
+              <Link
+                key={project.id}
+                href={`/internal/projects/${project.id}`}
+                style={{ textDecoration: 'none' }}
               >
-                {/* Top gradient line */}
                 <div
+                  className="project-card"
                   style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: 3,
-                    background: project.status === 'active'
-                      ? 'linear-gradient(90deg, #00F0FF, #FF00AA)'
-                      : 'rgba(255, 255, 255, 0.1)',
-                  }}
-                />
-
-                {/* Header */}
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    marginBottom: 16,
+                    padding: 24,
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: 16,
+                    transition: 'all 0.2s ease',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    overflow: 'hidden',
                   }}
                 >
-                  <div>
-                    <h3
-                      style={{
-                        margin: 0,
-                        fontSize: 18,
-                        fontWeight: 600,
-                        color: '#FAFAFA',
-                      }}
-                    >
-                      {project.name}
-                    </h3>
-                    <p style={{ margin: '4px 0 0', fontSize: 13, color: '#888' }}>
-                      {project.client}
-                    </p>
-                  </div>
-                  <StatusPill status={project.status} size="sm" />
-                </div>
-
-                {/* Description */}
-                <p
-                  style={{
-                    margin: '0 0 16px',
-                    fontSize: 13,
-                    color: '#666',
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {project.description}
-                </p>
-
-                {/* Progress section */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 16,
-                    marginBottom: 16,
-                  }}
-                >
-                  <ProgressRing
-                    percentage={project.completion}
-                    size="sm"
-                    label="Complete"
-                    color={project.status === 'active' ? 'gradient' : 'lime'}
+                  {/* Top gradient line */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: 3,
+                      background: project.status === 'active'
+                        ? 'linear-gradient(90deg, #00F0FF, #FF00AA)'
+                        : 'rgba(255, 255, 255, 0.1)',
+                    }}
                   />
 
-                  <div style={{ flex: 1 }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginBottom: 8,
-                      }}
-                    >
-                      <span style={{ fontSize: 12, color: '#888' }}>Tasks</span>
-                      <span style={{ fontSize: 12, color: '#FAFAFA', fontWeight: 600 }}>
-                        {project.tasksShipped}/{project.tasksTotal}
-                      </span>
+                  {/* Header */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      marginBottom: 16,
+                    }}
+                  >
+                    <div>
+                      <h3
+                        style={{
+                          margin: 0,
+                          fontSize: 18,
+                          fontWeight: 600,
+                          color: '#FAFAFA',
+                        }}
+                      >
+                        {project.name}
+                      </h3>
+                      <p style={{ margin: '4px 0 0', fontSize: 13, color: '#888' }}>
+                        {project.client_name}
+                      </p>
                     </div>
-                    <div
+                    <StatusPill status={project.status} size="sm" />
+                  </div>
+
+                  {/* Description */}
+                  {project.description && (
+                    <p
                       style={{
-                        height: 4,
-                        background: 'rgba(255, 255, 255, 0.1)',
-                        borderRadius: 2,
-                        overflow: 'hidden',
+                        margin: '0 0 16px',
+                        fontSize: 13,
+                        color: '#666',
+                        lineHeight: 1.5,
                       }}
                     >
+                      {project.description}
+                    </p>
+                  )}
+
+                  {/* Progress section */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 16,
+                      marginBottom: 16,
+                    }}
+                  >
+                    <ProgressRing
+                      percentage={completion}
+                      size="sm"
+                      label="Complete"
+                      color={project.status === 'active' ? 'gradient' : 'lime'}
+                    />
+
+                    <div style={{ flex: 1 }}>
                       <div
                         style={{
-                          height: '100%',
-                          width: project.tasksTotal > 0
-                            ? `${(project.tasksShipped / project.tasksTotal) * 100}%`
-                            : '0%',
-                          background: '#BFFF00',
-                          borderRadius: 2,
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          marginBottom: 8,
                         }}
-                      />
+                      >
+                        <span style={{ fontSize: 12, color: '#888' }}>Tasks</span>
+                        <span style={{ fontSize: 12, color: '#FAFAFA', fontWeight: 600 }}>
+                          {project.shipped_tasks}/{project.total_tasks}
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          height: 4,
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          borderRadius: 2,
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: '100%',
+                            width: project.total_tasks > 0
+                              ? `${(project.shipped_tasks / project.total_tasks) * 100}%`
+                              : '0%',
+                            background: '#BFFF00',
+                            borderRadius: 2,
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Footer metrics */}
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    paddingTop: 16,
-                    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: 11, color: '#666', marginBottom: 2 }}>SHIFT HRS</div>
-                    <div style={{ fontSize: 16, fontWeight: 700, color: '#00F0FF' }}>
-                      {project.shiftHours}h
+                  {/* Footer metrics */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      paddingTop: 16,
+                      borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 11, color: '#666', marginBottom: 2 }}>SHIFT HRS</div>
+                      <div style={{ fontSize: 16, fontWeight: 700, color: '#00F0FF' }}>
+                        {project.total_shift_hours.toFixed(1)}h
+                      </div>
                     </div>
-                  </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 11, color: '#666', marginBottom: 2 }}>EST. SAVINGS</div>
-                    <div style={{ fontSize: 16, fontWeight: 700, color: '#BFFF00' }}>
-                      {project.traditionalEstimate > 0
-                        ? `${Math.round(((project.traditionalEstimate - project.shiftHours) / project.traditionalEstimate) * 100)}%`
-                        : '-'}
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: 11, color: '#666', marginBottom: 2 }}>EST. SAVINGS</div>
+                      <div style={{ fontSize: 16, fontWeight: 700, color: '#BFFF00' }}>
+                        {project.total_traditional_estimate > 0
+                          ? `${Math.round(((project.total_traditional_estimate - project.total_shift_hours) / project.total_traditional_estimate) * 100)}%`
+                          : '-'}
+                      </div>
                     </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 11, color: '#666', marginBottom: 2 }}>TARGET</div>
-                    <div style={{ fontSize: 14, color: '#888' }}>
-                      {new Date(project.targetEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: 11, color: '#666', marginBottom: 2 }}>TARGET</div>
+                      <div style={{ fontSize: 14, color: '#888' }}>
+                        {project.target_end_date
+                          ? new Date(project.target_end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                          : '-'}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            )
+          })}
         </div>
       ) : (
         /* List view */
@@ -380,66 +453,85 @@ export default function ProjectsPage() {
           </div>
 
           {/* Rows */}
-          {filteredProjects.map((project) => (
-            <Link
-              key={project.id}
-              href={`/internal/projects/${project.id}`}
-              style={{ textDecoration: 'none' }}
-            >
-              <div
-                className="project-row"
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 100px',
-                  gap: 16,
-                  padding: '16px 20px',
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                  alignItems: 'center',
-                  cursor: 'pointer',
-                  transition: 'background 0.2s ease',
-                }}
+          {filteredProjects.map((project) => {
+            const completion = project.total_tasks > 0
+              ? Math.round((project.shipped_tasks / project.total_tasks) * 100)
+              : 0
+
+            return (
+              <Link
+                key={project.id}
+                href={`/internal/projects/${project.id}`}
+                style={{ textDecoration: 'none' }}
               >
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#FAFAFA' }}>
-                    {project.name}
+                <div
+                  className="project-row"
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 100px',
+                    gap: 16,
+                    padding: '16px 20px',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s ease',
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: '#FAFAFA' }}>
+                      {project.name}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#666' }}>{project.client_name}</div>
                   </div>
-                  <div style={{ fontSize: 12, color: '#666' }}>{project.client}</div>
-                </div>
-                <StatusPill status={project.status} size="sm" />
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div
-                    style={{
-                      flex: 1,
-                      height: 6,
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      borderRadius: 3,
-                      overflow: 'hidden',
-                    }}
-                  >
+                  <StatusPill status={project.status} size="sm" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <div
                       style={{
-                        height: '100%',
-                        width: `${project.completion}%`,
-                        background: 'linear-gradient(90deg, #00F0FF, #BFFF00)',
+                        flex: 1,
+                        height: 6,
+                        background: 'rgba(255, 255, 255, 0.1)',
                         borderRadius: 3,
+                        overflow: 'hidden',
                       }}
-                    />
+                    >
+                      <div
+                        style={{
+                          height: '100%',
+                          width: `${completion}%`,
+                          background: 'linear-gradient(90deg, #00F0FF, #BFFF00)',
+                          borderRadius: 3,
+                        }}
+                      />
+                    </div>
+                    <span style={{ fontSize: 12, color: '#888', minWidth: 40 }}>
+                      {completion}%
+                    </span>
                   </div>
-                  <span style={{ fontSize: 12, color: '#888', minWidth: 40 }}>
-                    {project.completion}%
-                  </span>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#00F0FF' }}>
+                    {project.total_shift_hours.toFixed(1)}h
+                  </div>
+                  <div style={{ fontSize: 13, color: '#888' }}>
+                    {project.target_end_date
+                      ? new Date(project.target_end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                      : '-'}
+                  </div>
+                  <div style={{ textAlign: 'right', color: '#888' }}>→</div>
                 </div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: '#00F0FF' }}>
-                  {project.shiftHours}h
-                </div>
-                <div style={{ fontSize: 13, color: '#888' }}>
-                  {new Date(project.targetEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                </div>
-                <div style={{ textAlign: 'right', color: '#888' }}>\u2192</div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            )
+          })}
         </div>
+      )}
+
+      {/* New Project Modal */}
+      {showNewProjectModal && (
+        <NewProjectModal
+          onClose={() => setShowNewProjectModal(false)}
+          onSuccess={() => {
+            setShowNewProjectModal(false)
+            fetchProjects()
+          }}
+        />
       )}
 
       <style jsx>{`
@@ -452,6 +544,173 @@ export default function ProjectsPage() {
           background: rgba(0, 240, 255, 0.05) !important;
         }
       `}</style>
+    </div>
+  )
+}
+
+// New Project Modal Component
+function NewProjectModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+  const [name, setName] = useState('')
+  const [clientName, setClientName] = useState('')
+  const [description, setDescription] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!name || !clientName || !supabase) return
+    const db = supabase as any
+
+    setSaving(true)
+    try {
+      const { error } = await db.from('projects').insert({
+        name,
+        client_name: clientName,
+        description: description || null,
+        status: 'active',
+      })
+
+      if (error) throw error
+      onSuccess()
+    } catch (error) {
+      console.error('Error creating project:', error)
+      alert('Failed to create project')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0, 0, 0, 0.8)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: '#1A1A1A',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: 16,
+          padding: 32,
+          width: '100%',
+          maxWidth: 480,
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 style={{ margin: '0 0 24px', fontSize: 20, color: '#FAFAFA' }}>New Project</h2>
+
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: 'block', fontSize: 13, color: '#888', marginBottom: 8 }}>
+              Project Name *
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: 8,
+                color: '#FAFAFA',
+                fontSize: 14,
+                outline: 'none',
+              }}
+              placeholder="e.g., Website Redesign"
+            />
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: 'block', fontSize: 13, color: '#888', marginBottom: 8 }}>
+              Client Name *
+            </label>
+            <input
+              type="text"
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: 8,
+                color: '#FAFAFA',
+                fontSize: 14,
+                outline: 'none',
+              }}
+              placeholder="e.g., Acme Corp"
+            />
+          </div>
+
+          <div style={{ marginBottom: 24 }}>
+            <label style={{ display: 'block', fontSize: 13, color: '#888', marginBottom: 8 }}>
+              Description
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: 8,
+                color: '#FAFAFA',
+                fontSize: 14,
+                outline: 'none',
+                resize: 'vertical',
+              }}
+              placeholder="Brief project description..."
+            />
+          </div>
+
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                padding: '10px 20px',
+                background: 'transparent',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: 8,
+                color: '#888',
+                fontSize: 14,
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving || !name || !clientName}
+              style={{
+                padding: '10px 20px',
+                background: 'linear-gradient(135deg, #00F0FF, #FF00AA)',
+                border: 'none',
+                borderRadius: 8,
+                color: '#0A0A0A',
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: saving ? 'not-allowed' : 'pointer',
+                opacity: saving || !name || !clientName ? 0.5 : 1,
+              }}
+            >
+              {saving ? 'Creating...' : 'Create Project'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }
