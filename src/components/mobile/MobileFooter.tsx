@@ -44,20 +44,38 @@ export function MobileFooter() {
         </span>
       </div>
 
-      {/* Social */}
-      <a
-        href="https://twitter.com/l7shift"
+      {/* Links */}
+      <div
         style={{
-          color: 'var(--soft-gray)',
-          textDecoration: 'none',
-          fontSize: '13px',
-          letterSpacing: '0.1em',
-          display: 'block',
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '24px',
           marginBottom: '16px',
         }}
       >
-        @l7shift
-      </a>
+        <a
+          href="https://twitter.com/l7shift"
+          style={{
+            color: 'var(--soft-gray)',
+            textDecoration: 'none',
+            fontSize: '13px',
+            letterSpacing: '0.1em',
+          }}
+        >
+          @l7shift
+        </a>
+        <a
+          href="/login"
+          style={{
+            color: 'var(--soft-gray)',
+            textDecoration: 'none',
+            fontSize: '13px',
+            letterSpacing: '0.1em',
+          }}
+        >
+          Client Portal
+        </a>
+      </div>
 
       {/* Copyright */}
       <p

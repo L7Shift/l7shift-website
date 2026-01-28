@@ -52,7 +52,7 @@ export function Footer({ onHoverStart, onHoverEnd }: FooterProps) {
         © 2026 L7 Shift. Break the square.
       </p>
 
-      <div style={{ display: 'flex', gap: '32px' }}>
+      <div style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
         <a
           href="https://twitter.com/l7shift"
           onMouseEnter={onHoverStart}
@@ -65,6 +65,20 @@ export function Footer({ onHoverStart, onHoverEnd }: FooterProps) {
           }}
         >
           @l7shift
+        </a>
+        <span style={{ color: 'var(--carbon-gray)' }}>|</span>
+        <a
+          href="/login"
+          onMouseEnter={onHoverStart}
+          onMouseLeave={onHoverEnd}
+          style={{
+            color: 'var(--soft-gray)',
+            textDecoration: 'none',
+            fontSize: '13px',
+            letterSpacing: '0.1em',
+          }}
+        >
+          Client Portal
         </a>
       </div>
     </footer>

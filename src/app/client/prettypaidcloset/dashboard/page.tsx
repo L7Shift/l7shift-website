@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
+import { CursorWrapper } from '@/components/shared/CursorWrapper'
 
 export default function PrettyPaidClosetDashboard() {
   const [isMobile, setIsMobile] = useState(false)
@@ -33,15 +34,16 @@ export default function PrettyPaidClosetDashboard() {
   }
 
   return (
-    <main
-      className="ppc-portal"
-      style={{
-        minHeight: '100vh',
-        background: `linear-gradient(135deg, ${softCream} 0%, #FFF5F5 50%, #FFFAF5 100%)`,
-        color: charcoal,
-        fontFamily: "'DM Sans', -apple-system, sans-serif",
-      }}
-    >
+    <CursorWrapper>
+      <main
+        className="ppc-portal"
+        style={{
+          minHeight: '100vh',
+          background: `linear-gradient(135deg, ${softCream} 0%, #FFF5F5 50%, #FFFAF5 100%)`,
+          color: charcoal,
+          fontFamily: "'DM Sans', -apple-system, sans-serif",
+        }}
+      >
       {/* Header */}
       <header
         style={{
@@ -174,6 +176,109 @@ export default function PrettyPaidClosetDashboard() {
           >
             Complete Discovery Form →
           </a>
+        </div>
+
+        {/* Actions Required Section */}
+        <div
+          style={{
+            background: `linear-gradient(135deg, ${roseGold}, ${hotPink})`,
+            borderRadius: '16px',
+            padding: '28px 32px',
+            marginBottom: '32px',
+            boxShadow: '0 8px 32px rgba(183,110,121,0.25)',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <div>
+              <h3 style={{ fontSize: '11px', color: 'rgba(255,255,255,0.8)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '6px', fontWeight: 600 }}>
+                Actions Required
+              </h3>
+              <h2
+                style={{
+                  fontSize: '22px',
+                  fontWeight: 300,
+                  fontFamily: "'Cormorant Garamond', Georgia, serif",
+                  color: 'white',
+                  fontStyle: 'italic',
+                }}
+              >
+                Complete These to Get Started
+              </h2>
+            </div>
+            <div
+              style={{
+                background: 'rgba(255,255,255,0.2)',
+                borderRadius: '50%',
+                width: '48px',
+                height: '48px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '20px',
+                fontWeight: 700,
+                color: 'white',
+              }}
+            >
+              1
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+            {/* Discovery Questionnaire - Primary Action */}
+            <a
+              href="/discovery/prettypaidcloset"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+                padding: '20px 24px',
+                background: 'white',
+                borderRadius: '12px',
+                textDecoration: 'none',
+                transition: 'all 0.3s ease',
+                border: `2px solid ${gold}`,
+                boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+              }}
+            >
+              <div
+                style={{
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '12px',
+                  background: `linear-gradient(135deg, ${gold}, #E5C158)`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  fontSize: '24px',
+                }}
+              >
+                📋
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ color: charcoal, fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>
+                  Discovery Questionnaire
+                </div>
+                <div style={{ color: '#888', fontSize: '13px' }}>
+                  Tell us about your business goals & vision
+                </div>
+              </div>
+              <div
+                style={{
+                  padding: '8px 16px',
+                  background: `linear-gradient(135deg, ${roseGold}, ${hotPink})`,
+                  color: 'white',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  borderRadius: '20px',
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Start →
+              </div>
+            </a>
+          </div>
         </div>
 
         {/* Stats Grid */}
@@ -606,24 +711,25 @@ export default function PrettyPaidClosetDashboard() {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer
-        style={{
-          marginTop: '48px',
-          padding: '20px 40px',
-          borderTop: `1px solid rgba(183,110,121,0.08)`,
-          textAlign: 'center',
-          background: 'white',
-        }}
-      >
-        <p style={{ color: '#999', fontSize: '10px', letterSpacing: '0.1em' }}>
-          POWERED BY{' '}
-          <a href="https://l7shift.com" style={{ color: roseGold, textDecoration: 'none' }}>
-            L7 SHIFT
-          </a>{' '}
-          • STRATEGY. SYSTEMS. SOLUTIONS.
-        </p>
-      </footer>
-    </main>
+        {/* Footer */}
+        <footer
+          style={{
+            marginTop: '48px',
+            padding: '20px 40px',
+            borderTop: `1px solid rgba(183,110,121,0.08)`,
+            textAlign: 'center',
+            background: 'white',
+          }}
+        >
+          <p style={{ color: '#999', fontSize: '10px', letterSpacing: '0.1em' }}>
+            POWERED BY{' '}
+            <a href="https://l7shift.com" style={{ color: roseGold, textDecoration: 'none' }}>
+              L7 SHIFT
+            </a>{' '}
+            • STRATEGY. SYSTEMS. SOLUTIONS.
+          </p>
+        </footer>
+      </main>
+    </CursorWrapper>
   )
 }

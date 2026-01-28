@@ -206,7 +206,7 @@ export function MobileHero() {
             </svg>
           </a>
           <a
-            href="#services"
+            href="/#services"
             className="btn-secondary"
             style={{
               justifyContent: 'center',

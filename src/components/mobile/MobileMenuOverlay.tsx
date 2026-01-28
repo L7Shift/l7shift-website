@@ -90,10 +90,10 @@ export function MobileMenuOverlay({ isOpen, onClose }: MobileMenuOverlayProps) {
         }}
       >
         {[
-          { label: 'Services', href: '#services', color: 'var(--electric-cyan)' },
-          { label: 'Process', href: '#process', color: 'var(--hot-magenta)' },
-          { label: 'Work', href: '#work', color: 'var(--acid-lime)' },
-          { label: 'Investment', href: '#investment', color: 'var(--electric-cyan)' },
+          { label: 'Services', href: '/#services', color: 'var(--electric-cyan)' },
+          { label: 'Process', href: '/#process', color: 'var(--hot-magenta)' },
+          { label: 'Work', href: '/#work', color: 'var(--acid-lime)' },
+          { label: 'Investment', href: '/#investment', color: 'var(--electric-cyan)' },
           { label: 'Insights', href: '/insights', color: 'var(--hot-magenta)' },
         ].map((item, i) => (
           <a

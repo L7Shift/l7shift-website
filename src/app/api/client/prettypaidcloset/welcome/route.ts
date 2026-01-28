@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { to, name } = body
+    const { to, name, cc } = body
 
     // Pretty Paid Closet Brand Colors
     const roseGold = '#B76E79'
@@ -21,13 +21,9 @@ export async function POST(request: NextRequest) {
     const softCream = '#FFF8F0'
     const charcoal = '#2D2D2D'
 
-    const magicLink = `https://l7shift.com/client/prettypaidcloset?token=jazz2024&setup=pin`
+    const portalLink = `https://l7shift.com/login`
 
-    await resend.emails.send({
-      from: 'Pretty Paid Closet <onboarding@resend.dev>',
-      to: [to],
-      subject: `${name ? name + ', your' : 'Your'} Pretty Paid Closet portal is ready`,
-      html: `
+    const emailHtml = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -63,7 +59,7 @@ export async function POST(request: NextRequest) {
               </p>
 
               <p style="margin: 0 0 24px; font-size: 15px; color: #666; line-height: 1.8;">
-                We've set up your client dashboard with insights about your closet and a roadmap to help you grow. Here's a quick look:
+                We've set up your client portal with insights about your closet and a roadmap to help you grow your business. Here's what you'll find inside:
               </p>
 
               <!-- Stats Preview -->
@@ -84,24 +80,40 @@ export async function POST(request: NextRequest) {
                 </tr>
               </table>
 
+              <!-- Login Credentials Box -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 32px; background: ${softCream}; border: 2px solid ${roseGold}; border-radius: 12px;">
+                <tr>
+                  <td style="padding: 24px;">
+                    <p style="margin: 0 0 12px; font-size: 11px; color: ${roseGold}; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 600;">
+                      Your Login Credentials
+                    </p>
+                    <p style="margin: 0 0 8px; font-size: 14px; color: ${charcoal};">
+                      <strong>Email:</strong> ${to}
+                    </p>
+                    <p style="margin: 0; font-size: 14px; color: ${charcoal};">
+                      <strong>Password:</strong> prettypaid2026
+                    </p>
+                    <p style="margin: 16px 0 0; font-size: 12px; color: #888;">
+                      You can change your password after logging in.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
               <p style="margin: 0 0 32px; font-size: 15px; color: #666; line-height: 1.8;">
-                Click below to access your dashboard, set up your PIN, and complete the discovery form.
+                Click below to log in to your portal and complete the discovery questionnaire so we can finalize your project.
               </p>
 
               <!-- CTA Button -->
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td align="center">
-                    <a href="${magicLink}" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, ${roseGold}, ${hotPink}); color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 8px; box-shadow: 0 8px 24px rgba(183,110,121,0.3);">
-                      Open My Dashboard
+                    <a href="${portalLink}" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, ${roseGold}, ${hotPink}); color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 8px; box-shadow: 0 8px 24px rgba(183,110,121,0.3);">
+                      Log In to Portal
                     </a>
                   </td>
                 </tr>
               </table>
-
-              <p style="margin: 32px 0 0; font-size: 12px; color: #999; text-align: center;">
-                This link is unique to you.
-              </p>
             </td>
           </tr>
 
@@ -112,12 +124,12 @@ export async function POST(request: NextRequest) {
                 <tr>
                   <td>
                     <p style="margin: 0 0 12px; font-size: 11px; color: ${roseGold}; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 600;">
-                      What's Inside
+                      What's Inside Your Portal
                     </p>
                     <ul style="margin: 0; padding: 0 0 0 18px; color: #666; font-size: 13px; line-height: 2.2;">
+                      <li>Discovery questionnaire to complete</li>
                       <li>Your closet analytics & performance</li>
-                      <li>Category & brand breakdown</li>
-                      <li>Platform fee savings calculator</li>
+                      <li>Brand deliverables & style guide</li>
                       <li>Growth roadmap & next steps</li>
                     </ul>
                   </td>
@@ -147,10 +159,22 @@ export async function POST(request: NextRequest) {
   </table>
 </body>
 </html>
-      `,
-    })
+    `
 
-    return NextResponse.json({ success: true, sentTo: to })
+    const emailOptions: Parameters<typeof resend.emails.send>[0] = {
+      from: 'L7 Shift <onboarding@resend.dev>',
+      to: [to],
+      subject: `${name ? name + ', your' : 'Your'} Pretty Paid Closet portal is ready`,
+      html: emailHtml,
+    }
+
+    if (cc) {
+      emailOptions.cc = Array.isArray(cc) ? cc : [cc]
+    }
+
+    await resend.emails.send(emailOptions)
+
+    return NextResponse.json({ success: true, sentTo: to, cc: cc || null })
   } catch (error) {
     console.error('Welcome email error:', error)
     return NextResponse.json({ error: 'Failed to send email' }, { status: 500 })

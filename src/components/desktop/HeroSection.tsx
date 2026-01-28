@@ -162,7 +162,7 @@ export function HeroSection({ scrollY, onHoverStart, onHoverEnd }: HeroSectionPr
               </svg>
             </a>
             <a
-              href="#services"
+              href="/#services"
               className="btn-secondary"
               onMouseEnter={onHoverStart}
               onMouseLeave={onHoverEnd}

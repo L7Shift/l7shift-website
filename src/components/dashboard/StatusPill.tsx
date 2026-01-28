@@ -1,6 +1,6 @@
 'use client'
 
-type Status = 'backlog' | 'active' | 'review' | 'shipped' | 'pending' | 'approved' | 'rejected' | 'draft' | 'implemented'
+type Status = 'backlog' | 'active' | 'review' | 'shipped' | 'pending' | 'approved' | 'rejected' | 'draft' | 'implemented' | 'on_hold' | 'completed' | 'cancelled'
 
 interface StatusPillProps {
   status: Status
@@ -63,6 +63,24 @@ const statusConfig: Record<Status, { label: string; bg: string; text: string; gl
     bg: 'rgba(0, 240, 255, 0.15)',
     text: '#00F0FF',
     glow: '0 0 8px rgba(0, 240, 255, 0.4)',
+  },
+  on_hold: {
+    label: 'On Hold',
+    bg: 'rgba(255, 170, 0, 0.15)',
+    text: '#FFAA00',
+    glow: '0 0 8px rgba(255, 170, 0, 0.4)',
+  },
+  completed: {
+    label: 'Completed',
+    bg: 'rgba(191, 255, 0, 0.15)',
+    text: '#BFFF00',
+    glow: '0 0 8px rgba(191, 255, 0, 0.4)',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    bg: 'rgba(136, 136, 136, 0.2)',
+    text: '#888',
+    glow: 'none',
   },
 }
 

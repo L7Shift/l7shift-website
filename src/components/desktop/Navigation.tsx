@@ -83,7 +83,7 @@ export function Navigation({ onHoverStart, onHoverEnd }: NavigationProps) {
         {['Services', 'Process', 'Investment'].map((item, i) => (
           <a
             key={i}
-            href={`#${item.toLowerCase()}`}
+            href={`/#${item.toLowerCase()}`}
             onMouseEnter={onHoverStart}
             onMouseLeave={onHoverEnd}
             style={{

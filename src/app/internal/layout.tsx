@@ -1,8 +1,9 @@
 'use client'
 
-import { ReactNode, useState } from 'react'
+import { ReactNode, useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { CursorWrapper } from '@/components/shared/CursorWrapper'
 
 interface InternalLayoutProps {
   children: ReactNode
@@ -16,19 +17,42 @@ const navItems = [
   { href: '/internal/metrics', icon: '\uD83D\uDCC8', label: 'Metrics' },
 ]
 
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null
+  return null
+}
+
 export default function InternalLayout({ children }: InternalLayoutProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const [collapsed, setCollapsed] = useState(false)
+  const [userName, setUserName] = useState('User')
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  useEffect(() => {
+    const name = getCookie('l7_user_name')
+    if (name) setUserName(decodeURIComponent(name))
+  }, [])
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    await fetch('/api/auth/logout', { method: 'POST' })
+    router.push('/login')
+  }
 
   return (
-    <div
-      className="internal-portal"
-      style={{
-        minHeight: '100vh',
-        background: '#0A0A0A',
-        display: 'flex',
-      }}
-    >
+    <CursorWrapper>
+      <div
+        className="internal-portal"
+        style={{
+          minHeight: '100vh',
+          background: '#0A0A0A',
+          display: 'flex',
+        }}
+      >
       {/* Sidebar */}
       <aside
         style={{
@@ -125,6 +149,7 @@ export default function InternalLayout({ children }: InternalLayoutProps) {
               alignItems: 'center',
               gap: 12,
               justifyContent: collapsed ? 'center' : 'flex-start',
+              marginBottom: collapsed ? 0 : 12,
             }}
           >
             <div
@@ -141,28 +166,48 @@ export default function InternalLayout({ children }: InternalLayoutProps) {
                 color: '#0A0A0A',
               }}
             >
-              KL
+              {userName.charAt(0).toUpperCase()}
             </div>
             {!collapsed && (
               <div>
-                <div style={{ fontSize: 13, fontWeight: 500, color: '#FAFAFA' }}>Ken Leftwich</div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: '#FAFAFA' }}>{userName}</div>
                 <div style={{ fontSize: 11, color: '#666' }}>Admin</div>
               </div>
             )}
           </div>
+          {!collapsed && (
+            <button
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: 6,
+                color: '#888',
+                fontSize: 12,
+                cursor: isLoggingOut ? 'not-allowed' : 'pointer',
+                opacity: isLoggingOut ? 0.6 : 1,
+              }}
+            >
+              {isLoggingOut ? 'Signing out...' : 'Sign Out'}
+            </button>
+          )}
         </div>
       </aside>
 
-      {/* Main content */}
-      <main
-        style={{
-          flex: 1,
-          padding: 24,
-          overflowY: 'auto',
-        }}
-      >
-        {children}
-      </main>
-    </div>
+        {/* Main content */}
+        <main
+          style={{
+            flex: 1,
+            padding: 24,
+            overflowY: 'auto',
+          }}
+        >
+          {children}
+        </main>
+      </div>
+    </CursorWrapper>
   )
 }

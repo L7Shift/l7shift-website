@@ -479,6 +479,9 @@ export interface Database {
   }
 }
 
+// User roles and permissions
+export type UserRole = 'admin' | 'internal' | 'client'
+
 // Convenience types
 export type Project = Database['public']['Tables']['projects']['Row']
 export type ProjectInsert = Database['public']['Tables']['projects']['Insert']

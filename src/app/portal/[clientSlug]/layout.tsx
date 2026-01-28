@@ -1,11 +1,20 @@
 'use client'
 
-import { ReactNode } from 'react'
+import { ReactNode, useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname, useParams } from 'next/navigation'
+import { usePathname, useParams, useRouter } from 'next/navigation'
+import { CursorWrapper } from '@/components/shared/CursorWrapper'
 
 interface PortalLayoutProps {
   children: ReactNode
+}
+
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null
+  return null
 }
 
 // Client configurations - will come from database
@@ -35,11 +44,25 @@ const clientConfigs: Record<string, {
 export default function PortalLayout({ children }: PortalLayoutProps) {
   const pathname = usePathname()
   const params = useParams()
+  const router = useRouter()
   const clientSlug = params.clientSlug as string
   const config = clientConfigs[clientSlug] || {
     name: 'Client Portal',
     primaryColor: '#00F0FF',
     accentColor: '#BFFF00',
+  }
+
+  const [userName, setUserName] = useState('User')
+  const [showDropdown, setShowDropdown] = useState(false)
+
+  useEffect(() => {
+    const name = getCookie('l7_user_name')
+    if (name) setUserName(decodeURIComponent(name))
+  }, [])
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' })
+    router.push('/login')
   }
 
   const navItems = [
@@ -50,15 +73,16 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
   ]
 
   return (
-    <div
-      className="client-portal"
-      style={{
-        minHeight: '100vh',
-        background: '#0A0A0A',
-        color: '#FAFAFA',
-        fontFamily: "'Inter', -apple-system, sans-serif",
-      }}
-    >
+    <CursorWrapper>
+      <div
+        className="client-portal"
+        style={{
+          minHeight: '100vh',
+          background: '#0A0A0A',
+          color: '#FAFAFA',
+          fontFamily: "'Inter', -apple-system, sans-serif",
+        }}
+      >
       {/* Top Header */}
       <header
         style={{
@@ -121,22 +145,65 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
           })}
         </nav>
 
-        {/* User Avatar */}
-        <div
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: '50%',
-            background: `linear-gradient(135deg, ${config.primaryColor}, ${config.accentColor})`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 14,
-            fontWeight: 600,
-            color: '#0A0A0A',
-          }}
-        >
-          C
+        {/* User Avatar & Dropdown */}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowDropdown(!showDropdown)}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              background: `linear-gradient(135deg, ${config.primaryColor}, ${config.accentColor})`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 14,
+              fontWeight: 600,
+              color: '#0A0A0A',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            {userName.charAt(0).toUpperCase()}
+          </button>
+          {showDropdown && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 44,
+                right: 0,
+                background: '#1A1A1A',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: 8,
+                padding: 8,
+                minWidth: 160,
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+              }}
+            >
+              <div style={{ padding: '8px 12px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', marginBottom: 8 }}>
+                <div style={{ fontSize: 13, fontWeight: 500, color: '#FAFAFA' }}>{userName}</div>
+                <div style={{ fontSize: 11, color: '#666' }}>{config.name}</div>
+              </div>
+              <button
+                onClick={handleLogout}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  background: 'transparent',
+                  border: 'none',
+                  borderRadius: 6,
+                  color: '#888',
+                  fontSize: 13,
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+              >
+                Sign Out
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -162,14 +229,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
         </p>
       </footer>
 
-      <style jsx global>{`
-        .client-portal * {
-          cursor: auto !important;
-        }
-        .client-portal a, .client-portal button {
-          cursor: pointer !important;
-        }
-      `}</style>
-    </div>
+      </div>
+    </CursorWrapper>
   )
 }
