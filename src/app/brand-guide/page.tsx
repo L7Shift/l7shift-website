@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import './brand-guide.css';
 
 const brandColors = {
   voidBlack: '#0A0A0A',
@@ -437,7 +438,7 @@ const SymbioticShiftPage = () => (
       true partnership — not as tool and user, but as collaborators.
     </div>
 
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+    <div className="brand-grid-2">
       {[
         {
           term: 'The SymbAIotic Shift™',
@@ -558,7 +559,7 @@ const LogoPage = () => (
   >
     <SectionLabel color={brandColors.electricCyan}>03 — Logo & Wordmark</SectionLabel>
 
-    <div style={{ display: 'flex', gap: '32px', marginTop: '24px' }}>
+    <div className="brand-flex-row" style={{ marginTop: '24px' }}>
       <div
         style={{
           flex: 1,
@@ -747,7 +748,7 @@ const ColorPalettePage = () => (
   >
     <SectionLabel color={brandColors.hotMagenta}>04 — Color Palette</SectionLabel>
 
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+    <div className="brand-grid-2">
       {[
         {
           name: 'Void Black',
@@ -1047,14 +1048,7 @@ const VoiceTonePage = () => (
   >
     <SectionLabel color={brandColors.acidLime}>06 — Voice & Tone</SectionLabel>
 
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '20px',
-        marginTop: '16px',
-      }}
-    >
+    <div className="brand-grid-2" style={{ marginTop: '16px' }}>
       {[
         {
           trait: 'Bold',
@@ -1284,7 +1278,7 @@ const VisualLanguagePage = () => (
   >
     <SectionLabel color={brandColors.hotMagenta}>08 — Visual Language</SectionLabel>
 
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+    <div className="brand-grid-2">
       <div>
         <div
           style={{
@@ -1463,7 +1457,7 @@ const DosDontsPage = () => (
   >
     <SectionLabel color={brandColors.acidLime}>09 — Do&apos;s & Don&apos;ts</SectionLabel>
 
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+    <div className="brand-grid-2" style={{ gap: '24px' }}>
       <div>
         <div
           style={{
@@ -1696,15 +1690,7 @@ export default function BrandGuidePage() {
       }}
     >
       {/* Navigation */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '4px',
-          marginBottom: '20px',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-        }}
-      >
+      <div className="brand-guide-nav">
         {pages.map((page, i) => (
           <button
             key={page}
@@ -1728,28 +1714,17 @@ export default function BrandGuidePage() {
 
       {/* Page Container */}
       <div
+        className="brand-guide-doc"
         style={{
-          width: '100%',
-          maxWidth: '700px',
-          aspectRatio: '8.5 / 11',
           background: brandColors.voidBlack,
           boxShadow: '0 20px 60px rgba(0, 240, 255, 0.1), 0 10px 30px rgba(255, 0, 170, 0.05)',
-          position: 'relative',
-          overflow: 'hidden',
         }}
       >
         <PageComponent />
       </div>
 
       {/* Page Navigation Arrows */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '16px',
-          marginTop: '20px',
-          alignItems: 'center',
-        }}
-      >
+      <div className="brand-guide-arrows">
         <button
           onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
           disabled={currentPage === 0}

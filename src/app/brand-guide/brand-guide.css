@@ -1,0 +1,270 @@
+/* Brand Guide Mobile Responsiveness */
+
+/* Base mobile adjustments */
+@media (max-width: 768px) {
+  .brand-guide-page {
+    padding: 12px !important;
+  }
+}
+
+/* Navigation buttons container */
+.brand-guide-nav {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .brand-guide-nav {
+    gap: 3px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .brand-guide-nav button {
+    padding: 5px 6px !important;
+    font-size: 7px !important;
+    letter-spacing: 0.5px !important;
+  }
+}
+
+/* Page document container */
+.brand-guide-doc {
+  width: 100%;
+  max-width: 700px;
+  aspect-ratio: 8.5 / 11;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .brand-guide-doc {
+    aspect-ratio: auto !important;
+    max-width: 100%;
+  }
+}
+
+/* Individual page content wrapper */
+.brand-page {
+  width: 100%;
+  height: 100%;
+  padding: 48px;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .brand-page {
+    padding: 24px !important;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-page {
+    padding: 16px !important;
+  }
+}
+
+/* Two-column grids */
+.brand-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .brand-grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+/* Three-column grids */
+.brand-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .brand-grid-3 {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+/* Flex row that should stack on mobile */
+.brand-flex-row {
+  display: flex;
+  gap: 32px;
+}
+
+@media (max-width: 640px) {
+  .brand-flex-row {
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+}
+
+/* Page arrows navigation */
+.brand-guide-arrows {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .brand-guide-arrows {
+    margin-top: 12px !important;
+    gap: 12px !important;
+  }
+
+  .brand-guide-arrows button {
+    padding: 10px 16px !important;
+    font-size: 10px !important;
+    letter-spacing: 1px !important;
+  }
+}
+
+/* Typography responsive scaling */
+.brand-headline-xl {
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+@media (max-width: 768px) {
+  .brand-headline-xl {
+    font-size: 42px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-headline-xl {
+    font-size: 32px !important;
+  }
+}
+
+.brand-headline-lg {
+  font-size: 48px;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .brand-headline-lg {
+    font-size: 32px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-headline-lg {
+    font-size: 24px !important;
+  }
+}
+
+.brand-headline-md {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .brand-headline-md {
+    font-size: 24px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-headline-md {
+    font-size: 20px !important;
+  }
+}
+
+/* Page number positioning */
+.brand-page-number {
+  position: absolute;
+  bottom: 32px;
+  right: 48px;
+}
+
+@media (max-width: 768px) {
+  .brand-page-number {
+    bottom: 16px !important;
+    right: 24px !important;
+    font-size: 10px !important;
+  }
+}
+
+/* Trademark cards */
+.tm-card {
+  padding: 20px;
+}
+
+@media (max-width: 640px) {
+  .tm-card {
+    padding: 16px !important;
+  }
+
+  .tm-card .tm-title {
+    font-size: 14px !important;
+  }
+
+  .tm-card .tm-phonetic {
+    font-size: 9px !important;
+  }
+
+  .tm-card .tm-def {
+    font-size: 11px !important;
+  }
+}
+
+/* Color swatches */
+.color-swatch {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .color-swatch {
+    width: 60px !important;
+    height: 60px !important;
+  }
+}
+
+/* Service pillar cards */
+.pillar-card {
+  display: flex;
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .pillar-card {
+    flex-direction: column !important;
+  }
+
+  .pillar-card > div:first-child {
+    width: 100% !important;
+    height: 40px !important;
+    transform: none !important;
+  }
+
+  .pillar-card > div:first-child > div {
+    transform: none !important;
+  }
+}
+
+/* Type scale display */
+.type-scale {
+  display: flex;
+  gap: 24px;
+}
+
+@media (max-width: 640px) {
+  .type-scale {
+    gap: 12px !important;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
