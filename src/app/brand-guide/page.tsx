@@ -441,21 +441,25 @@ const SymbioticShiftPage = () => (
       {[
         {
           term: 'The SymbAIotic Shift™',
+          phonetic: 'sim-bye-AH-tik shift',
           def: 'Our flagship methodology describing human-AI partnership and the transformational journey.',
           color: brandColors.electricCyan,
         },
         {
           term: 'SymbAIosis™',
+          phonetic: 'sim-bye-OH-sis',
           def: 'The state of effective human-AI collaboration. The destination of the Shift.',
           color: brandColors.hotMagenta,
         },
         {
           term: 'SymbAIotic™',
+          phonetic: 'sim-bye-AH-tik',
           def: 'Adjective form. Describes approaches, solutions, or cultures that embody human-AI partnership.',
           color: brandColors.acidLime,
         },
         {
           term: 'SymbAIote™',
+          phonetic: 'sim-bye-OAT',
           def: 'A practitioner who works symbiotically with AI. One who has completed The SymbAIotic Shift.',
           color: brandColors.white,
         },
@@ -474,10 +478,22 @@ const SymbioticShiftPage = () => (
               fontSize: '15px',
               fontWeight: '600',
               color: item.color,
-              marginBottom: '8px',
+              marginBottom: '4px',
             }}
           >
             {item.term}
+          </div>
+          <div
+            style={{
+              fontFamily: "'Courier New', monospace",
+              fontSize: '10px',
+              color: brandColors.gray,
+              marginBottom: '8px',
+              opacity: 0.7,
+              letterSpacing: '0.5px',
+            }}
+          >
+            /{item.phonetic}/
           </div>
           <div
             style={{
