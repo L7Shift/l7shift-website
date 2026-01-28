@@ -469,6 +469,14 @@ a, button, input, textarea, select, label,
   cursor: pointer !important;
 }
 
+/* Restore normal cursor for ShiftCard pages */
+.card-page, .card-page * {
+  cursor: auto !important;
+}
+.card-page a, .card-page button {
+  cursor: pointer !important;
+}
+
 /* Accessibility: Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
