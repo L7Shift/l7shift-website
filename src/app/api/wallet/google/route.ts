@@ -75,22 +75,123 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Generate unique object ID
-    const objectId = `${holderId}-${Date.now()}`
+    // Generate unique object ID (alphanumeric only for Google Wallet)
+    const objectSuffix = `${holderId}_${Date.now()}`
+    const objectId = `${issuerId}.${objectSuffix}`
 
-    // Generate pass object
-    const passObject = generateGooglePassObject(holder, objectId)
+    // Get theme and generate class
+    const theme = getTheme(holder.themeId || 'l7-shift')
+    const classId = `${issuerId}.shiftcard_${theme.id.replace(/-/g, '_')}`
 
-    // Create JWT
+    // Generate pass class (included in JWT for auto-creation)
+    const passClass = {
+      id: classId,
+      classTemplateInfo: {
+        cardTemplateOverride: {
+          cardRowTemplateInfos: [
+            {
+              twoItems: {
+                startItem: {
+                  firstValue: {
+                    fields: [{ fieldPath: "object.textModulesData['email']" }]
+                  }
+                },
+                endItem: {
+                  firstValue: {
+                    fields: [{ fieldPath: "object.textModulesData['phone']" }]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      imageModulesData: [
+        {
+          mainImage: {
+            sourceUri: {
+              uri: 'https://l7shift.com/wallet-assets/l7/hero.png'
+            },
+            contentDescription: {
+              defaultValue: { language: 'en', value: theme.tagline || 'ShiftCards by L7 Shift' }
+            }
+          },
+          id: 'hero_image'
+        }
+      ],
+      linksModuleData: {
+        uris: [
+          { uri: theme.website, description: theme.organizationName + ' Website', id: 'website' }
+        ]
+      },
+      enableSmartTap: true,
+      hexBackgroundColor: theme.backgroundColor,
+      securityAnimation: { animationType: 'FOIL_SHIMMER' }
+    }
+
+    // Generate pass object with correct classId
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://l7shift.com'
+    const passObject = {
+      id: objectId,
+      classId: classId,
+      state: 'ACTIVE',
+      heroImage: {
+        sourceUri: {
+          uri: 'https://l7shift.com/wallet-assets/l7/hero.png'
+        },
+        contentDescription: {
+          defaultValue: { language: 'en', value: theme.tagline || 'ShiftCards' }
+        }
+      },
+      logo: {
+        sourceUri: {
+          uri: 'https://l7shift.com/wallet-assets/l7/logo-google.png'
+        },
+        contentDescription: {
+          defaultValue: { language: 'en', value: theme.organizationName }
+        }
+      },
+      cardTitle: {
+        defaultValue: { language: 'en', value: holder.name }
+      },
+      subheader: {
+        defaultValue: { language: 'en', value: holder.title }
+      },
+      header: {
+        defaultValue: { language: 'en', value: holder.company }
+      },
+      textModulesData: [
+        { id: 'email', header: 'EMAIL', body: holder.email },
+        { id: 'phone', header: 'PHONE', body: holder.phone },
+        ...(holder.tagline ? [{ id: 'about', header: 'ABOUT', body: holder.tagline }] : [])
+      ],
+      linksModuleData: {
+        uris: [
+          { id: 'website', uri: holder.website, description: 'Website' },
+          { id: 'profile', uri: `${baseUrl}/card/${holder.id}`, description: 'Full Digital Card' },
+          ...(holder.socials?.linkedin ? [{ id: 'linkedin', uri: holder.socials.linkedin, description: 'LinkedIn' }] : []),
+          ...(holder.socials?.twitter ? [{ id: 'twitter', uri: holder.socials.twitter, description: 'X / Twitter' }] : [])
+        ]
+      },
+      barcode: {
+        type: 'QR_CODE',
+        value: `${baseUrl}/card/${holder.id}`,
+        alternateText: 'Scan for full profile'
+      },
+      hexBackgroundColor: theme.backgroundColor
+    }
+
+    // Create JWT with both class and object (class auto-created if not exists)
     const privateKey = privateKeyRaw.replace(/\\n/g, '\n')
     const key = await importPKCS8(privateKey, 'RS256')
 
     const jwt = await new SignJWT({
       iss: serviceEmail,
       aud: 'google',
-      origins: [process.env.NEXT_PUBLIC_SITE_URL || 'https://l7shift.com'],
+      origins: ['https://l7shift.com'],
       typ: 'savetowallet',
       payload: {
+        genericClasses: [passClass],
         genericObjects: [passObject],
       },
     })
