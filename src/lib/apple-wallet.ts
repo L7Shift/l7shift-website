@@ -286,40 +286,33 @@ export async function generateAppleWalletPass(
 }
 
 /**
- * Add images to the pass
+ * Add images to the pass with all resolution variants
  */
 async function addPassImages(pass: any, theme: WalletTheme, baseUrl: string): Promise<void> {
   const publicDir = path.join(process.cwd(), 'public')
+  const assetsDir = path.join(publicDir, 'wallet-assets/l7')
 
-  // Icon (required) - 29x29 @1x, 58x58 @2x, 87x87 @3x
-  const iconPath = theme.assets.appleIcon
-    ? path.join(publicDir, theme.assets.appleIcon)
-    : path.join(publicDir, 'wallet-assets/l7/icon.png')
-
-  if (fs.existsSync(iconPath)) {
-    pass.addBuffer('icon.png', fs.readFileSync(iconPath))
-  } else {
-    // Generate a simple icon placeholder
-    pass.addBuffer('icon.png', await generatePlaceholderIcon(theme))
+  // Helper to add image with all variants
+  const addImageVariants = (baseName: string, variants: string[]) => {
+    for (const variant of variants) {
+      const filePath = path.join(assetsDir, variant)
+      if (fs.existsSync(filePath)) {
+        pass.addBuffer(variant, fs.readFileSync(filePath))
+      }
+    }
   }
 
-  // Logo (optional) - 160x50 @1x
-  const logoPath = theme.assets.appleLogo
-    ? path.join(publicDir, theme.assets.appleLogo)
-    : path.join(publicDir, 'wallet-assets/l7/logo.png')
+  // Icon (required) - all resolutions for crisp display
+  addImageVariants('icon', ['icon.png', 'icon@2x.png', 'icon@3x.png'])
 
-  if (fs.existsSync(logoPath)) {
-    pass.addBuffer('logo.png', fs.readFileSync(logoPath))
-  }
+  // Logo - top of pass
+  addImageVariants('logo', ['logo.png', 'logo@2x.png'])
 
-  // Strip image (optional) - behind primary fields
-  const stripPath = theme.assets.appleStrip
-    ? path.join(publicDir, theme.assets.appleStrip)
-    : path.join(publicDir, 'wallet-assets/l7/strip.png')
+  // Strip - background behind fields (THIS IS KEY for visual impact)
+  addImageVariants('strip', ['strip.png', 'strip@2x.png'])
 
-  if (fs.existsSync(stripPath)) {
-    pass.addBuffer('strip.png', fs.readFileSync(stripPath))
-  }
+  // Thumbnail - shows on right side of pass, adds visual interest
+  addImageVariants('thumbnail', ['thumbnail.png', 'thumbnail@2x.png'])
 }
 
 /**

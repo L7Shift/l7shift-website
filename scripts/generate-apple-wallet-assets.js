@@ -173,35 +173,35 @@ async function generateStrips() {
         <!-- Subtle grid overlay -->
         <rect width="100%" height="100%" fill="url(#grid)"/>
 
-        <!-- Gradient border frame with glow -->
+        <!-- Gradient border frame with glow - BOLD -->
         <rect x="${borderWidth}" y="${borderWidth}"
               width="${width - borderWidth * 2}" height="${height - borderWidth * 2}"
-              fill="none" stroke="url(#borderGlow)" stroke-width="${borderWidth}"
+              fill="none" stroke="url(#borderGlow)" stroke-width="${borderWidth * 2}"
               rx="${borderWidth * 3}" ry="${borderWidth * 3}"
-              filter="url(#glow)" opacity="0.5"/>
+              filter="url(#glow)" opacity="0.85"/>
 
-        <!-- Corner accent lines - top left (cyan) -->
-        <path d="M ${cornerLength} ${borderWidth} L ${borderWidth} ${borderWidth} L ${borderWidth} ${cornerLength}"
-              fill="none" stroke="${COLORS.electricCyan}" stroke-width="${borderWidth}" opacity="0.9"/>
+        <!-- Corner accent lines - top left (cyan) - BOLD -->
+        <path d="M ${cornerLength} ${borderWidth * 2} L ${borderWidth * 2} ${borderWidth * 2} L ${borderWidth * 2} ${cornerLength}"
+              fill="none" stroke="${COLORS.electricCyan}" stroke-width="${borderWidth * 2}" stroke-linecap="square"/>
 
-        <!-- Corner accent - top right (magenta) -->
-        <path d="M ${width - cornerLength} ${borderWidth} L ${width - borderWidth} ${borderWidth} L ${width - borderWidth} ${cornerLength}"
-              fill="none" stroke="${COLORS.hotMagenta}" stroke-width="${borderWidth}" opacity="0.9"/>
+        <!-- Corner accent - top right (magenta) - BOLD -->
+        <path d="M ${width - cornerLength} ${borderWidth * 2} L ${width - borderWidth * 2} ${borderWidth * 2} L ${width - borderWidth * 2} ${cornerLength}"
+              fill="none" stroke="${COLORS.hotMagenta}" stroke-width="${borderWidth * 2}" stroke-linecap="square"/>
 
-        <!-- Corner accent - bottom left (lime) -->
-        <path d="M ${borderWidth} ${height - cornerLength} L ${borderWidth} ${height - borderWidth} L ${cornerLength} ${height - borderWidth}"
-              fill="none" stroke="${COLORS.acidLime}" stroke-width="${borderWidth}" opacity="0.9"/>
+        <!-- Corner accent - bottom left (lime) - BOLD -->
+        <path d="M ${borderWidth * 2} ${height - cornerLength} L ${borderWidth * 2} ${height - borderWidth * 2} L ${cornerLength} ${height - borderWidth * 2}"
+              fill="none" stroke="${COLORS.acidLime}" stroke-width="${borderWidth * 2}" stroke-linecap="square"/>
 
-        <!-- Corner accent - bottom right (cyan) -->
-        <path d="M ${width - borderWidth} ${height - cornerLength} L ${width - borderWidth} ${height - borderWidth} L ${width - cornerLength} ${height - borderWidth}"
-              fill="none" stroke="${COLORS.electricCyan}" stroke-width="${borderWidth}" opacity="0.9"/>
+        <!-- Corner accent - bottom right (cyan) - BOLD -->
+        <path d="M ${width - borderWidth * 2} ${height - cornerLength} L ${width - borderWidth * 2} ${height - borderWidth * 2} L ${width - cornerLength} ${height - borderWidth * 2}"
+              fill="none" stroke="${COLORS.electricCyan}" stroke-width="${borderWidth * 2}" stroke-linecap="square"/>
 
-        <!-- Breaking square element (rotated, subtle) -->
+        <!-- Breaking square element (rotated) - MORE VISIBLE -->
         <g transform="translate(${squareX}, ${squareY}) rotate(15)">
           <rect x="${-squareSize/2}" y="${-squareSize/2}"
                 width="${squareSize}" height="${squareSize}"
-                fill="none" stroke="url(#borderGlow)" stroke-width="${borderWidth * 0.75}"
-                opacity="0.3"/>
+                fill="none" stroke="url(#borderGlow)" stroke-width="${borderWidth * 1.5}"
+                opacity="0.5"/>
         </g>
       </svg>
     `
@@ -215,7 +215,7 @@ async function generateStrips() {
 }
 
 /**
- * Generate thumbnail (optional - for photo placeholder)
+ * Generate thumbnail with gradient ring (like the web avatar)
  */
 async function generateThumbnail() {
   const sizes = [
@@ -224,16 +224,46 @@ async function generateThumbnail() {
   ]
 
   for (const { name, size } of sizes) {
-    const fontSize = Math.floor(size * 0.35)
+    const fontSize = Math.floor(size * 0.32)
+    const ringWidth = Math.max(4, Math.floor(size / 20))
+    const innerRadius = size / 2 - ringWidth * 2
+
     const svg = `
       <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
-        <rect width="${size}" height="${size}" fill="${COLORS.voidBlack}" rx="${size * 0.1}"/>
-        <circle cx="${size / 2}" cy="${size / 2}" r="${size * 0.4}"
-                fill="none" stroke="${COLORS.electricCyan}" stroke-width="2"/>
+        <defs>
+          <!-- Gradient ring like web design -->
+          <linearGradient id="thumbRing" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:${COLORS.electricCyan};stop-opacity:1" />
+            <stop offset="33%" style="stop-color:${COLORS.hotMagenta};stop-opacity:1" />
+            <stop offset="66%" style="stop-color:${COLORS.acidLime};stop-opacity:1" />
+            <stop offset="100%" style="stop-color:${COLORS.electricCyan};stop-opacity:1" />
+          </linearGradient>
+          <filter id="ringGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="${ringWidth/2}" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- Background -->
+        <rect width="${size}" height="${size}" fill="${COLORS.voidBlack}"/>
+
+        <!-- Outer glow ring -->
+        <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2 - ringWidth}"
+                fill="none" stroke="url(#thumbRing)" stroke-width="${ringWidth}"
+                filter="url(#ringGlow)"/>
+
+        <!-- Inner dark circle -->
+        <circle cx="${size / 2}" cy="${size / 2}" r="${innerRadius}"
+                fill="${COLORS.voidBlack}"/>
+
+        <!-- KL initials (placeholder for avatar) -->
         <text x="${size / 2}" y="${size * 0.58}"
               font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
               font-size="${fontSize}" font-weight="bold"
-              fill="${COLORS.electricCyan}" text-anchor="middle">KL</text>
+              fill="${COLORS.white}" text-anchor="middle" opacity="0.9">KL</text>
       </svg>
     `
 
