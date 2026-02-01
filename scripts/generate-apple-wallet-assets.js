@@ -89,42 +89,83 @@ async function generateIcons() {
 }
 
 /**
- * Generate logo - SHIFTCARDS™ in bold gradient (like JJ Rewards)
- * Sized to fill the space properly
+ * Generate logo - SHIFTCARDS™ with forward momentum arrow in S
+ * Two-line stacked design: SHIFT (with arrow S) over CARDS
+ * Compact width to leave room for company name on right
  */
 async function generateLogos() {
   const sizes = [
-    { name: 'logo.png', width: 160, height: 50 },
-    { name: 'logo@2x.png', width: 320, height: 100 },
+    { name: 'logo.png', width: 120, height: 50 },  // Narrower to leave space for "L7 SHIFT"
+    { name: 'logo@2x.png', width: 240, height: 100 },
   ]
 
   for (const { name, width, height } of sizes) {
-    // Size to fit "SHIFTCARDS™" across the width
-    const mainFontSize = Math.floor(width / 6.5)  // ~49px for 320w, fits nicely
-    const tmFontSize = Math.floor(mainFontSize * 0.4)
+    const shiftFontSize = Math.floor(height * 0.42)
+    const cardsFontSize = Math.floor(height * 0.28)
+    const tmFontSize = Math.floor(cardsFontSize * 0.5)
+    const arrowSize = Math.floor(shiftFontSize * 0.9)
+    const strokeWidth = Math.max(1.5, Math.floor(height / 40))
 
     const svg = `
       <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <!-- Cyan to magenta gradient for SHIFT -->
+          <linearGradient id="shiftGrad" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" style="stop-color:${COLORS.electricCyan};stop-opacity:1" />
-            <stop offset="45%" style="stop-color:${COLORS.hotMagenta};stop-opacity:1" />
+            <stop offset="100%" style="stop-color:${COLORS.hotMagenta};stop-opacity:1" />
+          </linearGradient>
+          <!-- Magenta to lime gradient for CARDS -->
+          <linearGradient id="cardsGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:${COLORS.hotMagenta};stop-opacity:1" />
             <stop offset="100%" style="stop-color:${COLORS.acidLime};stop-opacity:1" />
           </linearGradient>
-          <filter id="logoGlow" x="-10%" y="-10%" width="120%" height="120%">
-            <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+          <!-- Arrow gradient -->
+          <linearGradient id="arrowGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+            <stop offset="0%" style="stop-color:${COLORS.electricCyan};stop-opacity:1" />
+            <stop offset="100%" style="stop-color:${COLORS.hotMagenta};stop-opacity:1" />
+          </linearGradient>
+          <filter id="logoGlow" x="-15%" y="-15%" width="130%" height="130%">
+            <feGaussianBlur stdDeviation="${strokeWidth * 0.5}" result="coloredBlur"/>
             <feMerge>
               <feMergeNode in="coloredBlur"/>
               <feMergeNode in="SourceGraphic"/>
             </feMerge>
           </filter>
         </defs>
-        <!-- SHIFTCARDS™ - bold gradient, properly spaced -->
-        <text x="0" y="${height * 0.72}"
+
+        <!-- Forward arrow S - tilted right for momentum -->
+        <g transform="translate(${arrowSize * 0.1}, ${height * 0.08})">
+          <!-- Arrow shape: forward-pointing S with arrow head -->
+          <path d="M ${arrowSize * 0.15} ${arrowSize * 0.25}
+                   L ${arrowSize * 0.6} ${arrowSize * 0.08}
+                   L ${arrowSize * 0.85} ${arrowSize * 0.25}
+                   L ${arrowSize * 0.65} ${arrowSize * 0.25}
+                   L ${arrowSize * 0.65} ${arrowSize * 0.45}
+                   L ${arrowSize * 0.35} ${arrowSize * 0.55}
+                   L ${arrowSize * 0.35} ${arrowSize * 0.72}
+                   L ${arrowSize * 0.7} ${arrowSize * 0.72}
+                   L ${arrowSize * 0.7} ${arrowSize * 0.85}
+                   L ${arrowSize * 0.1} ${arrowSize * 0.85}
+                   L ${arrowSize * 0.1} ${arrowSize * 0.55}
+                   L ${arrowSize * 0.4} ${arrowSize * 0.45}
+                   L ${arrowSize * 0.4} ${arrowSize * 0.25}
+                   Z"
+                fill="url(#arrowGrad)" filter="url(#logoGlow)"/>
+        </g>
+
+        <!-- HIFT text (after the arrow S) -->
+        <text x="${arrowSize * 0.95}" y="${height * 0.44}"
               font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
-              font-size="${mainFontSize}" font-weight="800"
-              fill="url(#logoGradient)" filter="url(#logoGlow)"
-              letter-spacing="-1">SHIFTCARDS<tspan font-size="${tmFontSize}" baseline-shift="super" fill="${COLORS.white}">™</tspan></text>
+              font-size="${shiftFontSize}" font-weight="800"
+              fill="url(#shiftGrad)" filter="url(#logoGlow)"
+              letter-spacing="-1">HIFT</text>
+
+        <!-- CARDS below, slightly indented -->
+        <text x="${arrowSize * 0.2}" y="${height * 0.82}"
+              font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+              font-size="${cardsFontSize}" font-weight="700"
+              fill="url(#cardsGrad)" filter="url(#logoGlow)"
+              letter-spacing="1">CARDS<tspan font-size="${tmFontSize}" baseline-shift="super" fill="${COLORS.white}" opacity="0.9">™</tspan></text>
       </svg>
     `
 
@@ -383,24 +424,37 @@ async function generateGoogleLogo() {
 /**
  * Generate Google Wallet hero image (1032x336)
  * Full-width banner with SHIFTCARDS™ branding
- * Matches Apple strip design aesthetic
+ * Stacked SHIFT/CARDS with arrow S, matches Apple logo design
  */
 async function generateGoogleHero() {
   const width = 1032
   const height = 336
   const borderWidth = Math.floor(width / 180)
   const cornerLength = Math.floor(width / 12)
-  const mainFontSize = Math.floor(height * 0.28)
-  const tmFontSize = Math.floor(mainFontSize * 0.35)
+
+  // Text sizing for stacked layout
+  const shiftFontSize = Math.floor(height * 0.35)
+  const cardsFontSize = Math.floor(height * 0.22)
+  const tmFontSize = Math.floor(cardsFontSize * 0.4)
+  const arrowSize = Math.floor(shiftFontSize * 1.1)
 
   const svg = `
     <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <!-- Main gradient for text and border -->
-        <linearGradient id="heroGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <!-- Cyan to magenta gradient for SHIFT -->
+        <linearGradient id="heroShiftGrad" x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" style="stop-color:${COLORS.electricCyan};stop-opacity:1" />
-          <stop offset="45%" style="stop-color:${COLORS.hotMagenta};stop-opacity:1" />
+          <stop offset="100%" style="stop-color:${COLORS.hotMagenta};stop-opacity:1" />
+        </linearGradient>
+        <!-- Magenta to lime gradient for CARDS -->
+        <linearGradient id="heroCardsGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:${COLORS.hotMagenta};stop-opacity:1" />
           <stop offset="100%" style="stop-color:${COLORS.acidLime};stop-opacity:1" />
+        </linearGradient>
+        <!-- Arrow gradient -->
+        <linearGradient id="heroArrowGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+          <stop offset="0%" style="stop-color:${COLORS.electricCyan};stop-opacity:1" />
+          <stop offset="100%" style="stop-color:${COLORS.hotMagenta};stop-opacity:1" />
         </linearGradient>
 
         <!-- Border glow gradient -->
@@ -412,7 +466,7 @@ async function generateGoogleHero() {
 
         <!-- Glow filter -->
         <filter id="heroGlow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="${borderWidth * 1.5}" result="coloredBlur"/>
+          <feGaussianBlur stdDeviation="${borderWidth * 1.2}" result="coloredBlur"/>
           <feMerge>
             <feMergeNode in="coloredBlur"/>
             <feMergeNode in="SourceGraphic"/>
@@ -468,13 +522,41 @@ async function generateGoogleHero() {
       <path d="M ${width - borderWidth * 2} ${height - cornerLength} L ${width - borderWidth * 2} ${height - borderWidth * 2} L ${width - cornerLength} ${height - borderWidth * 2}"
             fill="none" stroke="${COLORS.electricCyan}" stroke-width="${borderWidth * 1.5}" stroke-linecap="square"/>
 
-      <!-- SHIFTCARDS™ text - centered, bold gradient -->
-      <text x="${width / 2}" y="${height * 0.62}"
-            font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
-            font-size="${mainFontSize}" font-weight="800"
-            fill="url(#heroGradient)" text-anchor="middle"
-            filter="url(#heroGlow)"
-            letter-spacing="2">SHIFTCARDS<tspan font-size="${tmFontSize}" baseline-shift="super" fill="${COLORS.white}">™</tspan></text>
+      <!-- Centered SHIFT + CARDS stacked logo -->
+      <g transform="translate(${width / 2 - arrowSize * 1.8}, ${height * 0.15})">
+        <!-- Forward arrow S -->
+        <g transform="translate(0, 0)">
+          <path d="M ${arrowSize * 0.15} ${arrowSize * 0.25}
+                   L ${arrowSize * 0.6} ${arrowSize * 0.08}
+                   L ${arrowSize * 0.85} ${arrowSize * 0.25}
+                   L ${arrowSize * 0.65} ${arrowSize * 0.25}
+                   L ${arrowSize * 0.65} ${arrowSize * 0.45}
+                   L ${arrowSize * 0.35} ${arrowSize * 0.55}
+                   L ${arrowSize * 0.35} ${arrowSize * 0.72}
+                   L ${arrowSize * 0.7} ${arrowSize * 0.72}
+                   L ${arrowSize * 0.7} ${arrowSize * 0.85}
+                   L ${arrowSize * 0.1} ${arrowSize * 0.85}
+                   L ${arrowSize * 0.1} ${arrowSize * 0.55}
+                   L ${arrowSize * 0.4} ${arrowSize * 0.45}
+                   L ${arrowSize * 0.4} ${arrowSize * 0.25}
+                   Z"
+                fill="url(#heroArrowGrad)" filter="url(#heroGlow)"/>
+        </g>
+
+        <!-- HIFT text -->
+        <text x="${arrowSize * 0.9}" y="${arrowSize * 0.78}"
+              font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+              font-size="${shiftFontSize}" font-weight="800"
+              fill="url(#heroShiftGrad)" filter="url(#heroGlow)"
+              letter-spacing="-2">HIFT</text>
+
+        <!-- CARDS below -->
+        <text x="${arrowSize * 0.15}" y="${arrowSize * 0.78 + cardsFontSize * 1.1}"
+              font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+              font-size="${cardsFontSize}" font-weight="700"
+              fill="url(#heroCardsGrad)" filter="url(#heroGlow)"
+              letter-spacing="3">CARDS<tspan font-size="${tmFontSize}" baseline-shift="super" fill="${COLORS.white}" opacity="0.9">™</tspan></text>
+      </g>
     </svg>
   `
 
