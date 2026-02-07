@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { StatusPill } from './StatusPill'
 
-type TaskStatus = 'backlog' | 'active' | 'review' | 'shipped'
+type TaskStatus = 'backlog' | 'active' | 'review' | 'shipped' | 'icebox'
 
 interface Task {
   id: string
@@ -27,6 +27,7 @@ const columns: { status: TaskStatus; title: string; color: string }[] = [
   { status: 'active', title: 'Active', color: '#00F0FF' },
   { status: 'review', title: 'In Review', color: '#FF00AA' },
   { status: 'shipped', title: 'Shipped', color: '#BFFF00' },
+  { status: 'icebox', title: 'Icebox', color: '#6B7280' },
 ]
 
 const priorityColors = {
@@ -68,7 +69,7 @@ export function KanbanBoard({ tasks, onTaskMove, onTaskClick }: KanbanBoardProps
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: 'repeat(5, 1fr)',
         gap: 16,
         height: '100%',
         minHeight: 500,

@@ -11,10 +11,13 @@ export type Json =
 
 // Enums
 export type ProjectStatus = 'active' | 'completed' | 'on_hold' | 'cancelled'
-export type TaskStatus = 'backlog' | 'active' | 'review' | 'shipped'
+export type TaskStatus = 'backlog' | 'active' | 'review' | 'shipped' | 'icebox'
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent'
 export type RequirementStatus = 'draft' | 'review' | 'approved' | 'implemented'
 export type DeliverableStatus = 'pending' | 'uploaded' | 'in_review' | 'approved' | 'rejected'
+export type LeadStatus = 'incoming' | 'qualified' | 'contacted' | 'converted' | 'disqualified'
+export type LeadTier = 'SOFTBALL' | 'MEDIUM' | 'HARD' | 'DISQUALIFY'
+export type LeadSource = 'website' | 'referral' | 'linkedin' | 'other'
 
 export interface Database {
   public: {
@@ -463,6 +466,55 @@ export interface Database {
         }
       }
 
+      // Leads - Lead pipeline management
+      leads: {
+        Row: {
+          id: string
+          name: string
+          email: string
+          company: string | null
+          phone: string | null
+          message: string | null
+          status: LeadStatus
+          tier: LeadTier | null
+          source: LeadSource
+          answers: Json | null
+          ai_assessment: Json | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          email: string
+          company?: string | null
+          phone?: string | null
+          message?: string | null
+          status?: LeadStatus
+          tier?: LeadTier | null
+          source?: LeadSource
+          answers?: Json | null
+          ai_assessment?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          email?: string
+          company?: string | null
+          phone?: string | null
+          message?: string | null
+          status?: LeadStatus
+          tier?: LeadTier | null
+          source?: LeadSource
+          answers?: Json | null
+          ai_assessment?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+
       // Activity Log - Track all changes
       activity_log: {
         Row: {
@@ -544,6 +596,10 @@ export type ClientUpdate = Database['public']['Tables']['clients']['Update']
 export type Deliverable = Database['public']['Tables']['deliverables']['Row']
 export type RequirementDoc = Database['public']['Tables']['requirements_docs']['Row']
 export type ActivityLogEntry = Database['public']['Tables']['activity_log']['Row']
+
+export type Lead = Database['public']['Tables']['leads']['Row']
+export type LeadInsert = Database['public']['Tables']['leads']['Insert']
+export type LeadUpdate = Database['public']['Tables']['leads']['Update']
 
 // ShiftCards types
 export type ShiftCardTier = 'basic' | 'pro' | 'custom'
