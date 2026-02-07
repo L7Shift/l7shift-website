@@ -810,7 +810,7 @@ function AddTaskModal({
   )
 }
 
-// Task Detail Modal Component
+// Task Detail Modal Component with Edit Functionality
 function TaskDetailModal({
   task,
   onClose,
@@ -820,6 +820,16 @@ function TaskDetailModal({
   onClose: () => void
   onUpdate: () => void
 }) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+
+  // Editable fields
+  const [title, setTitle] = useState(task.title)
+  const [description, setDescription] = useState(task.description || '')
+  const [status, setStatus] = useState<TaskStatus>(task.status)
+  const [priority, setPriority] = useState<TaskPriority>(task.priority)
+  const [shiftHours, setShiftHours] = useState(task.shift_hours.toString())
+
   const priorityColors = {
     low: '#666',
     medium: '#888',
@@ -832,6 +842,88 @@ function TaskDetailModal({
     active: 'Active',
     review: 'In Review',
     shipped: 'Shipped',
+  }
+
+  const statusOptions: { value: TaskStatus; label: string }[] = [
+    { value: 'backlog', label: 'Backlog' },
+    { value: 'active', label: 'Active' },
+    { value: 'review', label: 'In Review' },
+    { value: 'shipped', label: 'Shipped' },
+  ]
+
+  const priorityOptions: { value: TaskPriority; label: string }[] = [
+    { value: 'low', label: 'Low' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'high', label: 'High' },
+    { value: 'urgent', label: 'Urgent' },
+  ]
+
+  async function handleSave() {
+    if (!supabase || !title.trim()) return
+    const db = supabase!
+
+    setSaving(true)
+    try {
+      const updateData: TaskUpdate = {
+        title: title.trim(),
+        description: description.trim() || null,
+        status,
+        priority,
+        shift_hours: parseFloat(shiftHours) || 0,
+        updated_at: new Date().toISOString(),
+      }
+
+      // Set shipped_at if status changed to shipped
+      if (status === 'shipped' && task.status !== 'shipped') {
+        updateData.shipped_at = new Date().toISOString()
+      }
+
+      const { error } = await (db as any)
+        .from('tasks')
+        .update(updateData)
+        .eq('id', task.id)
+
+      if (error) throw error
+
+      // Log activity
+      await (db as any).from('activity_log').insert({
+        project_id: task.project_id,
+        entity_type: 'task',
+        entity_id: task.id,
+        action: 'task_updated',
+        actor: 'Ken', // TODO: Use actual user
+        actor_type: 'internal',
+        metadata: { title: title.trim(), changes: 'Task details updated' },
+      })
+
+      onUpdate()
+    } catch (error) {
+      console.error('Error updating task:', error)
+      alert('Failed to update task')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function handleCancel() {
+    // Reset to original values
+    setTitle(task.title)
+    setDescription(task.description || '')
+    setStatus(task.status)
+    setPriority(task.priority)
+    setShiftHours(task.shift_hours.toString())
+    setIsEditing(false)
+  }
+
+  const inputStyle = {
+    width: '100%',
+    padding: '12px 16px',
+    background: 'rgba(255, 255, 255, 0.05)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: 8,
+    color: '#FAFAFA',
+    fontSize: 14,
+    outline: 'none',
   }
 
   return (
@@ -855,79 +947,172 @@ function TaskDetailModal({
           padding: 32,
           width: '100%',
           maxWidth: 520,
+          maxHeight: '90vh',
+          overflowY: 'auto',
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
-          <div>
-            <h2 style={{ margin: '0 0 8px', fontSize: 20, color: '#FAFAFA' }}>{task.title}</h2>
+          <div style={{ flex: 1, marginRight: 16 }}>
+            {isEditing ? (
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                style={{ ...inputStyle, fontSize: 20, fontWeight: 600, marginBottom: 12 }}
+                placeholder="Task title"
+              />
+            ) : (
+              <h2 style={{ margin: '0 0 8px', fontSize: 20, color: '#FAFAFA' }}>{task.title}</h2>
+            )}
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <span
-                style={{
-                  padding: '4px 12px',
-                  background: `${priorityColors[task.priority]}22`,
-                  color: priorityColors[task.priority],
-                  borderRadius: 12,
-                  fontSize: 11,
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                }}
-              >
-                {task.priority}
-              </span>
-              <span style={{ fontSize: 12, color: '#888' }}>•</span>
-              <span style={{ fontSize: 12, color: '#00F0FF' }}>{statusLabels[task.status]}</span>
+              {isEditing ? (
+                <>
+                  <select
+                    value={priority}
+                    onChange={(e) => setPriority(e.target.value as TaskPriority)}
+                    style={{ ...inputStyle, width: 'auto', padding: '6px 12px', fontSize: 12 }}
+                  >
+                    {priorityOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as TaskStatus)}
+                    style={{ ...inputStyle, width: 'auto', padding: '6px 12px', fontSize: 12 }}
+                  >
+                    {statusOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </>
+              ) : (
+                <>
+                  <span
+                    style={{
+                      padding: '4px 12px',
+                      background: `${priorityColors[task.priority]}22`,
+                      color: priorityColors[task.priority],
+                      borderRadius: 12,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    {task.priority}
+                  </span>
+                  <span style={{ fontSize: 12, color: '#888' }}>•</span>
+                  <span style={{ fontSize: 12, color: '#00F0FF' }}>{statusLabels[task.status]}</span>
+                </>
+              )}
             </div>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: '#666',
-              fontSize: 24,
-              cursor: 'pointer',
-              padding: 0,
-              lineHeight: 1,
-            }}
-          >
-            ×
-          </button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {!isEditing && (
+              <button
+                onClick={() => setIsEditing(true)}
+                style={{
+                  padding: '6px 12px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: 6,
+                  color: '#888',
+                  fontSize: 12,
+                  cursor: 'pointer',
+                }}
+              >
+                Edit
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#666',
+                fontSize: 24,
+                cursor: 'pointer',
+                padding: 0,
+                lineHeight: 1,
+              }}
+            >
+              ×
+            </button>
+          </div>
         </div>
 
         {/* Description */}
-        {task.description && (
-          <div style={{ marginBottom: 24 }}>
-            <label style={{ display: 'block', fontSize: 12, color: '#666', marginBottom: 8 }}>Description</label>
-            <p style={{ margin: 0, fontSize: 14, color: '#FAFAFA', lineHeight: 1.6 }}>{task.description}</p>
-          </div>
-        )}
-
-        {/* Hours comparison */}
         <div style={{ marginBottom: 24 }}>
-          <label style={{ display: 'block', fontSize: 12, color: '#666', marginBottom: 12 }}>Hours Comparison</label>
-          <div style={{ display: 'flex', gap: 24 }}>
-            <div>
-              <div style={{ fontSize: 24, fontWeight: 700, color: '#00F0FF' }}>{task.shift_hours}h</div>
-              <div style={{ fontSize: 11, color: '#666' }}>Shift Hours</div>
-            </div>
-            <div>
-              <div style={{ fontSize: 24, fontWeight: 700, color: '#FF00AA' }}>{task.traditional_hours_estimate}h</div>
-              <div style={{ fontSize: 11, color: '#666' }}>Traditional Est.</div>
-            </div>
-            {task.traditional_hours_estimate > 0 && (
-              <div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: '#BFFF00' }}>
-                  {Math.round(((task.traditional_hours_estimate - task.shift_hours) / task.traditional_hours_estimate) * 100)}%
-                </div>
-                <div style={{ fontSize: 11, color: '#666' }}>Time Saved</div>
-              </div>
-            )}
-          </div>
+          <label style={{ display: 'block', fontSize: 12, color: '#666', marginBottom: 8 }}>Description</label>
+          {isEditing ? (
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              style={{ ...inputStyle, resize: 'vertical' }}
+              placeholder="Task description..."
+            />
+          ) : (
+            <p style={{ margin: 0, fontSize: 14, color: task.description ? '#FAFAFA' : '#666', lineHeight: 1.6 }}>
+              {task.description || 'No description'}
+            </p>
+          )}
+        </div>
 
-          {/* Progress bar */}
-          {task.traditional_hours_estimate > 0 && (
+        {/* Hours - Editable Shift Hours */}
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ display: 'block', fontSize: 12, color: '#666', marginBottom: 12 }}>Hours</label>
+
+          {isEditing ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: '#00F0FF', marginBottom: 6 }}>
+                  Shift Hours (Actual)
+                </label>
+                <input
+                  type="number"
+                  value={shiftHours}
+                  onChange={(e) => setShiftHours(e.target.value)}
+                  min="0"
+                  step="0.5"
+                  style={inputStyle}
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: '#FF00AA', marginBottom: 6 }}>
+                  Traditional Est.
+                </label>
+                <div style={{ ...inputStyle, background: 'rgba(255, 255, 255, 0.02)', color: '#888' }}>
+                  {task.traditional_hours_estimate}h
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', gap: 24 }}>
+              <div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#00F0FF' }}>{task.shift_hours}h</div>
+                <div style={{ fontSize: 11, color: '#666' }}>Shift Hours</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#FF00AA' }}>{task.traditional_hours_estimate}h</div>
+                <div style={{ fontSize: 11, color: '#666' }}>Traditional Est.</div>
+              </div>
+              {task.traditional_hours_estimate > 0 && (
+                <div>
+                  <div style={{ fontSize: 24, fontWeight: 700, color: '#BFFF00' }}>
+                    {Math.round(((task.traditional_hours_estimate - task.shift_hours) / task.traditional_hours_estimate) * 100)}%
+                  </div>
+                  <div style={{ fontSize: 11, color: '#666' }}>Time Saved</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Progress bar - only show in view mode */}
+          {!isEditing && task.traditional_hours_estimate > 0 && (
             <div style={{ marginTop: 16 }}>
               <div
                 style={{
@@ -986,21 +1171,59 @@ function TaskDetailModal({
         </div>
 
         {/* Actions */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <button
-            onClick={onClose}
-            style={{
-              padding: '10px 20px',
-              background: 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: 8,
-              color: '#888',
-              fontSize: 14,
-              cursor: 'pointer',
-            }}
-          >
-            Close
-          </button>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+          {isEditing ? (
+            <>
+              <button
+                onClick={handleCancel}
+                disabled={saving}
+                style={{
+                  padding: '10px 20px',
+                  background: 'transparent',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: 8,
+                  color: '#888',
+                  fontSize: 14,
+                  cursor: saving ? 'not-allowed' : 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !title.trim()}
+                style={{
+                  padding: '10px 20px',
+                  background: 'linear-gradient(135deg, #00F0FF, #FF00AA)',
+                  border: 'none',
+                  borderRadius: 8,
+                  color: '#0A0A0A',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: saving || !title.trim() ? 'not-allowed' : 'pointer',
+                  opacity: saving || !title.trim() ? 0.5 : 1,
+                  minWidth: 100,
+                }}
+              >
+                {saving ? 'Saving...' : 'Save'}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={onClose}
+              style={{
+                padding: '10px 20px',
+                background: 'transparent',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: 8,
+                color: '#888',
+                fontSize: 14,
+                cursor: 'pointer',
+              }}
+            >
+              Close
+            </button>
+          )}
         </div>
       </div>
     </div>

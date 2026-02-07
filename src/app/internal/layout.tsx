@@ -11,6 +11,7 @@ interface InternalLayoutProps {
 
 const navItems = [
   { href: '/internal', icon: '\uD83D\uDCCA', label: 'Dashboard' },
+  { href: '/internal/leads', icon: '\uD83D\uDCE5', label: 'Leads' },
   { href: '/internal/projects', icon: '\uD83D\uDCC1', label: 'Projects' },
   { href: '/internal/clients', icon: '\uD83D\uDC65', label: 'Clients' },
   { href: '/internal/requirements', icon: '\uD83D\uDCDD', label: 'Requirements' },
