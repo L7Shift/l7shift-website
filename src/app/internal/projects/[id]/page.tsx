@@ -842,6 +842,7 @@ function TaskDetailModal({
     active: 'Active',
     review: 'In Review',
     shipped: 'Shipped',
+    icebox: 'Icebox',
   }
 
   const statusOptions: { value: TaskStatus; label: string }[] = [
