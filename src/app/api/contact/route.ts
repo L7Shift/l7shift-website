@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase, ContactSubmission } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+import { ContactSubmission } from '@/lib/supabase'
+import { sendNewLeadNotification, sendContactConfirmation } from '@/lib/email'
 
-// Make.com webhook for lead pipeline
+// Create server-side Supabase client
+function getServerSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) return null
+  return createClient(url, key)
+}
+
+// Make.com webhook for lead pipeline automation (secondary)
 const MAKE_WEBHOOK_URL = 'https://hook.us2.make.com/ud1mk1qkvy4hpu7rw7wtn45ukxhlixru'
 
 export async function POST(request: NextRequest) {
@@ -26,42 +36,113 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Send to Make.com webhook for lead pipeline
-    try {
-      await fetch(MAKE_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, message })
-      })
-    } catch (webhookError) {
-      console.error('Make.com webhook error:', webhookError)
-      // Continue even if webhook fails - don't block form submission
+    // Track what succeeded for error reporting
+    const results = {
+      supabase: false,
+      emailNotification: false,
+      emailConfirmation: false,
+      makeWebhook: false
     }
 
-    // Check if Supabase is configured (legacy contact_submissions table)
-    if (!supabase) {
-      console.log('Contact form submission (Supabase not configured):', { name, email })
+    // 1. PRIMARY: Save to Supabase (this is our source of truth)
+    const supabase = getServerSupabase()
+    if (supabase) {
+      try {
+        const { error } = await supabase
+          .from('contact_submissions')
+          .insert([{
+            name,
+            email,
+            message,
+            created_at: new Date().toISOString()
+          }])
+
+        if (!error) {
+          results.supabase = true
+        } else {
+          console.error('Supabase insert error:', error)
+        }
+      } catch (dbError) {
+        console.error('Supabase connection error:', dbError)
+      }
+    } else {
+      console.warn('Supabase not configured - skipping database save')
+    }
+
+    // 2. FAILSAFE: Send email notification to Ken directly
+    // This ensures Ken gets notified even if Make.com is down
+    try {
+      const emailResult = await sendNewLeadNotification({
+        name,
+        email,
+        message,
+        source: 'website contact form'
+      })
+      results.emailNotification = emailResult.success
+      if (!emailResult.success) {
+        console.error('Lead notification email failed:', emailResult.error)
+      }
+    } catch (emailError) {
+      console.error('Lead notification email error:', emailError)
+    }
+
+    // 3. Send confirmation email to the person who submitted
+    try {
+      const confirmResult = await sendContactConfirmation({ name, email })
+      results.emailConfirmation = confirmResult.success
+    } catch (confirmError) {
+      console.error('Confirmation email error:', confirmError)
+      // Non-critical - don't fail the request
+    }
+
+    // 4. SECONDARY: Send to Make.com for automation (lead classification, etc.)
+    // This is now secondary - we have direct email as failsafe
+    try {
+      const webhookResponse = await fetch(MAKE_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          email,
+          message,
+          timestamp: new Date().toISOString(),
+          source: 'website'
+        })
+      })
+      results.makeWebhook = webhookResponse.ok
+      if (!webhookResponse.ok) {
+        console.error('Make.com webhook returned:', webhookResponse.status)
+      }
+    } catch (webhookError) {
+      console.error('Make.com webhook error:', webhookError)
+      // Continue - we have failsafes in place
+    }
+
+    // Log what happened for debugging
+    console.log('Contact form submission results:', {
+      name,
+      email: email.replace(/(.{3}).*@/, '$1***@'), // Partially redact email
+      results
+    })
+
+    // Success if at least ONE primary method worked
+    if (results.supabase || results.emailNotification) {
       return NextResponse.json(
-        { success: true, message: 'Contact form submitted successfully' },
+        {
+          success: true,
+          message: 'Contact form submitted successfully'
+        },
         { status: 201 }
       )
     }
 
-    // Insert into Supabase contact_submissions (legacy backup)
-    const { data, error } = await (supabase
-      .from('contact_submissions') as any)
-      .insert([{ name, email, message }])
-      .select()
-
-    if (error) {
-      console.error('Supabase error:', error)
-      // Don't fail the request - webhook already captured the lead
-    }
-
+    // If both primary methods failed, that's a problem
+    console.error('CRITICAL: Both Supabase and email notification failed for contact form')
     return NextResponse.json(
-      { success: true, message: 'Contact form submitted successfully' },
-      { status: 201 }
+      { error: 'Failed to submit form. Please try again or email us directly at ken@l7shift.com' },
+      { status: 500 }
     )
+
   } catch (error) {
     console.error('Contact form error:', error)
     return NextResponse.json(
