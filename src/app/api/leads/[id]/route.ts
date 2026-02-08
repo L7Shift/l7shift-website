@@ -11,7 +11,7 @@ import { createServerClient } from '@/lib/supabase'
 import type { LeadStatus, LeadTier, Json } from '@/lib/database.types'
 
 // Valid enum values for validation
-const VALID_STATUSES: LeadStatus[] = ['incoming', 'qualified', 'contacted', 'converted', 'disqualified']
+const VALID_STATUSES: LeadStatus[] = ['incoming', 'qualified', 'contacted', 'nurturing', 'converted', 'disqualified']
 const VALID_TIERS: LeadTier[] = ['SOFTBALL', 'MEDIUM', 'HARD', 'DISQUALIFY']
 
 // ID validation - accepts integers or UUIDs
@@ -162,17 +162,7 @@ export async function PATCH(
       hasUpdates = true
     }
 
-    // Add optional string fields
-    if (body.company !== undefined) {
-      updateData.company = body.company?.trim() || null
-      hasUpdates = true
-    }
-
-    if (body.phone !== undefined) {
-      updateData.phone = body.phone?.trim() || null
-      hasUpdates = true
-    }
-
+    // Add message if provided
     if (body.message !== undefined) {
       updateData.message = body.message?.trim() || null
       hasUpdates = true
@@ -185,9 +175,6 @@ export async function PATCH(
         { status: 400 }
       )
     }
-
-    // Always update the updated_at timestamp
-    updateData.updated_at = new Date().toISOString()
 
     // Perform the update
     // Note: Using 'as any' until database types are regenerated from Supabase

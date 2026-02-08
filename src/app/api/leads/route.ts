@@ -10,7 +10,7 @@ import { createServerClient } from '@/lib/supabase'
 import type { LeadStatus, LeadTier, LeadSource } from '@/lib/database.types'
 
 // Valid enum values for validation
-const VALID_STATUSES: LeadStatus[] = ['incoming', 'qualified', 'contacted', 'converted', 'disqualified']
+const VALID_STATUSES: LeadStatus[] = ['incoming', 'qualified', 'contacted', 'nurturing', 'converted', 'disqualified']
 const VALID_TIERS: LeadTier[] = ['SOFTBALL', 'MEDIUM', 'HARD', 'DISQUALIFY']
 const VALID_SOURCES: LeadSource[] = ['website', 'referral', 'linkedin', 'other']
 
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate required fields
-    const { name, email, company, phone, message, source, answers } = body
+    const { name, email, message, source } = body
 
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
       return NextResponse.json(
@@ -137,12 +137,10 @@ export async function POST(request: NextRequest) {
     // Validate source if provided
     const leadSource: LeadSource = source && VALID_SOURCES.includes(source) ? source : 'website'
 
-    // Prepare lead data
+    // Prepare lead data (only columns that exist in the table)
     const leadData = {
       name: name.trim(),
       email: email.toLowerCase().trim(),
-      company: company?.trim() || null,
-      phone: phone?.trim() || null,
       message: message?.trim() || null,
       source: leadSource,
       status: 'incoming' as const,

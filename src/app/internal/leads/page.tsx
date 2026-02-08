@@ -8,17 +8,15 @@ type LeadStatus = 'incoming' | 'qualified' | 'contacted' | 'nurturing' | 'conver
 type LeadTier = 'SOFTBALL' | 'MEDIUM' | 'HARD' | 'DISQUALIFY' | null
 
 interface Lead {
-  id: string
+  id: number
   name: string
   email: string
-  company: string | null
+  message: string | null
   status: LeadStatus
   tier: LeadTier
   source: string | null
-  answers: Record<string, unknown> | null
   ai_assessment: Record<string, unknown> | null
   created_at: string
-  updated_at: string
 }
 
 // Status configuration with L7 Shift brand colors
@@ -107,8 +105,7 @@ export default function LeadsPage() {
       const query = searchQuery.toLowerCase()
       return (
         lead.name.toLowerCase().includes(query) ||
-        lead.email.toLowerCase().includes(query) ||
-        (lead.company?.toLowerCase().includes(query) ?? false)
+        lead.email.toLowerCase().includes(query)
       )
     }
     return true
@@ -396,16 +393,11 @@ export default function LeadsPage() {
                 transition: 'background 0.2s ease',
               }}
             >
-              {/* Name & Company */}
+              {/* Name */}
               <div>
                 <div style={{ fontSize: 14, fontWeight: 600, color: '#FAFAFA' }}>
                   {lead.name}
                 </div>
-                {lead.company && (
-                  <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>
-                    {lead.company}
-                  </div>
-                )}
               </div>
 
               {/* Email */}

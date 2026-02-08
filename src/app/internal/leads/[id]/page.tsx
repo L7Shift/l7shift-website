@@ -9,26 +9,29 @@ type LeadStatus = 'incoming' | 'qualified' | 'contacted' | 'nurturing' | 'conver
 type LeadTier = 'SOFTBALL' | 'MEDIUM' | 'HARD' | 'DISQUALIFY' | null
 
 interface Lead {
-  id: string
+  id: number
   name: string
   email: string
-  company: string | null
+  message: string | null
   status: LeadStatus
   tier: LeadTier
   source: string | null
-  answers: Record<string, unknown> | null
   ai_assessment: AIAssessment | null
   created_at: string
-  updated_at: string
 }
 
 interface AIAssessment {
   tier: string
   confidence: number
   reasoning: string
-  flags?: string[]
+  red_flags?: string[]
+  green_flags?: string[]
   recommended_action?: string
-  score_breakdown?: Record<string, number>
+  suggested_case_study?: string
+  estimated_deal_size?: string
+  urgency_score?: number
+  fit_score?: number
+  notes_for_kj?: string
 }
 
 // Status configuration with L7 Shift brand colors
@@ -75,21 +78,6 @@ function formatSource(source: string | null): string {
   return sourceMap[source] || source.charAt(0).toUpperCase() + source.slice(1)
 }
 
-function formatAnswerKey(key: string): string {
-  return key
-    .replace(/_/g, ' ')
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/^./, (str) => str.toUpperCase())
-    .trim()
-}
-
-function formatAnswerValue(value: unknown): string {
-  if (value === null || value === undefined) return '—'
-  if (typeof value === 'boolean') return value ? 'Yes' : 'No'
-  if (Array.isArray(value)) return value.join(', ')
-  if (typeof value === 'object') return JSON.stringify(value)
-  return String(value)
-}
 
 export default function LeadDetailPage() {
   const params = useParams()
@@ -224,7 +212,7 @@ export default function LeadDetailPage() {
             {lead.name}
           </h1>
           <p style={{ margin: '8px 0 0', color: '#888', fontSize: 14 }}>
-            {lead.company || 'No company'} • {lead.email}
+            {lead.email}
           </p>
         </div>
 
@@ -473,12 +461,35 @@ export default function LeadDetailPage() {
                 </div>
               )}
 
-              {/* Flags */}
-              {assessment.flags && assessment.flags.length > 0 && (
-                <div>
-                  <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>Flags</div>
+              {/* Green Flags */}
+              {assessment.green_flags && assessment.green_flags.length > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>Green Flags</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {assessment.flags.map((flag, i) => (
+                    {assessment.green_flags.map((flag, i) => (
+                      <span
+                        key={i}
+                        style={{
+                          padding: '4px 10px',
+                          background: 'rgba(191, 255, 0, 0.1)',
+                          borderRadius: 4,
+                          fontSize: 12,
+                          color: '#BFFF00',
+                        }}
+                      >
+                        {flag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Red Flags */}
+              {assessment.red_flags && assessment.red_flags.length > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>Red Flags</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {assessment.red_flags.map((flag, i) => (
                       <span
                         key={i}
                         style={{
@@ -496,25 +507,44 @@ export default function LeadDetailPage() {
                 </div>
               )}
 
-              {/* Score Breakdown */}
-              {assessment.score_breakdown && Object.keys(assessment.score_breakdown).length > 0 && (
+              {/* Scores & Details */}
+              <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                  {assessment.fit_score !== undefined && (
+                    <div>
+                      <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>Fit Score</div>
+                      <div style={{ fontSize: 18, fontWeight: 600, color: '#00F0FF' }}>{assessment.fit_score}/10</div>
+                    </div>
+                  )}
+                  {assessment.urgency_score !== undefined && (
+                    <div>
+                      <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>Urgency</div>
+                      <div style={{ fontSize: 18, fontWeight: 600, color: '#FFAA00' }}>{assessment.urgency_score}/10</div>
+                    </div>
+                  )}
+                  {assessment.estimated_deal_size && (
+                    <div>
+                      <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>Est. Deal Size</div>
+                      <div style={{ fontSize: 18, fontWeight: 600, color: '#BFFF00' }}>{assessment.estimated_deal_size}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Notes for KJ */}
+              {assessment.notes_for_kj && (
                 <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                  <div style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Score Breakdown</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
-                    {Object.entries(assessment.score_breakdown).map(([key, value]) => (
-                      <div key={key}>
-                        <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>{formatAnswerKey(key)}</div>
-                        <div style={{ fontSize: 18, fontWeight: 600, color: '#FAFAFA' }}>{value}</div>
-                      </div>
-                    ))}
-                  </div>
+                  <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>Notes</div>
+                  <p style={{ margin: 0, fontSize: 14, color: '#FAFAFA', lineHeight: 1.6 }}>
+                    {assessment.notes_for_kj}
+                  </p>
                 </div>
               )}
             </div>
           )}
 
-          {/* Questionnaire Answers */}
-          {lead.answers && Object.keys(lead.answers).length > 0 && (
+          {/* Lead Message */}
+          {lead.message && (
             <div
               style={{
                 padding: 24,
@@ -524,20 +554,11 @@ export default function LeadDetailPage() {
               }}
             >
               <h3 style={{ margin: '0 0 16px', fontSize: 16, color: '#FAFAFA' }}>
-                📋 Questionnaire Responses
+                Message
               </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {Object.entries(lead.answers).map(([key, value]) => (
-                  <div key={key}>
-                    <div style={{ fontSize: 12, color: '#888', marginBottom: 4 }}>
-                      {formatAnswerKey(key)}
-                    </div>
-                    <div style={{ fontSize: 14, color: '#FAFAFA' }}>
-                      {formatAnswerValue(value)}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <p style={{ margin: 0, fontSize: 14, color: '#FAFAFA', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                {lead.message}
+              </p>
             </div>
           )}
         </div>
@@ -564,13 +585,6 @@ export default function LeadDetailPage() {
                 {lead.email}
               </a>
             </div>
-
-            {lead.company && (
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 12, color: '#888', marginBottom: 4 }}>Company</div>
-                <div style={{ fontSize: 14, color: '#FAFAFA' }}>{lead.company}</div>
-              </div>
-            )}
 
             <div>
               <div style={{ fontSize: 12, color: '#888', marginBottom: 4 }}>Source</div>
@@ -608,27 +622,6 @@ export default function LeadDetailPage() {
                   </div>
                 </div>
               </div>
-
-              {lead.updated_at !== lead.created_at && (
-                <div style={{ display: 'flex', gap: 12 }}>
-                  <div
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      background: '#888',
-                      marginTop: 6,
-                      flexShrink: 0,
-                    }}
-                  />
-                  <div>
-                    <div style={{ fontSize: 13, color: '#FAFAFA' }}>Last Updated</div>
-                    <div style={{ fontSize: 12, color: '#666', marginTop: 2 }}>
-                      {formatDate(lead.updated_at)}
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {assessment && (
                 <div style={{ display: 'flex', gap: 12 }}>
