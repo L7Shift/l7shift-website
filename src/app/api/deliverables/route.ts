@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Note: Using 'as any' until database types are regenerated from Supabase
     let query = (supabase
       .from('deliverables') as any)
       .select('*', { count: 'exact' })
@@ -167,6 +168,7 @@ export async function POST(request: NextRequest) {
       client_approved: false,
     }
 
+    // Note: Using 'as any' until database types are regenerated from Supabase
     // Insert deliverable
     const { data, error } = await (supabase
       .from('deliverables') as any)

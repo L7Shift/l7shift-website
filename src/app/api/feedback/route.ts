@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Note: Using 'as any' until database types are regenerated from Supabase
     // Insert feedback
     const { data, error } = await (supabase
       .from('client_feedback') as any)

@@ -104,7 +104,6 @@ export async function POST(request: NextRequest) {
         tier: classification.tier,
         status: newStatus,
         ai_assessment: classificationToJson(classification),
-        updated_at: new Date().toISOString(),
       })
       .eq('id', lead_id)
       .select()

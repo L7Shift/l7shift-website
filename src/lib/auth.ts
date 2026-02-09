@@ -64,7 +64,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
 
   // Fallback to env-based users if Supabase not configured
   if (!supabase) {
-    return getEnvUser(email)
+    return await getEnvUser(email)
   }
 
   const { data, error } = await supabase
@@ -75,7 +75,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
 
   if (error || !data) {
     // Fallback to env users
-    return getEnvUser(email)
+    return await getEnvUser(email)
   }
 
   return data as User
@@ -83,7 +83,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
 
 // Environment-based users (fallback when Supabase not available)
 // Passwords MUST be set via environment variables in production
-function getEnvUser(email: string): User | null {
+async function getEnvUser(email: string): Promise<User | null> {
   const normalizedEmail = email.toLowerCase().trim()
 
   const envUsers: Record<string, Omit<User, 'id' | 'created_at' | 'updated_at' | 'failed_login_attempts' | 'locked_until'> & { envPassword: string }> = {
@@ -125,12 +125,13 @@ function getEnvUser(email: string): User | null {
     return null
   }
 
-  // For env users, we store the plain password temporarily
-  // The login route will handle comparison
+  // Hash the env password with bcrypt so all users use the same comparison path
+  const hashedPassword = await hashPassword(envUser.envPassword)
+
   return {
     id: `env_${normalizedEmail}`,
     email: envUser.email,
-    password_hash: envUser.envPassword, // Plain for env users, bcrypt for DB users
+    password_hash: hashedPassword,
     role: envUser.role,
     client_slug: envUser.client_slug,
     name: envUser.name,

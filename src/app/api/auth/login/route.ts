@@ -3,7 +3,6 @@ import { cookies } from 'next/headers'
 import {
   getUserByEmail,
   verifyPassword,
-  isEnvUser,
   createSession,
   generateSecureToken,
   isAccountLocked,
@@ -114,16 +113,10 @@ export async function POST(request: NextRequest) {
     // Get user
     const user = await getUserByEmail(normalizedEmail)
 
-    // Verify password
+    // Verify password (all users use bcrypt comparison)
     let isValid = false
     if (user) {
-      if (isEnvUser(user.id)) {
-        // For env-based users, password_hash contains the plain password from env
-        isValid = user.password_hash === password
-      } else {
-        // For database users, use bcrypt comparison
-        isValid = await verifyPassword(password, user.password_hash)
-      }
+      isValid = await verifyPassword(password, user.password_hash)
     }
 
     // Add timing jitter to prevent timing attacks

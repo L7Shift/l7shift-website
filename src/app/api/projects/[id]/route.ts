@@ -216,8 +216,8 @@ export async function PATCH(
     // Always update the updated_at timestamp
     updateData.updated_at = new Date().toISOString()
 
-    // Perform the update
     // Note: Using 'as any' until database types are regenerated from Supabase
+    // Perform the update
     const { data, error } = await (supabase
       .from('projects') as any)
       .update(updateData)
@@ -284,8 +284,8 @@ export async function DELETE(
 
     const supabase = createServerClient()
 
-    // Check if project exists first
     // Note: Using 'as any' until database types are regenerated from Supabase
+    // Check if project exists first
     const { data: existingProject, error: fetchError } = await (supabase
       .from('projects') as any)
       .select('id')
@@ -307,7 +307,6 @@ export async function DELETE(
     }
 
     // Delete the project
-    // Note: Using 'as any' until database types are regenerated from Supabase
     const { error: deleteError } = await (supabase
       .from('projects') as any)
       .delete()

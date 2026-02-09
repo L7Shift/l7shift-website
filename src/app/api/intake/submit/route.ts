@@ -142,19 +142,8 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Update the lead with intake data
-      if (leadId) {
-        const { error: updateLeadError } = await supabase
-          .from('leads')
-          .update({
-            answers: answers,
-          } as never)
-          .eq('id', leadId)
-
-        if (updateLeadError) {
-          console.error('Failed to update lead with intake data:', updateLeadError)
-        }
-      }
+      // Note: intake answers are stored in intake_submissions table, not on leads
+      // The leads table does not have an 'answers' column
 
     } catch (dbError) {
       console.error('Database error:', dbError)

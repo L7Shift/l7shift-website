@@ -1,13 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Prevent bundling these packages (loaded at runtime instead)
-  serverExternalPackages: [
-    'passkit-generator',
-    'node-forge',
-    'sharp',
-  ],
   // Speed up build trace collection - exclude large/native packages
   experimental: {
+    // Prevent bundling these packages (loaded at runtime instead)
+    serverComponentsExternalPackages: [
+      'passkit-generator',
+      'node-forge',
+      'sharp',
+    ],
     outputFileTracingExcludes: {
       '*': [
         // Platform-specific binaries

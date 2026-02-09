@@ -41,8 +41,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Build query
     // Note: Using 'as any' until database types are regenerated from Supabase
+    // Build query
     let query = (supabase
       .from('projects') as any)
       .select('*', { count: 'exact' })
@@ -156,8 +156,8 @@ export async function POST(request: NextRequest) {
       target_end_date: target_end_date || null
     }
 
-    // Insert project
     // Note: Using 'as any' until database types are regenerated from Supabase
+    // Insert project
     const { data, error } = await (supabase
       .from('projects') as any)
       .insert(projectData)

@@ -65,8 +65,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Build query
     // Note: Using 'as any' until database types are regenerated from Supabase
+    // Build query
     let query = (supabase
       .from('tasks') as any)
       .select('*', { count: 'exact' })
@@ -207,8 +207,8 @@ export async function POST(request: NextRequest) {
       order_index: order_index || 0
     }
 
-    // Insert task
     // Note: Using 'as any' until database types are regenerated from Supabase
+    // Insert task
     const { data, error } = await (supabase
       .from('tasks') as any)
       .insert(taskData)

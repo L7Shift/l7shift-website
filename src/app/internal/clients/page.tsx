@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
 import type { Client as DbClient } from '@/lib/database.types'
 
 interface ClientWithMetrics extends DbClient {
@@ -51,36 +50,16 @@ export default function ClientsPage() {
   }, [])
 
   async function fetchClients() {
-    if (!supabase) {
-      console.error('Supabase client not initialized')
-      setLoading(false)
-      return
-    }
-
-    const db = supabase as any
-
     try {
-      const { data: clientsData, error: clientsError } = await db
-        .from('clients')
-        .select('*')
-        .order('last_active', { ascending: false })
+      const res = await fetch('/api/clients')
+      if (!res.ok) throw new Error('Failed to fetch clients')
+      const data = await res.json()
 
-      if (clientsError) throw clientsError
-
-      // Fetch project counts for each client
-      const clientsWithMetrics: ClientWithMetrics[] = await Promise.all(
-        (clientsData || []).map(async (client: DbClient) => {
-          const { data: projects, error: projectsError } = await db
-            .from('projects')
-            .select('id')
-            .eq('client_name', client.company)
-
-          return {
-            ...client,
-            project_count: projectsError ? 0 : (projects || []).length,
-          }
-        })
-      )
+      // Add project_count if not already included
+      const clientsWithMetrics: ClientWithMetrics[] = (data.data || data || []).map((client: DbClient & { project_count?: number }) => ({
+        ...client,
+        project_count: client.project_count || 0,
+      }))
 
       setClients(clientsWithMetrics)
     } catch (error) {
@@ -462,23 +441,26 @@ function AddClientModal({ onClose, onSuccess }: { onClose: () => void; onSuccess
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!name || !company || !email || !supabase) return
-    const db = supabase as any
+    if (!name || !company || !email) return
 
     setSaving(true)
     try {
-      const { error } = await db.from('clients').insert({
-        name,
-        company,
-        email,
-        phone: phone || null,
-        status,
-        total_value: 0,
-        joined_at: new Date().toISOString(),
-        last_active: new Date().toISOString(),
+      const res = await fetch('/api/clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          company,
+          email,
+          phone: phone || null,
+          status,
+          total_value: 0,
+          joined_at: new Date().toISOString(),
+          last_active: new Date().toISOString(),
+        }),
       })
 
-      if (error) throw error
+      if (!res.ok) throw new Error('Failed to create client')
       onSuccess()
     } catch (error) {
       console.error('Error creating client:', error)

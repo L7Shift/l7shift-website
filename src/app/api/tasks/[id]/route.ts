@@ -226,6 +226,7 @@ export async function PATCH(
     // Always update the updated_at timestamp
     updateData.updated_at = new Date().toISOString()
 
+    // Note: Using 'as any' until database types are regenerated from Supabase
     // Get current task status before update (for notification logic)
     const { data: currentTask } = await (supabase
       .from('tasks') as any)
@@ -237,7 +238,6 @@ export async function PATCH(
     const isBeingShipped = body.status === 'shipped'
 
     // Perform the update
-    // Note: Using 'as any' until database types are regenerated from Supabase
     const { data, error } = await (supabase
       .from('tasks') as any)
       .update(updateData)
@@ -347,8 +347,8 @@ export async function DELETE(
 
     const supabase = createServerClient()
 
-    // Check if task exists first
     // Note: Using 'as any' until database types are regenerated from Supabase
+    // Check if task exists first
     const { data: existingTask, error: fetchError } = await (supabase
       .from('tasks') as any)
       .select('id')
@@ -370,7 +370,6 @@ export async function DELETE(
     }
 
     // Delete the task
-    // Note: Using 'as any' until database types are regenerated from Supabase
     const { error: deleteError } = await (supabase
       .from('tasks') as any)
       .delete()

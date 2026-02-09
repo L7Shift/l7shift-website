@@ -18,7 +18,7 @@ import {
   classificationToJson,
   type ClassificationResult,
 } from '@/lib/classifier'
-import type { Lead, LeadInsert, LeadSource, LeadStatus, Json } from '@/lib/database.types'
+import type { Lead, LeadInsert, LeadSource, LeadStatus } from '@/lib/database.types'
 
 // Valid sources for leads
 const VALID_SOURCES: LeadSource[] = ['website', 'referral', 'linkedin', 'other']
@@ -40,11 +40,8 @@ interface WebhookPayload {
   lead?: {
     name: string
     email: string
-    company?: string
-    phone?: string
     message?: string
     source?: LeadSource
-    answers?: Record<string, unknown>
   }
   // For classify
   lead_id?: string
@@ -144,7 +141,6 @@ export async function POST(request: NextRequest) {
           tier: classification.tier,
           status: TIER_STATUS_MAP[classification.tier] || 'incoming',
           ai_assessment: classificationToJson(classification),
-          updated_at: new Date().toISOString(),
         })
         .eq('id', payload.lead_id)
         .select()
@@ -199,15 +195,12 @@ export async function POST(request: NextRequest) {
       const leadInsert: LeadInsert = {
         name: leadData.name.trim(),
         email: leadData.email.toLowerCase().trim(),
-        company: leadData.company?.trim() || null,
-        phone: leadData.phone?.trim() || null,
         message: leadData.message?.trim() || null,
         source: VALID_SOURCES.includes(leadData.source as LeadSource)
           ? (leadData.source as LeadSource)
           : 'website',
         status: 'incoming',
         tier: null,
-        answers: (leadData.answers as Json) || null,
         ai_assessment: null,
       }
 
@@ -254,7 +247,6 @@ export async function POST(request: NextRequest) {
           tier: classification.tier,
           status: TIER_STATUS_MAP[classification.tier] || 'incoming',
           ai_assessment: classificationToJson(classification),
-          updated_at: new Date().toISOString(),
         })
         .eq('id', newLead.id)
         .select()
@@ -305,7 +297,6 @@ export async function POST(request: NextRequest) {
         .from('leads') as ReturnType<typeof supabase.from>)
         .update({
           status: payload.status,
-          updated_at: new Date().toISOString(),
         })
         .eq('id', payload.lead_id)
         .select()

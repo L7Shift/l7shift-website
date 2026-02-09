@@ -90,8 +90,6 @@ Return ONLY valid JSON:
  * Build the user prompt from lead data
  */
 function buildUserPrompt(lead: Lead): string {
-  const answers = lead.answers as Record<string, unknown> | null
-
   // Build the prompt with available data
   const parts = [
     'Classify this incoming lead for L7 Shift:',
@@ -99,10 +97,13 @@ function buildUserPrompt(lead: Lead): string {
     '## Lead Information',
     `- **Name:** ${lead.name}`,
     `- **Email:** ${lead.email}`,
-    `- **Company:** ${lead.company || 'Not provided'}`,
   ]
 
-  // Add answers if available
+  // Check for linked intake submission answers (stored in intake_submissions table, not on lead)
+  // For now, classify based on contact form message
+  const answers: Record<string, unknown> | null = null
+
+  // Add answers if available (from intake submissions lookup)
   if (answers && typeof answers === 'object') {
     parts.push('')
     parts.push('## Their Answers')

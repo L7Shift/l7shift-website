@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
 import type { Project } from '@/lib/database.types'
 import { ProgressRing, StatusPill, MetricCard } from '@/components/dashboard'
 
@@ -28,45 +27,11 @@ export default function ProjectsPage() {
   }, [])
 
   async function fetchProjects() {
-    if (!supabase) {
-      console.error('Supabase client not initialized')
-      setLoading(false)
-      return
-    }
-
-    const db = supabase as any // Type assertion for Supabase queries
-
     try {
-      const { data: projectsData, error: projectsError } = await db
-        .from('projects')
-        .select('*')
-        .order('updated_at', { ascending: false })
-
-      if (projectsError) throw projectsError
-
-      // Fetch task counts for each project
-      const projectsWithMetrics: ProjectWithMetrics[] = await Promise.all(
-        (projectsData || []).map(async (project: Project) => {
-          const { data: tasks } = await db
-            .from('tasks')
-            .select('status, shift_hours, traditional_hours_estimate')
-            .eq('project_id', project.id)
-
-          type TaskRow = { status: string; shift_hours: number | null; traditional_hours_estimate: number | null }
-          const taskList: TaskRow[] = tasks || []
-          const shippedTasks = taskList.filter((t: TaskRow) => t.status === 'shipped')
-
-          return {
-            ...project,
-            total_tasks: taskList.length,
-            shipped_tasks: shippedTasks.length,
-            total_shift_hours: taskList.reduce((sum: number, t: TaskRow) => sum + (t.shift_hours || 0), 0),
-            total_traditional_estimate: taskList.reduce((sum: number, t: TaskRow) => sum + (t.traditional_hours_estimate || 0), 0),
-          }
-        })
-      )
-
-      setProjects(projectsWithMetrics)
+      const res = await fetch('/api/internal/dashboard')
+      if (!res.ok) throw new Error('Failed to fetch projects')
+      const data = await res.json()
+      setProjects(data.projects || [])
     } catch (error) {
       console.error('Error fetching projects:', error)
     } finally {
@@ -611,19 +576,22 @@ function NewProjectModal({ onClose, onSuccess }: { onClose: () => void; onSucces
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!name || !clientName || !supabase) return
-    const db = supabase as any
+    if (!name || !clientName) return
 
     setSaving(true)
     try {
-      const { error } = await db.from('projects').insert({
-        name,
-        client_name: clientName,
-        description: description || null,
-        status: 'active',
+      const res = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          client_name: clientName,
+          description: description || null,
+          status: 'active',
+        }),
       })
 
-      if (error) throw error
+      if (!res.ok) throw new Error('Failed to create project')
       onSuccess()
     } catch (error) {
       console.error('Error creating project:', error)

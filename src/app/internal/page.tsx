@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
 import type { Project, ActivityLogEntry } from '@/lib/database.types'
 import {
   ProgressRing,
@@ -38,88 +37,14 @@ export default function InternalDashboard() {
   }, [])
 
   async function fetchDashboardData() {
-    if (!supabase) {
-      console.error('Supabase client not initialized')
-      setLoading(false)
-      return
-    }
-
-    const db = supabase! // Non-null assertion after null check
-
     try {
-      // Fetch projects with metrics
-      const { data: projectsData, error: projectsError } = await db
-        .from('projects')
-        .select('*')
-        .order('updated_at', { ascending: false })
+      const res = await fetch('/api/internal/dashboard')
+      if (!res.ok) throw new Error('Failed to fetch dashboard data')
+      const data = await res.json()
 
-      if (projectsError) throw projectsError
-
-      // Fetch task counts for each project
-      const projects = (projectsData || []) as Project[]
-      const projectsWithMetrics: ProjectWithMetrics[] = await Promise.all(
-        projects.map(async (project) => {
-          const { data: tasks } = await db
-            .from('tasks')
-            .select('status, shift_hours, traditional_hours_estimate')
-            .eq('project_id', project.id)
-
-          const taskList = (tasks || []) as { status: string; shift_hours: number | null; traditional_hours_estimate: number | null }[]
-          const shippedTasks = taskList.filter(t => t.status === 'shipped')
-          const reviewTasks = taskList.filter(t => t.status === 'review')
-
-          return {
-            ...project,
-            total_tasks: taskList.length,
-            shipped_tasks: shippedTasks.length,
-            total_shift_hours: taskList.reduce((sum, t) => sum + (t.shift_hours || 0), 0),
-            total_traditional_estimate: taskList.reduce((sum, t) => sum + (t.traditional_hours_estimate || 0), 0),
-            pending_actions: reviewTasks.length, // Items awaiting review
-          }
-        })
-      )
-
-      setProjects(projectsWithMetrics)
-
-      // Fetch recent activity
-      const { data: activityData, error: activityError } = await db
-        .from('activity_log')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10)
-
-      if (!activityError && activityData) {
-        setActivity(activityData)
-      }
-
-      // Calculate velocity (tasks shipped per day over last 14 days)
-      const fourteenDaysAgo = new Date()
-      fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14)
-
-      const { data: recentTasks } = await db
-        .from('tasks')
-        .select('shipped_at')
-        .not('shipped_at', 'is', null)
-        .gte('shipped_at', fourteenDaysAgo.toISOString())
-
-      // Group by day
-      const velocityMap = new Map<string, number>()
-      for (let i = 0; i < 14; i++) {
-        const date = new Date()
-        date.setDate(date.getDate() - (13 - i))
-        velocityMap.set(date.toISOString().split('T')[0], 0)
-      }
-
-      ((recentTasks || []) as { shipped_at: string | null }[]).forEach(task => {
-        if (task.shipped_at) {
-          const day = task.shipped_at.split('T')[0]
-          if (velocityMap.has(day)) {
-            velocityMap.set(day, (velocityMap.get(day) || 0) + 1)
-          }
-        }
-      })
-
-      setVelocity(Array.from(velocityMap.values()))
+      setProjects(data.projects || [])
+      setActivity(data.activity || [])
+      setVelocity(data.velocity || [])
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
     } finally {

@@ -491,51 +491,40 @@ export interface Database {
       }
 
       // Leads - Lead pipeline management
+      // Actual Supabase columns: id (int), created_at, name, email, message, status, tier, source, ai_assessment
       leads: {
         Row: {
-          id: string
+          id: number
           name: string
           email: string
-          company: string | null
-          phone: string | null
           message: string | null
           status: LeadStatus
           tier: LeadTier | null
           source: LeadSource
-          answers: Json | null
           ai_assessment: Json | null
           created_at: string
-          updated_at: string
         }
         Insert: {
-          id?: string
+          id?: number
           name: string
           email: string
-          company?: string | null
-          phone?: string | null
           message?: string | null
           status?: LeadStatus
           tier?: LeadTier | null
           source?: LeadSource
-          answers?: Json | null
           ai_assessment?: Json | null
           created_at?: string
-          updated_at?: string
         }
         Update: {
-          id?: string
+          id?: number
           name?: string
           email?: string
-          company?: string | null
-          phone?: string | null
           message?: string | null
           status?: LeadStatus
           tier?: LeadTier | null
           source?: LeadSource
-          answers?: Json | null
           ai_assessment?: Json | null
           created_at?: string
-          updated_at?: string
         }
       }
 

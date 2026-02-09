@@ -59,7 +59,7 @@ export default function ProjectDetailPage() {
 
     try {
       // Fetch project
-      const { data: projectData, error: projectError } = await db
+      const { data: projectData, error: projectError } = await (db as any)
         .from('projects')
         .select('*')
         .eq('id', projectId)
@@ -69,7 +69,7 @@ export default function ProjectDetailPage() {
       setProject(projectData)
 
       // Fetch tasks
-      const { data: tasksData, error: tasksError } = await db
+      const { data: tasksData, error: tasksError } = await (db as any)
         .from('tasks')
         .select('*')
         .eq('project_id', projectId)
@@ -80,7 +80,7 @@ export default function ProjectDetailPage() {
       }
 
       // Fetch activity
-      const { data: activityData, error: activityError } = await db
+      const { data: activityData, error: activityError } = await (db as any)
         .from('activity_log')
         .select('*')
         .eq('project_id', projectId)
@@ -112,6 +112,7 @@ export default function ProjectDetailPage() {
         updateData.shipped_at = new Date().toISOString()
       }
 
+      // Note: Using 'as any' until database types are regenerated from Supabase
       const { error } = await (db as any)
         .from('tasks')
         .update(updateData)
@@ -125,7 +126,7 @@ export default function ProjectDetailPage() {
         entity_type: 'task',
         entity_id: taskId,
         action: newStatus === 'shipped' ? 'task_shipped' : 'task_updated',
-        actor: 'Ken', // TODO: Use actual user
+        actor: document.cookie.match(/l7_user_name=([^;]+)/)?.[1] || 'Unknown',
         actor_type: 'internal',
         metadata: { title: tasks.find(t => t.id === taskId)?.title, new_status: newStatus },
       })
@@ -615,6 +616,7 @@ function AddTaskModal({
 
     setSaving(true)
     try {
+      // Note: Using 'as any' until database types are regenerated from Supabase
       const { error } = await (db as any).from('tasks').insert({
         project_id: projectId,
         title,
@@ -633,7 +635,7 @@ function AddTaskModal({
         entity_type: 'task',
         entity_id: 'new', // Will be replaced with actual ID
         action: 'task_created',
-        actor: 'Ken', // TODO: Use actual user
+        actor: document.cookie.match(/l7_user_name=([^;]+)/)?.[1] || 'Unknown',
         actor_type: 'internal',
         metadata: { title },
       })
@@ -879,6 +881,7 @@ function TaskDetailModal({
         updateData.shipped_at = new Date().toISOString()
       }
 
+      // Note: Using 'as any' until database types are regenerated from Supabase
       const { error } = await (db as any)
         .from('tasks')
         .update(updateData)
@@ -892,7 +895,7 @@ function TaskDetailModal({
         entity_type: 'task',
         entity_id: task.id,
         action: 'task_updated',
-        actor: 'Ken', // TODO: Use actual user
+        actor: document.cookie.match(/l7_user_name=([^;]+)/)?.[1] || 'Unknown',
         actor_type: 'internal',
         metadata: { title: title.trim(), changes: 'Task details updated' },
       })
@@ -1254,6 +1257,7 @@ function EditProjectModal({
 
     setSaving(true)
     try {
+      // Note: Using 'as any' until database types are regenerated from Supabase
       const { error } = await (db as any)
         .from('projects')
         .update({
