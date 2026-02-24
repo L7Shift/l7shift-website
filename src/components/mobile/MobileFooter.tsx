@@ -77,15 +77,38 @@ export function MobileFooter() {
         </a>
       </div>
 
-      {/* Copyright */}
+      {/* Location + Copyright */}
       <p
         style={{
-          fontSize: '12px',
+          fontSize: '13px',
+          color: 'var(--foreground)',
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+          fontWeight: 400,
+          marginBottom: '4px',
+        }}
+      >
+        <span style={{ color: 'var(--electric-cyan)' }}>Indian Trail</span>, North Carolina
+      </p>
+      <p
+        style={{
+          fontSize: '11px',
+          color: 'var(--soft-gray)',
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          marginBottom: '4px',
+        }}
+      >
+        Born in <span style={{ color: 'var(--electric-cyan)', fontWeight: 500 }}>IT</span>. Breaking squares everywhere.
+      </p>
+      <p
+        style={{
+          fontSize: '11px',
           color: 'var(--carbon-gray)',
           letterSpacing: '0.05em',
         }}
       >
-        © 2026 L7 Shift. Break the square.
+        © 2026 L7 Shift
       </p>
 
       {/* Bottom gradient bar */}

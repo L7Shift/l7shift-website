@@ -129,7 +129,7 @@ export function StatsTickerSection() {
             }}
           >
             faster than<br />
-            <span style={{ color: '#888' }}>traditional agencies</span>
+            <span style={{ color: '#888' }}>traditional builds</span>
           </span>
         </div>
       </div>

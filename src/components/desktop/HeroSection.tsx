@@ -135,7 +135,7 @@ export function HeroSection({ scrollY, onHoverStart, onHoverEnd }: HeroSectionPr
                 lineHeight: 1.7,
               }}
             >
-              Digital transformation for the non-conformist. We help leaders and entrepreneurs shift forward—from strategy to systems to solutions, we build what others won't.
+              The AI-native venture studio that partners with domain experts to build revenue-sharing software products. Strategy to systems to solutions — from Charlotte to everywhere.
             </p>
           </div>
 
@@ -162,12 +162,12 @@ export function HeroSection({ scrollY, onHoverStart, onHoverEnd }: HeroSectionPr
               </svg>
             </a>
             <a
-              href="/#services"
+              href="/#process"
               className="btn-secondary"
               onMouseEnter={onHoverStart}
               onMouseLeave={onHoverEnd}
             >
-              EXPLORE SERVICES
+              HOW IT WORKS
             </a>
           </div>
         </div>

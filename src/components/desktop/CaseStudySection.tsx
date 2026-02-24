@@ -29,7 +29,7 @@ export function CaseStudySection({ onHoverStart, onHoverEnd }: CaseStudySectionP
             marginBottom: '24px',
           }}
         >
-          CASE STUDY
+          CASE STUDIES
         </span>
 
         <h2
@@ -87,10 +87,10 @@ export function CaseStudySection({ onHoverStart, onHoverEnd }: CaseStudySectionP
                 marginBottom: '32px',
               }}
             >
-              Full-stack SaaS + AI chatbot + Cloudflare CDN + marketing infrastructure + operations.
-              We don't build to compete—we build to dominate. Customer portal, admin dashboard,
-              mobile crew app, Stripe subscriptions, automated emails, Google Ads, Monday.com ops,
-              and an AI assistant for 24/7 customer support.
+              Complete SaaS platform delivered by The SymbAIotic Shift in under 3 weeks.
+              Customer portal, admin dashboard, crew app, Stripe billing, email automation,
+              scheduling engine, and AI assistant — all platform-produced, production-ready,
+              with a paying customer on day one.
             </p>
 
             <div
@@ -223,10 +223,10 @@ export function CaseStudySection({ onHoverStart, onHoverEnd }: CaseStudySectionP
               }}
             >
               <h4 style={{ fontSize: '16px', marginBottom: '8px', color: 'var(--electric-cyan)' }}>
-                Traditional Quote
+                Traditional Approach
               </h4>
               <p style={{ fontSize: '14px', color: 'var(--soft-gray)', lineHeight: 1.7 }}>
-                $50K+ and 4-8 weeks with a traditional agency. Multiple developers, endless
+                $50K+ and 4-8 weeks through traditional methods. Multiple developers, endless
                 meetings, slow iteration cycles.
               </p>
             </div>
@@ -238,12 +238,12 @@ export function CaseStudySection({ onHoverStart, onHoverEnd }: CaseStudySectionP
               }}
             >
               <h4 style={{ fontSize: '16px', marginBottom: '8px', color: 'var(--hot-magenta)' }}>
-                What We Delivered
+                What The Symb<span style={{ color: 'var(--hot-magenta)', fontWeight: 800, textShadow: '0 0 12px rgba(255,0,170,0.6)' }}>AI</span>otic Shift™ Delivered
               </h4>
               <p style={{ fontSize: '14px', color: 'var(--soft-gray)', lineHeight: 1.7 }}>
-                4 portals + AI chatbot + AI hero generator + Cloudflare CDN + Stripe billing + 8
+                4 portals + AI chatbot + AI hero generator + Stripe billing + 8
                 email automations + commission engine + Playwright E2E tests + self-service tools.
-                Built to dominate, not compete.
+                Platform-delivered. Production-ready.
               </p>
             </div>
             <div
@@ -258,13 +258,123 @@ export function CaseStudySection({ onHoverStart, onHoverEnd }: CaseStudySectionP
               </h4>
               <p style={{ fontSize: '14px', color: 'var(--soft-gray)', lineHeight: 1.7 }}>
                 Strategy → Systems → Solutions → Shifted outcomes. Live business. Paying customers.
-                Zero manual processes. They launched ready to dominate.
+                Zero manual processes. Platform-delivered in a fraction of the time and cost.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Future clients placeholder */}
+        {/* More Case Studies */}
+        <div
+          style={{
+            marginTop: '40px',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '32px',
+          }}
+        >
+          {/* Stitchwichs */}
+          <div
+            onMouseEnter={onHoverStart}
+            onMouseLeave={onHoverEnd}
+            style={{
+              background: 'var(--void-black)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              padding: '48px',
+            }}
+          >
+            <span
+              style={{
+                color: 'var(--hot-magenta)',
+                fontSize: '12px',
+                fontWeight: 700,
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+                display: 'block',
+                marginBottom: '16px',
+              }}
+            >
+              SHOPIFY OPTIMIZATION — CLIENT
+            </span>
+            <h3 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '16px' }}>
+              Stitchwichs
+            </h3>
+            <p style={{ fontSize: '15px', color: 'var(--soft-gray)', lineHeight: 1.8, marginBottom: '24px' }}>
+              Custom apparel brand drowning in Shopify app fees. We replaced 6+ paid apps with custom code, built a unified order system, and delivered 208 custom files across a 3-layer architecture.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+              <div>
+                <span style={{ fontSize: '28px', fontWeight: 700, color: 'var(--hot-magenta)', display: 'block' }}>208</span>
+                <span style={{ fontSize: '12px', color: 'var(--soft-gray)', letterSpacing: '0.1em' }}>CUSTOM FILES</span>
+              </div>
+              <div>
+                <span style={{ fontSize: '28px', fontWeight: 700, color: 'var(--electric-cyan)', display: 'block' }}>21K+</span>
+                <span style={{ fontSize: '12px', color: 'var(--soft-gray)', letterSpacing: '0.1em' }}>LINES OF CODE</span>
+              </div>
+              <div>
+                <span style={{ fontSize: '28px', fontWeight: 700, color: 'var(--acid-lime)', display: 'block' }}>224</span>
+                <span style={{ fontSize: '12px', color: 'var(--soft-gray)', letterSpacing: '0.1em' }}>PRODUCTS</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {['Shopify', 'Next.js', 'Vite', 'TypeScript', 'Custom Orders'].map((tech, i) => (
+                <span key={i} style={{ padding: '6px 14px', background: 'var(--carbon-gray)', fontSize: '12px', fontWeight: 600, letterSpacing: '0.05em' }}>{tech}</span>
+              ))}
+            </div>
+          </div>
+
+          {/* StackPaper */}
+          <div
+            onMouseEnter={onHoverStart}
+            onMouseLeave={onHoverEnd}
+            style={{
+              background: 'var(--void-black)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              padding: '48px',
+            }}
+          >
+            <span
+              style={{
+                color: 'var(--acid-lime)',
+                fontSize: '12px',
+                fontWeight: 700,
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+                display: 'block',
+                marginBottom: '16px',
+              }}
+            >
+              REVENUE-SHARE VENTURE — PARTNER
+            </span>
+            <h3 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '16px' }}>
+              StackPaper
+            </h3>
+            <p style={{ fontSize: '15px', color: 'var(--soft-gray)', lineHeight: 1.8, marginBottom: '24px' }}>
+              Expense tracking for small businesses, built with a CPA partner. Dual experience — mobile app for business owners, white-label dashboard for accountants. Revenue-sharing model from day one.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+              <div>
+                <span style={{ fontSize: '28px', fontWeight: 700, color: 'var(--acid-lime)', display: 'block' }}>2</span>
+                <span style={{ fontSize: '12px', color: 'var(--soft-gray)', letterSpacing: '0.1em' }}>EXPERIENCES</span>
+              </div>
+              <div>
+                <span style={{ fontSize: '28px', fontWeight: 700, color: 'var(--hot-magenta)', display: 'block' }}>12</span>
+                <span style={{ fontSize: '12px', color: 'var(--soft-gray)', letterSpacing: '0.1em' }}>PAGE ROUTES</span>
+              </div>
+              <div>
+                <span style={{ fontSize: '28px', fontWeight: 700, color: 'var(--electric-cyan)', display: 'block' }}>$9.99</span>
+                <span style={{ fontSize: '12px', color: 'var(--soft-gray)', letterSpacing: '0.1em' }}>/MO TARGET</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {['Next.js', 'Tailwind', 'Supabase', 'Stripe', 'White-Label'].map((tech, i) => (
+                <span key={i} style={{ padding: '6px 14px', background: 'var(--carbon-gray)', fontSize: '12px', fontWeight: 600, letterSpacing: '0.05em' }}>{tech}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* CTA */}
         <div
           style={{
             marginTop: '40px',
@@ -281,7 +391,7 @@ export function CaseStudySection({ onHoverStart, onHoverEnd }: CaseStudySectionP
               marginBottom: '16px',
             }}
           >
-            Your project could be here.
+            Your project could be next.
           </p>
           <a
             href="/start"

@@ -10,24 +10,24 @@ interface InvestmentSectionProps {
 export function InvestmentSection({ onHoverStart, onHoverEnd }: InvestmentSectionProps) {
   const tiers = [
     {
-      type: 'PROJECT',
-      price: 'Fixed Scope',
-      desc: 'One-time builds',
-      features: ['Defined scope & deliverables', 'Clear timeline & milestones', 'Perfect for MVPs, brands, sites'],
+      type: 'LAUNCH',
+      price: 'Fixed Price',
+      desc: 'Complete product delivery',
+      features: ['Full-stack app or platform', 'Delivered in days, not months', 'Includes brand assets & deployment'],
       color: 'var(--electric-cyan)',
     },
     {
-      type: 'RETAINER',
-      price: 'Ongoing',
-      desc: 'Monthly partnership',
-      features: ['Dedicated capacity monthly', 'Priority support & iterations', 'Continuous improvement'],
+      type: 'GROWTH',
+      price: 'Subscription',
+      desc: 'Continuous platform access',
+      features: ['Ongoing feature development', 'Priority AI agent allocation', 'Monitoring, updates & scaling'],
       color: 'var(--hot-magenta)',
     },
     {
       type: 'PARTNER',
       price: 'Equity',
       desc: 'Startup collaboration',
-      features: ['Reduced cash + equity stake', 'Full commitment to success', 'For early-stage companies'],
+      features: ['Reduced cost + equity alignment', 'Full commitment to success', 'For early-stage companies'],
       color: 'var(--acid-lime)',
     },
   ]
@@ -65,7 +65,7 @@ export function InvestmentSection({ onHoverStart, onHoverEnd }: InvestmentSectio
             color: 'var(--void-black)',
           }}
         >
-          Flexible Engagement Models
+          Simple, Productized Pricing
         </h2>
 
         <div

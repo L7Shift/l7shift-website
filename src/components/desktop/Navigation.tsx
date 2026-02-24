@@ -24,8 +24,9 @@ export function Navigation({ onHoverStart, onHoverEnd }: NavigationProps) {
         backdropFilter: 'blur(10px)',
       }}
     >
-      <div
-        style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}
+      <a
+        href="/"
+        style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', gap: '0px' }}
         onMouseEnter={onHoverStart}
         onMouseLeave={onHoverEnd}
       >
@@ -78,12 +79,12 @@ export function Navigation({ onHoverStart, onHoverEnd }: NavigationProps) {
         >
           Break the Square
         </span>
-      </div>
+      </a>
       <div style={{ display: 'flex', gap: '48px', alignItems: 'center' }}>
-        {['Services', 'Process', 'Investment'].map((item, i) => (
+        {[{ label: 'Services', href: '/#services' }, { label: 'Process', href: '/#process' }, { label: 'Investment', href: '/#investment' }].map((item, i) => (
           <a
             key={i}
-            href={`/#${item.toLowerCase()}`}
+            href={item.href}
             onMouseEnter={onHoverStart}
             onMouseLeave={onHoverEnd}
             style={{
@@ -97,7 +98,7 @@ export function Navigation({ onHoverStart, onHoverEnd }: NavigationProps) {
               padding: '8px 0',
             }}
           >
-            {item}
+            {item.label}
           </a>
         ))}
         <a

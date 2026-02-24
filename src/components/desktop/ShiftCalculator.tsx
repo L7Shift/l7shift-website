@@ -409,7 +409,7 @@ export function ShiftCalculator() {
                   marginBottom: '24px',
                 }}
               >
-                Traditional Agency
+                Traditional Approach
               </h3>
               <div style={{ marginBottom: '20px' }}>
                 <div style={{ color: colors.softGray, fontSize: '12px', marginBottom: '4px' }}>

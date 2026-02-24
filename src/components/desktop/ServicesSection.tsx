@@ -39,8 +39,8 @@ export function ServicesSection({ onHoverStart, onHoverEnd }: ServicesSectionPro
               maxWidth: '800px',
             }}
           >
-            We help you <span style={{ fontStyle: 'italic', color: 'var(--acid-lime)' }}>break</span>{' '}
-            the box.
+            One studio.{' '}
+            <span style={{ fontStyle: 'italic', color: 'var(--acid-lime)' }}>Complete</span> delivery.
           </h2>
         </div>
 
@@ -104,7 +104,7 @@ export function ServicesSection({ onHoverStart, onHoverEnd }: ServicesSectionPro
                   color: 'var(--soft-gray)',
                 }}
               >
-                Custom Apps & Websites
+                Apps, Platforms & SaaS
               </p>
               <p
                 style={{
@@ -114,8 +114,8 @@ export function ServicesSection({ onHoverStart, onHoverEnd }: ServicesSectionPro
                   marginBottom: '40px',
                 }}
               >
-                From MVPs to full platforms. AI-powered tools. Modern stacks. No bloated enterprise
-                BS.
+                AI agent teams build complete applications in days, not months. Full-stack platforms,
+                modern tools, production-ready.
               </p>
               <div
                 style={{
@@ -203,7 +203,7 @@ export function ServicesSection({ onHoverStart, onHoverEnd }: ServicesSectionPro
                   color: 'var(--soft-gray)',
                 }}
               >
-                Identity & Strategy
+                Identity, Story & Market Position
               </p>
               <p
                 style={{
@@ -213,8 +213,7 @@ export function ServicesSection({ onHoverStart, onHoverEnd }: ServicesSectionPro
                   marginBottom: '40px',
                 }}
               >
-                Logos that stick. Messaging that cuts through. Positioning that makes you
-                unforgettable.
+                Strategy-driven brand identity, positioning, and visual systems — crafted with intent, not templates. Your brand isn't decoration. It's the business.
               </p>
               <div
                 style={{
@@ -223,7 +222,7 @@ export function ServicesSection({ onHoverStart, onHoverEnd }: ServicesSectionPro
                   gap: '12px',
                 }}
               >
-                {['Strategy', 'Visual Identity', 'Guidelines', 'Naming', 'Pitch Decks', 'Collateral'].map(
+                {['Brand Strategy', 'Visual Identity', 'Market Positioning', 'Brand Voice', 'Marketing Assets', 'Style Guides'].map(
                   (item, i) => (
                     <span
                       key={i}
@@ -302,7 +301,7 @@ export function ServicesSection({ onHoverStart, onHoverEnd }: ServicesSectionPro
                   color: 'var(--soft-gray)',
                 }}
               >
-                Business Transformation
+                Automation & Integration
               </p>
               <p
                 style={{
@@ -312,7 +311,8 @@ export function ServicesSection({ onHoverStart, onHoverEnd }: ServicesSectionPro
                   marginBottom: '40px',
                 }}
               >
-                Process automation. AI integration. New revenue streams. Futureproofing operations.
+                Replace manual processes with automated systems. Payments, email, scheduling, and
+                AI workflows — built in, not bolted on.
               </p>
               <div
                 style={{
@@ -321,7 +321,7 @@ export function ServicesSection({ onHoverStart, onHoverEnd }: ServicesSectionPro
                   gap: '12px',
                 }}
               >
-                {['AI Strategy', 'Automation', 'Operations', 'Tech Strategy', 'Growth', 'Training'].map(
+                {['Payments', 'Automation', 'Scheduling', 'Email Systems', 'AI Workflows', 'Integrations'].map(
                   (item, i) => (
                     <span
                       key={i}
@@ -349,7 +349,7 @@ export function ServicesSection({ onHoverStart, onHoverEnd }: ServicesSectionPro
           </div>
         </div>
 
-        {/* Tech Capabilities */}
+        {/* Partnership Model */}
         <div
           style={{
             marginTop: '80px',
@@ -373,7 +373,7 @@ export function ServicesSection({ onHoverStart, onHoverEnd }: ServicesSectionPro
                 letterSpacing: '0.2em',
               }}
             >
-              CAPABILITIES
+              TWO WAYS TO WORK WITH US
             </span>
             <div
               style={{
@@ -388,133 +388,101 @@ export function ServicesSection({ onHoverStart, onHoverEnd }: ServicesSectionPro
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '24px',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '32px',
             }}
           >
-            {/* Optimize & Scale */}
+            {/* Revenue-Share Partner */}
             <div
               style={{
-                padding: '24px',
+                padding: '40px',
                 background: 'var(--void-black)',
-                borderTop: '3px solid var(--electric-cyan)',
+                borderTop: '4px solid var(--acid-lime)',
               }}
             >
               <h4
                 style={{
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  color: 'var(--electric-cyan)',
-                  marginBottom: '16px',
-                  letterSpacing: '0.1em',
-                }}
-              >
-                OPTIMIZE & SCALE
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {['Docker', 'Kubernetes', 'AWS', 'GCP', 'Terraform', 'CI/CD'].map((tech, i) => (
-                  <span key={i} style={{ fontSize: '13px', color: 'var(--soft-gray)' }}>
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Build Modern */}
-            <div
-              style={{
-                padding: '24px',
-                background: 'var(--void-black)',
-                borderTop: '3px solid var(--hot-magenta)',
-              }}
-            >
-              <h4
-                style={{
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  color: 'var(--hot-magenta)',
-                  marginBottom: '16px',
-                  letterSpacing: '0.1em',
-                }}
-              >
-                BUILD MODERN
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {['Next.js', 'TypeScript', 'Tailwind', 'Supabase', 'Vercel', 'Resend'].map(
-                  (tech, i) => (
-                    <span key={i} style={{ fontSize: '13px', color: 'var(--soft-gray)' }}>
-                      {tech}
-                    </span>
-                  )
-                )}
-              </div>
-            </div>
-
-            {/* E-Commerce */}
-            <div
-              style={{
-                padding: '24px',
-                background: 'var(--void-black)',
-                borderTop: '3px solid var(--acid-lime)',
-              }}
-            >
-              <h4
-                style={{
-                  fontSize: '14px',
+                  fontSize: '24px',
                   fontWeight: 700,
                   color: 'var(--acid-lime)',
                   marginBottom: '16px',
-                  letterSpacing: '0.1em',
                 }}
               >
-                E-COMMERCE
+                PARTNER
               </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {[
-                  'Shopify',
-                  'WooCommerce',
-                  'Stripe',
-                  'Custom Storefronts',
-                  'Inventory Systems',
-                  'Payment Integration',
-                ].map((tech, i) => (
-                  <span key={i} style={{ fontSize: '13px', color: 'var(--soft-gray)' }}>
-                    {tech}
+              <p
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: 'var(--soft-gray)',
+                  marginBottom: '24px',
+                }}
+              >
+                Revenue-Sharing Ventures
+              </p>
+              <p
+                style={{
+                  fontSize: '15px',
+                  color: 'var(--soft-gray)',
+                  lineHeight: 1.8,
+                  marginBottom: '24px',
+                }}
+              >
+                You bring the domain expertise and customers. We build the technology. Revenue is shared — we win when you win.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {['You own the domain knowledge', 'We build & maintain the product', 'Shared revenue model', 'Long-term aligned partnership'].map((item, i) => (
+                  <span key={i} style={{ fontSize: '13px', color: 'var(--clean-white)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ width: '4px', height: '4px', background: 'var(--acid-lime)' }} />
+                    {item}
                   </span>
                 ))}
               </div>
             </div>
 
-            {/* Legacy & Migration */}
+            {/* Done-For-You Client */}
             <div
               style={{
-                padding: '24px',
+                padding: '40px',
                 background: 'var(--void-black)',
-                borderTop: '3px solid var(--electric-cyan)',
+                borderTop: '4px solid var(--electric-cyan)',
               }}
             >
               <h4
                 style={{
-                  fontSize: '14px',
+                  fontSize: '24px',
                   fontWeight: 700,
                   color: 'var(--electric-cyan)',
                   marginBottom: '16px',
-                  letterSpacing: '0.1em',
                 }}
               >
-                LEGACY & MIGRATION
+                CLIENT
               </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {[
-                  'WordPress',
-                  'PHP',
-                  'MySQL',
-                  'PostgreSQL',
-                  'API Integrations',
-                  'Data Migration',
-                ].map((tech, i) => (
-                  <span key={i} style={{ fontSize: '13px', color: 'var(--soft-gray)' }}>
-                    {tech}
+              <p
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: 'var(--soft-gray)',
+                  marginBottom: '24px',
+                }}
+              >
+                Done-For-You Builds
+              </p>
+              <p
+                style={{
+                  fontSize: '15px',
+                  color: 'var(--soft-gray)',
+                  lineHeight: 1.8,
+                  marginBottom: '24px',
+                }}
+              >
+                You need it built right and built fast. We deliver production-ready platforms in days — then stick around to keep it running.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {['Fixed-price project delivery', 'Production-ready in days', 'Optional managed services', 'Ongoing maintenance & iteration'].map((item, i) => (
+                  <span key={i} style={{ fontSize: '13px', color: 'var(--clean-white)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ width: '4px', height: '4px', background: 'var(--electric-cyan)' }} />
+                    {item}
                   </span>
                 ))}
               </div>
@@ -530,8 +498,7 @@ export function ServicesSection({ onHoverStart, onHoverEnd }: ServicesSectionPro
               fontStyle: 'italic',
             }}
           >
-            We meet you where you are — whether that's optimizing legacy systems or building from
-            scratch.
+            Charlotte-based. Strategy-first. Built for domain experts who know their market better than anyone.
           </p>
         </div>
       </div>

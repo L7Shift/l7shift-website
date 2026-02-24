@@ -105,7 +105,7 @@ export function ContactSection({
             margin: '0 auto 48px',
           }}
         >
-          Tell us about your vision. No pitch decks. No BS. Just a quick conversation starter.
+          Describe your vision. Our platform will scope it, price it, and show you what's possible — in minutes, not meetings.
         </p>
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', flexWrap: 'wrap' }}>

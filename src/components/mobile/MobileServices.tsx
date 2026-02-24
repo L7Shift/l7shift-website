@@ -7,25 +7,25 @@ export function MobileServices() {
     {
       num: '01',
       title: 'BUILD',
-      subtitle: 'Custom Apps & Websites',
-      desc: 'From MVPs to full platforms. AI-powered tools. Modern stacks. No bloated enterprise BS.',
+      subtitle: 'Apps, Platforms & SaaS',
+      desc: 'AI agent teams build complete applications in days, not months. Full-stack platforms, modern tools, production-ready.',
       features: ['Web Apps', 'Mobile', 'AI Integration', 'E-Commerce', 'SaaS', 'Automation'],
       color: 'var(--electric-cyan)',
     },
     {
       num: '02',
       title: 'BRAND',
-      subtitle: 'Identity & Strategy',
-      desc: 'Logos that stick. Messaging that cuts through. Positioning that makes you unforgettable.',
-      features: ['Strategy', 'Visual Identity', 'Guidelines', 'Naming', 'Pitch Decks', 'Collateral'],
+      subtitle: 'Identity, Story & Market Position',
+      desc: 'Strategy-driven brand identity, positioning, and visual systems — crafted with intent, not templates. Your brand isn\'t decoration. It\'s the business.',
+      features: ['Brand Strategy', 'Visual Identity', 'Market Positioning', 'Brand Voice', 'Marketing Assets', 'Style Guides'],
       color: 'var(--hot-magenta)',
     },
     {
       num: '03',
       title: 'SHIFT',
-      subtitle: 'Business Transformation',
-      desc: 'Process automation. AI integration. New revenue streams. Futureproofing operations.',
-      features: ['AI Strategy', 'Automation', 'Operations', 'Tech Strategy', 'Growth', 'Training'],
+      subtitle: 'Automation & Integration',
+      desc: 'Replace manual processes with automated systems. Payments, email, scheduling, and AI workflows — built in, not bolted on.',
+      features: ['Payments', 'Automation', 'Scheduling', 'Email Systems', 'AI Workflows', 'Integrations'],
       color: 'var(--acid-lime)',
     },
   ]
@@ -59,8 +59,8 @@ export function MobileServices() {
             lineHeight: 1.1,
           }}
         >
-          We help you{' '}
-          <span style={{ fontStyle: 'italic', color: 'var(--acid-lime)' }}>break</span> the box.
+          One studio.{' '}
+          <span style={{ fontStyle: 'italic', color: 'var(--acid-lime)' }}>Complete</span> delivery.
         </h2>
       </div>
 

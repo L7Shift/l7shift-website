@@ -12,7 +12,7 @@ export function ProblemSection({ onHoverStart, onHoverEnd }: ProblemSectionProps
     { title: 'Outdated tech', desc: 'Legacy systems that slow everything down' },
     { title: 'Cookie-cutter brands', desc: 'Looking like everyone else in the market' },
     { title: 'Fear of change', desc: 'Knowing they need to evolve but not how' },
-    { title: 'Wasted budgets', desc: 'Paying agencies for mediocre results' },
+    { title: 'Wasted budgets', desc: 'Paying vendors for mediocre results' },
   ]
 
   return (

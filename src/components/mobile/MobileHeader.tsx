@@ -36,7 +36,7 @@ export function MobileHeader({ onMenuToggle }: MobileHeaderProps) {
       />
 
       {/* Full Logo - Matching Desktop */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
+      <a href="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', gap: '0px' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
           <span
             className="glitch"
@@ -88,7 +88,7 @@ export function MobileHeader({ onMenuToggle }: MobileHeaderProps) {
         >
           Break the Square
         </span>
-      </div>
+      </a>
 
       {/* Menu Button */}
       <button

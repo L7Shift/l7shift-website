@@ -22,7 +22,7 @@ export function MarqueeSection() {
       >
         {[...Array(2)].map((_, i) => (
           <div key={i} style={{ display: 'flex', gap: '80px', alignItems: 'center' }}>
-            {['BUILD', 'BRAND', 'SHIFT', 'INNOVATE', 'CREATE', 'TRANSFORM'].map((word, j) => (
+            {['DISCOVER', 'ARCHITECT', 'DEPLOY', 'SHIFT', 'BUILD', 'BRAND'].map((word, j) => (
               <span
                 key={j}
                 style={{

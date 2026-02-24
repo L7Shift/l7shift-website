@@ -9,10 +9,10 @@ interface ProcessSectionProps {
 
 export function ProcessSection({ onHoverStart, onHoverEnd }: ProcessSectionProps) {
   const steps = [
-    { num: '01', title: 'DISCOVER', desc: 'Deep dive into your business, goals, and constraints', color: 'var(--electric-cyan)' },
-    { num: '02', title: 'DESIGN', desc: 'Strategy, concepts, and prototypes before building', color: 'var(--hot-magenta)' },
-    { num: '03', title: 'BUILD', desc: 'Rapid development with weekly check-ins', color: 'var(--acid-lime)' },
-    { num: '04', title: 'LAUNCH', desc: 'Deploy, test, iterate, and scale', color: 'var(--electric-cyan)' },
+    { num: '01', title: 'DISCOVER', desc: 'You bring the domain expertise. We map the opportunity — classifying scope, identifying revenue models, and charting the fastest path to market.', color: 'var(--electric-cyan)' },
+    { num: '02', title: 'ARCHITECT', desc: 'AI agent teams generate architecture, brand systems, and prototypes — reviewed and refined by a human architect who owns the outcome.', color: 'var(--hot-magenta)' },
+    { num: '03', title: 'DEPLOY', desc: 'Specialized AI agents build in parallel — frontend, backend, payments, automation — production-ready and live in days, not months.', color: 'var(--acid-lime)' },
+    { num: '04', title: 'SHIFT', desc: 'Your business is live. Revenue flows. We stay in the loop — iterating, optimizing, and growing alongside you as a true partner.', color: 'var(--electric-cyan)' },
   ]
 
   return (
@@ -64,7 +64,7 @@ export function ProcessSection({ onHoverStart, onHoverEnd }: ProcessSectionProps
             marginBottom: '100px',
           }}
         >
-          How We Work
+          The Symb<span style={{ color: 'var(--electric-cyan)', fontWeight: 800, textShadow: '0 0 12px rgba(0,240,255,0.6)' }}>AI</span>otic Shift™
         </h2>
 
         <div

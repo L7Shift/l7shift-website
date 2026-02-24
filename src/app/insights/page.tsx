@@ -4,6 +4,15 @@ import Link from 'next/link'
 
 const articles = [
   {
+    slug: 'frankensteins-theme',
+    title: "Frankenstein's Theme",
+    subtitle: 'Stitching React into Shopify\'s Liquid — and why brownfield is harder than greenfield',
+    date: 'February 23, 2026',
+    readTime: '12 min read',
+    tags: ['Case Study', 'Shopify', 'SymbAIotic Shift™'],
+    featured: true,
+  },
+  {
     slug: 'my-weekend-at-claudes',
     title: "My Weekend at Claude's",
     subtitle: 'How a Strategic Leader Built a Production SaaS in 24 Hours',

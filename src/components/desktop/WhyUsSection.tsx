@@ -9,10 +9,10 @@ interface WhyUsSectionProps {
 
 export function WhyUsSection({ onHoverStart, onHoverEnd }: WhyUsSectionProps) {
   const benefits = [
-    { title: 'No Agency BS', desc: 'No account managers, no layers. You work directly with the people building.', color: 'var(--electric-cyan)' },
-    { title: 'Outcomes First', desc: "We measure success by your results — revenue, users, growth. Not deliverables.", color: 'var(--hot-magenta)' },
-    { title: 'Ship & Iterate', desc: 'Launch fast, learn from real users, improve continuously. Momentum over perfection.', color: 'var(--acid-lime)' },
-    { title: 'Skin in the Game', desc: 'We care about your success, not billable hours. Your win is our win.', color: 'var(--electric-cyan)' },
+    { title: 'Your Expertise, Our Engine', desc: 'You know your market. We know how to build. AI agent teams build your product while a human architect ensures every detail is right.', color: 'var(--electric-cyan)' },
+    { title: '10x Faster', desc: "What takes traditional firms months, our methodology delivers in days. AI agents work in parallel, around the clock. Your time-to-market collapses.", color: 'var(--hot-magenta)' },
+    { title: 'Ship & Iterate', desc: 'Launch fast, learn from real users, improve continuously. Momentum over perfection — we stay in the loop as your technology partner.', color: 'var(--acid-lime)' },
+    { title: '80% Lower Cost', desc: 'AI compute costs a fraction of developer salaries. Enterprise-quality products at small business prices. The math finally works.', color: 'var(--electric-cyan)' },
   ]
 
   return (

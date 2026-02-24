@@ -21,7 +21,7 @@ export interface ClassificationResult {
 }
 
 // The system prompt for Claude to classify leads
-const SYSTEM_PROMPT = `You are the lead qualification system for L7 Shift, an AI-augmented development consultancy.
+const SYSTEM_PROMPT = `You are the lead qualification system for L7 Shift, an AI-native development platform.
 
 Your job: Analyze incoming leads and classify them as SOFTBALL, MEDIUM, HARD, or DISQUALIFY.
 

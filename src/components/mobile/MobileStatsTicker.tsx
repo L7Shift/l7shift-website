@@ -110,7 +110,7 @@ export function MobileStatsTicker() {
             marginTop: 8,
           }}
         >
-          faster than <span style={{ color: '#888' }}>traditional agencies</span>
+          faster than <span style={{ color: '#888' }}>traditional builds</span>
         </div>
       </div>
     </section>

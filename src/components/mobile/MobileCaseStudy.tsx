@@ -24,7 +24,7 @@ export function MobileCaseStudy() {
             marginBottom: '16px',
           }}
         >
-          CASE STUDY
+          CASE STUDIES
         </span>
         <h2
           style={{
@@ -125,8 +125,8 @@ export function MobileCaseStudy() {
               marginBottom: '20px',
             }}
           >
-            Full-stack SaaS + AI chatbot + Cloudflare CDN + marketing infrastructure. We don't
-            build to compete—we build to dominate.
+            Complete SaaS platform-delivered by The SymbAIotic Shift in under 3 weeks.
+            Portals, payments, automation, AI — production-ready on day one.
           </p>
 
           {/* Tech tags */}
@@ -160,9 +160,77 @@ export function MobileCaseStudy() {
             </h4>
             <p style={{ fontSize: '13px', color: 'var(--soft-gray)', lineHeight: 1.6 }}>
               Strategy → Systems → Solutions → Shifted outcomes. Live business. Paying customers.
-              Zero manual processes.
+              Platform-delivered in a fraction of the time and cost.
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Stitchwichs Card */}
+      <div
+        style={{
+          marginTop: '24px',
+          background: 'var(--carbon-gray)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <span style={{ color: 'var(--hot-magenta)', fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+            SHOPIFY OPTIMIZATION — CLIENT
+          </span>
+          <h3 style={{ fontSize: '28px', fontWeight: 700 }}>Stitchwichs</h3>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1px', background: 'rgba(255,255,255,0.05)' }}>
+          {[
+            { value: '208', label: 'CUSTOM FILES', color: 'var(--hot-magenta)' },
+            { value: '21K+', label: 'LINES', color: 'var(--electric-cyan)' },
+            { value: '224', label: 'PRODUCTS', color: 'var(--acid-lime)' },
+          ].map((stat, i) => (
+            <div key={i} style={{ background: 'var(--carbon-gray)', padding: '16px', textAlign: 'center' }}>
+              <span style={{ fontSize: '20px', fontWeight: 700, color: stat.color, display: 'block' }}>{stat.value}</span>
+              <span style={{ fontSize: '9px', color: 'var(--soft-gray)', letterSpacing: '0.1em' }}>{stat.label}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ padding: '24px' }}>
+          <p style={{ fontSize: '13px', color: 'var(--soft-gray)', lineHeight: 1.6 }}>
+            Custom apparel brand — replaced 6+ Shopify apps with custom code. 3-layer architecture, unified order system, production-ready.
+          </p>
+        </div>
+      </div>
+
+      {/* StackPaper Card */}
+      <div
+        style={{
+          marginTop: '16px',
+          background: 'var(--carbon-gray)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <span style={{ color: 'var(--acid-lime)', fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+            REVENUE-SHARE VENTURE — PARTNER
+          </span>
+          <h3 style={{ fontSize: '28px', fontWeight: 700 }}>StackPaper</h3>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1px', background: 'rgba(255,255,255,0.05)' }}>
+          {[
+            { value: '2', label: 'EXPERIENCES', color: 'var(--acid-lime)' },
+            { value: '12', label: 'ROUTES', color: 'var(--hot-magenta)' },
+            { value: '$9.99', label: '/MO TARGET', color: 'var(--electric-cyan)' },
+          ].map((stat, i) => (
+            <div key={i} style={{ background: 'var(--carbon-gray)', padding: '16px', textAlign: 'center' }}>
+              <span style={{ fontSize: '20px', fontWeight: 700, color: stat.color, display: 'block' }}>{stat.value}</span>
+              <span style={{ fontSize: '9px', color: 'var(--soft-gray)', letterSpacing: '0.1em' }}>{stat.label}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ padding: '24px' }}>
+          <p style={{ fontSize: '13px', color: 'var(--soft-gray)', lineHeight: 1.6 }}>
+            Expense tracking built with a CPA partner. Dual experience — mobile app for owners, white-label dashboard for accountants. Revenue-sharing from day one.
+          </p>
         </div>
       </div>
 
@@ -180,7 +248,7 @@ export function MobileCaseStudy() {
             marginBottom: '12px',
           }}
         >
-          Your project could be here.
+          Your project could be next.
         </p>
         <a
           href="/start"

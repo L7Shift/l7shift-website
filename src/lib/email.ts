@@ -129,7 +129,7 @@ export async function sendContactConfirmation(data: {
       </ul>
     </div>
 
-    <p style="color: #AAA; margin: 20px 0;">In the meantime, feel free to explore our <a href="https://l7shift.com" style="color: #00F0FF;">website</a> to learn more about how we help businesses transform their digital presence.</p>
+    <p style="color: #AAA; margin: 20px 0;">In the meantime, feel free to explore our <a href="https://l7shift.com" style="color: #00F0FF;">website</a> to see how our platform delivers digital products in days, not months.</p>
 
     <p style="color: #888; margin: 24px 0 0;">— The L7 Shift Team</p>
   `

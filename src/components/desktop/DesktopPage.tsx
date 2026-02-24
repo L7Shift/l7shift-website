@@ -15,6 +15,7 @@ import { ServicesSection } from './ServicesSection'
 import { ProcessSection } from './ProcessSection'
 import { WhyUsSection } from './WhyUsSection'
 import { CaseStudySection } from './CaseStudySection'
+import { FounderSection } from './FounderSection'
 import { InvestmentSection } from './InvestmentSection'
 import { ContactSection } from './ContactSection'
 import { Footer } from './Footer'
@@ -68,6 +69,9 @@ export function DesktopPage() {
 
       {/* Case Study Section */}
       <CaseStudySection onHoverStart={handleHoverStart} onHoverEnd={handleHoverEnd} />
+
+      {/* Founder Section */}
+      <FounderSection onHoverStart={handleHoverStart} onHoverEnd={handleHoverEnd} />
 
       {/* Investment Section */}
       <InvestmentSection onHoverStart={handleHoverStart} onHoverEnd={handleHoverEnd} />

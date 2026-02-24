@@ -66,7 +66,7 @@ export function MobileContact({}: MobileContactProps) {
             marginBottom: '32px',
           }}
         >
-          Tell us about your vision. No pitch decks. No BS.
+          Describe your vision. Our platform scopes it in minutes, not meetings.
         </p>
 
         {/* CTA Buttons */}

@@ -42,15 +42,38 @@ export function Footer({ onHoverStart, onHoverEnd }: FooterProps) {
         </span>
       </div>
 
-      <p
-        style={{
-          fontSize: '13px',
-          color: 'var(--carbon-gray)',
-          letterSpacing: '0.05em',
-        }}
-      >
-        © 2026 L7 Shift. Break the square.
-      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+        <p
+          style={{
+            fontSize: '14px',
+            color: 'var(--foreground)',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            fontWeight: 400,
+          }}
+        >
+          <span style={{ color: 'var(--electric-cyan)' }}>Indian Trail</span>, North Carolina
+        </p>
+        <p
+          style={{
+            fontSize: '12px',
+            color: 'var(--soft-gray)',
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+          }}
+        >
+          Born in <span style={{ color: 'var(--electric-cyan)', fontWeight: 500 }}>IT</span>. Breaking squares everywhere.
+        </p>
+        <p
+          style={{
+            fontSize: '11px',
+            color: 'var(--carbon-gray)',
+            letterSpacing: '0.05em',
+          }}
+        >
+          © 2026 L7 Shift
+        </p>
+      </div>
 
       <div style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
         <a

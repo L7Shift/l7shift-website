@@ -186,8 +186,8 @@ export function MobileHero() {
             maxWidth: '400px',
           }}
         >
-          Digital transformation for the non-conformist. We help leaders and entrepreneurs
-          shift forward—from strategy to systems to solutions, we build what others won't.
+          The AI-native venture studio that partners with domain experts to build
+          revenue-sharing software products. Charlotte-based. Methodology-driven.
         </p>
 
         {/* CTA Buttons */}
@@ -206,14 +206,14 @@ export function MobileHero() {
             </svg>
           </a>
           <a
-            href="/#services"
+            href="/#process"
             className="btn-secondary"
             style={{
               justifyContent: 'center',
               padding: '18px 32px',
             }}
           >
-            EXPLORE SERVICES
+            HOW IT WORKS
           </a>
         </div>
       </div>

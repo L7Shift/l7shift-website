@@ -9,6 +9,7 @@ import { MobileStatsTicker } from './MobileStatsTicker'
 import { MobileServices } from './MobileServices'
 import { MobileProcess } from './MobileProcess'
 import { MobileCaseStudy } from './MobileCaseStudy'
+import { MobileFounder } from './MobileFounder'
 import { MobilePricing } from './MobilePricing'
 import { MobileContact } from './MobileContact'
 import { MobileFooter } from './MobileFooter'
@@ -45,6 +46,9 @@ export function MobilePage() {
 
       {/* Case Study Section */}
       <MobileCaseStudy />
+
+      {/* Founder Section */}
+      <MobileFounder />
 
       {/* Pricing Section */}
       <MobilePricing />
