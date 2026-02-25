@@ -13,6 +13,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifySlackSignature } from '@/lib/slack'
 import { parseIntent, handleIntent } from '@/lib/artemis'
 
+export const maxDuration = 30 // Allow up to 30s for Vercel function
+
 export async function POST(request: NextRequest) {
   // Ignore Slack retries — cold starts cause timeouts, retries cause duplicates
   const retryNum = request.headers.get('x-slack-retry-num')
@@ -55,10 +57,11 @@ export async function POST(request: NextRequest) {
     if (event.type === 'app_mention') {
       const parsed = parseIntent(event.text)
 
-      // Run async — respond to Slack within 3 seconds
-      handleIntent(parsed, event.channel, event.ts).catch(err => {
+      try {
+        await handleIntent(parsed, event.channel, event.ts)
+      } catch (err) {
         console.error('Artemis handler error:', err)
-      })
+      }
 
       return NextResponse.json({ ok: true })
     }
@@ -67,9 +70,11 @@ export async function POST(request: NextRequest) {
     if (event.type === 'message' && event.channel_type === 'im') {
       const parsed = parseIntent(event.text)
 
-      handleIntent(parsed, event.channel, event.ts).catch(err => {
+      try {
+        await handleIntent(parsed, event.channel, event.ts)
+      } catch (err) {
         console.error('Artemis handler error:', err)
-      })
+      }
 
       return NextResponse.json({ ok: true })
     }
