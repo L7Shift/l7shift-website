@@ -20,10 +20,14 @@ export async function GET() {
 
     if (error) throw error
 
-    const totalShiftHours = (tasks || []).reduce(
+    // Exclude icebox tasks from metrics - they are parked ideas, not active work
+    const activeTasks = (tasks || []).filter(
+      (t: Record<string, unknown>) => t.status !== 'icebox'
+    )
+    const totalShiftHours = activeTasks.reduce(
       (sum: number, t: Record<string, number | null>) => sum + ((t.shift_hours as number) || 0), 0
     )
-    const totalTraditionalHours = (tasks || []).reduce(
+    const totalTraditionalHours = activeTasks.reduce(
       (sum: number, t: Record<string, number | null>) => sum + ((t.traditional_hours_estimate as number) || 0), 0
     )
     const hoursSaved = totalTraditionalHours - totalShiftHours

@@ -149,13 +149,14 @@ export async function getProjectBySlug(slug: string): Promise<PortalProject | nu
 
     const projectTasks: Task[] = (tasksResult.data as Task[] | null) || []
 
-    // Calculate metrics
-    const shippedTasks = projectTasks.filter(t => t.status === 'shipped').length
-    const completion = projectTasks.length > 0
-      ? Math.round((shippedTasks / projectTasks.length) * 100)
+    // Calculate metrics (exclude icebox tasks from completion and hour totals)
+    const activeTasks = projectTasks.filter(t => t.status !== 'icebox')
+    const shippedTasks = activeTasks.filter(t => t.status === 'shipped').length
+    const completion = activeTasks.length > 0
+      ? Math.round((shippedTasks / activeTasks.length) * 100)
       : 0
-    const shiftHours = projectTasks.reduce((sum, t) => sum + (t.shift_hours || 0), 0)
-    const traditionalEstimate = projectTasks.reduce((sum, t) => sum + (t.traditional_hours_estimate || 0), 0)
+    const shiftHours = activeTasks.reduce((sum, t) => sum + (t.shift_hours || 0), 0)
+    const traditionalEstimate = activeTasks.reduce((sum, t) => sum + (t.traditional_hours_estimate || 0), 0)
 
     // Count pending items
     const { data: pendingReqs } = await db

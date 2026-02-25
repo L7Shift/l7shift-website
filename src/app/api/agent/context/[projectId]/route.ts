@@ -152,12 +152,14 @@ export async function GET(
       requirements: requirements || [],
       tasks: tasksByStatus,
       task_summary: {
-        total: tasks?.length || 0,
+        total: (tasks?.length || 0) - (tasksByStatus.icebox?.length || 0),
+        total_including_icebox: tasks?.length || 0,
         available_for_agents: tasksByStatus.available.length,
         active: tasksByStatus.active.length,
         in_review: tasksByStatus.review.length,
         shipped: tasksByStatus.shipped.length,
-        backlog: tasksByStatus.backlog.length
+        backlog: tasksByStatus.backlog.length,
+        icebox: tasksByStatus.icebox?.length || 0
       },
       deliverables: {
         recent: deliverables || [],

@@ -185,16 +185,17 @@ CREATE INDEX idx_activity_created ON activity_log(created_at DESC);
 CREATE VIEW project_metrics AS
 SELECT
   p.id AS project_id,
-  COUNT(t.id) AS total_tasks,
+  COUNT(CASE WHEN t.status != 'icebox' THEN 1 END) AS total_tasks,
   COUNT(CASE WHEN t.status = 'shipped' THEN 1 END) AS shipped_tasks,
   COUNT(CASE WHEN t.status = 'active' THEN 1 END) AS active_tasks,
   COUNT(CASE WHEN t.status = 'review' THEN 1 END) AS review_tasks,
   COUNT(CASE WHEN t.status = 'backlog' THEN 1 END) AS backlog_tasks,
-  COALESCE(SUM(t.shift_hours), 0) AS total_shift_hours,
-  COALESCE(SUM(t.traditional_hours_estimate), 0) AS total_traditional_estimate,
+  COUNT(CASE WHEN t.status = 'icebox' THEN 1 END) AS icebox_tasks,
+  COALESCE(SUM(CASE WHEN t.status != 'icebox' THEN t.shift_hours ELSE 0 END), 0) AS total_shift_hours,
+  COALESCE(SUM(CASE WHEN t.status != 'icebox' THEN t.traditional_hours_estimate ELSE 0 END), 0) AS total_traditional_estimate,
   CASE
-    WHEN COUNT(t.id) > 0
-    THEN ROUND((COUNT(CASE WHEN t.status = 'shipped' THEN 1 END)::NUMERIC / COUNT(t.id)) * 100, 1)
+    WHEN COUNT(CASE WHEN t.status != 'icebox' THEN 1 END) > 0
+    THEN ROUND((COUNT(CASE WHEN t.status = 'shipped' THEN 1 END)::NUMERIC / COUNT(CASE WHEN t.status != 'icebox' THEN 1 END)) * 100, 1)
     ELSE 0
   END AS completion_percentage
 FROM projects p

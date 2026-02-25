@@ -54,10 +54,11 @@ export default function MetricsPage() {
             .eq('project_id', project.id)
 
           const taskList = tasks || []
-          const shiftHours = taskList.reduce((s: number, t: { shift_hours: number | null }) => s + (t.shift_hours || 0), 0)
-          const traditionalEstimate = taskList.reduce((s: number, t: { traditional_hours_estimate: number | null }) => s + (t.traditional_hours_estimate || 0), 0)
-          const tasksShipped = taskList.filter((t: { status: string }) => t.status === 'shipped').length
-          const tasksTotal = taskList.length
+          const nonIceboxTasks = taskList.filter((t: { status: string }) => t.status !== 'icebox')
+          const shiftHours = nonIceboxTasks.reduce((s: number, t: { shift_hours: number | null }) => s + (t.shift_hours || 0), 0)
+          const traditionalEstimate = nonIceboxTasks.reduce((s: number, t: { traditional_hours_estimate: number | null }) => s + (t.traditional_hours_estimate || 0), 0)
+          const tasksShipped = nonIceboxTasks.filter((t: { status: string }) => t.status === 'shipped').length
+          const tasksTotal = nonIceboxTasks.length
           const savings = traditionalEstimate > 0
             ? Math.round(((traditionalEstimate - shiftHours) / traditionalEstimate) * 100)
             : 0

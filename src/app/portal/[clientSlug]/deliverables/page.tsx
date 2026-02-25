@@ -352,46 +352,49 @@ export default function DeliverablesPage() {
                       v{deliverable.version} • {formatDate(deliverable.uploaded_at)}
                     </span>
 
-                    {(deliverable.status === 'in_review' || deliverable.status === 'pending') && (
-                      <button
-                        onClick={() => handleApprove(deliverable.id)}
-                        disabled={approvingId === deliverable.id}
-                        style={{
-                          padding: '6px 14px',
-                          background: approvingId === deliverable.id
-                            ? 'rgba(0, 240, 255, 0.3)'
-                            : 'linear-gradient(135deg, #00F0FF, #FF00AA)',
-                          border: 'none',
-                          borderRadius: 6,
-                          color: '#0A0A0A',
-                          fontSize: 11,
-                          fontWeight: 600,
-                          cursor: approvingId === deliverable.id ? 'not-allowed' : 'pointer',
-                        }}
-                      >
-                        {approvingId === deliverable.id ? 'Approving...' : 'Approve →'}
-                      </button>
-                    )}
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      {deliverable.url && (
+                        <a
+                          href={deliverable.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            padding: '6px 14px',
+                            background: `${typeColor}22`,
+                            border: `1px solid ${typeColor}44`,
+                            borderRadius: 6,
+                            color: typeColor,
+                            fontSize: 11,
+                            fontWeight: 600,
+                            textDecoration: 'none',
+                            transition: 'all 0.2s ease',
+                          }}
+                        >
+                          Download
+                        </a>
+                      )}
 
-                    {deliverable.status === 'approved' && deliverable.url && (
-                      <a
-                        href={deliverable.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          padding: '6px 14px',
-                          background: 'rgba(255, 255, 255, 0.1)',
-                          border: 'none',
-                          borderRadius: 6,
-                          color: '#888',
-                          fontSize: 11,
-                          fontWeight: 500,
-                          textDecoration: 'none',
-                        }}
-                      >
-                        Download
-                      </a>
-                    )}
+                      {(deliverable.status === 'in_review' || deliverable.status === 'pending') && (
+                        <button
+                          onClick={() => handleApprove(deliverable.id)}
+                          disabled={approvingId === deliverable.id}
+                          style={{
+                            padding: '6px 14px',
+                            background: approvingId === deliverable.id
+                              ? 'rgba(0, 240, 255, 0.3)'
+                              : 'linear-gradient(135deg, #00F0FF, #FF00AA)',
+                            border: 'none',
+                            borderRadius: 6,
+                            color: '#0A0A0A',
+                            fontSize: 11,
+                            fontWeight: 600,
+                            cursor: approvingId === deliverable.id ? 'not-allowed' : 'pointer',
+                          }}
+                        >
+                          {approvingId === deliverable.id ? 'Approving...' : 'Approve →'}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
