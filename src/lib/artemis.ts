@@ -42,7 +42,7 @@ const TOOLS: Anthropic.Tool[] = [
       type: 'object' as const,
       properties: {
         task_id: { type: 'string', description: 'Task ID' },
-        status: { type: 'string', enum: ['pending', 'in_progress', 'blocked', 'completed', 'cancelled'] },
+        status: { type: 'string', enum: ['backlog', 'active', 'shipped', 'blocked', 'cancelled'] },
         priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low'] },
         notes: { type: 'string', description: 'Additional notes' },
       },
@@ -186,7 +186,7 @@ async function executeTool(name: string, input: any): Promise<string> {
         priority: input.priority || 'medium',
         assigned_to: input.assigned_to || 'kj',
         due_date: input.due_date || null,
-        status: 'pending',
+        status: 'backlog',
       }).select().single()
 
       if (error) return `Error creating task: ${error.message}`
@@ -408,7 +408,7 @@ async function loadShiftBoardData(): Promise<string> {
   ] = await Promise.all([
     supabase.from('projects').select('id, name, status, phase, type, contract_value').in('status', ['planning', 'active', 'paused']),
     supabase.from('leads').select('id, name, email, company, status, tier, source, created_at').order('created_at', { ascending: false }).limit(20),
-    supabase.from('tasks').select('id, title, status, priority, project_id, assigned_to').in('status', ['pending', 'in_progress', 'blocked']).order('priority').limit(30),
+    supabase.from('tasks').select('id, title, status, priority, project_id, assigned_to').in('status', ['backlog', 'active', 'blocked']).order('priority').limit(30),
     (supabase.from('approval_queue') as ReturnType<typeof supabase.from>).select('id, action_type, description, risk_level, status, created_at').eq('status', 'pending'),
     (supabase.from('revenue_entries') as ReturnType<typeof supabase.from>).select('amount, collected, source, description, date').order('date', { ascending: false }).limit(15),
     (supabase.from('expense_entries') as ReturnType<typeof supabase.from>).select('amount, category, vendor, description, date').order('date', { ascending: false }).limit(15),
