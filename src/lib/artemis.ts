@@ -176,11 +176,11 @@ async function executeTool(name: string, input: any): Promise<string> {
           .select('id')
           .ilike('name', `%${input.project_name}%`)
           .limit(1)
-          .single()
+          .single() as { data: { id: string } | null }
         projectId = data?.id || null
       }
 
-      const { data, error } = await supabase.from('tasks').insert({
+      const { data, error } = await (supabase.from('tasks') as any).insert({
         title: input.title,
         project_id: projectId,
         priority: input.priority || 'medium',
@@ -199,7 +199,7 @@ async function executeTool(name: string, input: any): Promise<string> {
       if (input.priority) updates.priority = input.priority
       if (input.notes) updates.agent_notes = input.notes
 
-      const { error } = await supabase.from('tasks')
+      const { error } = await (supabase.from('tasks') as any)
         .update(updates)
         .eq('id', input.task_id)
 
@@ -212,7 +212,7 @@ async function executeTool(name: string, input: any): Promise<string> {
       if (input.status) updates.status = input.status
       if (input.tier) updates.tier = input.tier
 
-      const { data, error } = await supabase.from('leads')
+      const { data, error } = await (supabase.from('leads') as any)
         .update(updates)
         .eq('id', input.lead_id)
         .select('name')
@@ -223,7 +223,7 @@ async function executeTool(name: string, input: any): Promise<string> {
     }
 
     case 'create_project': {
-      const { data, error } = await supabase.from('projects').insert({
+      const { data, error } = await (supabase.from('projects') as any).insert({
         name: input.name,
         type: input.type,
         status: input.status || 'planning',
