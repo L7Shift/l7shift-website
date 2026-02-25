@@ -160,10 +160,11 @@ export default function ProjectDetailPage() {
   }))
 
   // Calculate metrics
-  const totalShiftHours = tasks.reduce((sum, t) => sum + t.shift_hours, 0)
-  const totalTraditionalHours = tasks.reduce((sum, t) => sum + t.traditional_hours_estimate, 0)
+  const totalShiftHours = tasks.filter(t => t.status !== 'icebox').reduce((sum, t) => sum + t.shift_hours, 0)
+  const totalTraditionalHours = tasks.filter(t => t.status !== 'icebox').reduce((sum, t) => sum + t.traditional_hours_estimate, 0)
+  const activeTasks = tasks.filter(t => t.status !== 'icebox')
   const completedTasks = tasks.filter(t => t.status === 'shipped').length
-  const completion = tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0
+  const completion = activeTasks.length > 0 ? Math.round((completedTasks / activeTasks.length) * 100) : 0
   const reviewTasks = tasks.filter(t => t.status === 'review').length
 
   // Mock phases - could be derived from project data or sprints
@@ -345,7 +346,7 @@ export default function ProjectDetailPage() {
           <div>
             <div style={{ fontSize: 13, color: '#888', marginBottom: 4 }}>Tasks</div>
             <div style={{ fontSize: 24, fontWeight: 700, color: '#FAFAFA' }}>
-              {completedTasks}/{tasks.length}
+              {completedTasks}/{activeTasks.length}
             </div>
           </div>
         </div>

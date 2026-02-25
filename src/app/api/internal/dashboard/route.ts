@@ -32,15 +32,16 @@ export async function GET() {
           .eq('project_id', project.id)
 
         const taskList = (tasks || []) as { status: string; shift_hours: number | null; traditional_hours_estimate: number | null }[]
+        const activeTasks = taskList.filter(t => t.status !== 'icebox')
         const shippedTasks = taskList.filter(t => t.status === 'shipped')
         const reviewTasks = taskList.filter(t => t.status === 'review')
 
         return {
           ...project,
-          total_tasks: taskList.length,
+          total_tasks: activeTasks.length,
           shipped_tasks: shippedTasks.length,
-          total_shift_hours: taskList.reduce((sum, t) => sum + (t.shift_hours || 0), 0),
-          total_traditional_estimate: taskList.reduce((sum, t) => sum + (t.traditional_hours_estimate || 0), 0),
+          total_shift_hours: activeTasks.reduce((sum, t) => sum + (t.shift_hours || 0), 0),
+          total_traditional_estimate: activeTasks.reduce((sum, t) => sum + (t.traditional_hours_estimate || 0), 0),
           pending_actions: reviewTasks.length,
         }
       })
