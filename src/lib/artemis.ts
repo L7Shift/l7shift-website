@@ -1,414 +1,147 @@
 /**
  * Artemis — L7 Shift Chief Architect Brain
  *
- * Routes natural language commands to the right handler,
- * queries ShiftBoard for context, and responds via Slack.
+ * Claude IS the brain. No regex. No hardcoded handlers.
+ * User says anything → Claude reads ShiftBoard → Claude responds.
  */
 
+import Anthropic from '@anthropic-ai/sdk'
 import { createServerClient } from '@/lib/supabase'
 import {
   postMessage,
   replyInThread,
-  headerBlock,
-  sectionBlock,
-  fieldsBlock,
-  dividerBlock,
-  actionsBlock,
-  contextBlock,
   CHANNELS,
 } from '@/lib/slack'
 
-// ---- Intent Detection ----
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY_V2,
+})
 
-type Intent =
-  | 'status'        // "what's the status?" "how are things?"
-  | 'pipeline'      // "show me the pipeline" "what leads do we have?"
-  | 'money'         // "how much did we make?" "what's revenue?"
-  | 'projects'      // "what projects are active?" "show me projects"
-  | 'tasks'         // "what's on my plate?" "open tasks"
-  | 'briefing'      // "give me a briefing" "morning report"
-  | 'approve'       // "approve it" "looks good"
-  | 'help'          // "help" "what can you do?"
-  | 'unknown'
+// ---- System Prompt ----
 
-interface ParsedIntent {
-  intent: Intent
-  raw: string
-  projectName?: string
-  timeframe?: string
-}
+const SYSTEM_PROMPT = `You are Artemis, the Chief Architect AI for L7 Shift — an AI-powered digital agency.
 
-const INTENT_PATTERNS: [RegExp, Intent][] = [
-  [/\b(brief|briefing|report|morning|recap|summary|update me)\b/i, 'briefing'],
-  [/\b(pipeline|leads?|prospect|incoming|softball)\b/i, 'pipeline'],
-  [/\b(money|revenue|income|expense|spent|p&l|profit|made|earned|cost)\b/i, 'money'],
-  [/\b(project|client|active project|what.*working)\b/i, 'projects'],
-  [/\b(task|todo|to.do|plate|backlog|sprint|blocked)\b/i, 'tasks'],
-  [/\b(status|how.*things|what.*going|sit.?rep)\b/i, 'status'],
-  [/\b(approve|lgtm|looks good|ship it|go ahead|green.?light)\b/i, 'approve'],
-  [/\b(help|what can you|commands?|how do i)\b/i, 'help'],
-]
+You report directly to KJ (Kenneth Leftwich), the founder. You're his right hand — sharp, direct, no fluff. You talk like a trusted partner, not a corporate bot. Keep it real but professional.
 
-export function parseIntent(text: string): ParsedIntent {
-  const cleaned = text.replace(/<@[A-Z0-9]+>/g, '').trim()
+Your job:
+- Give KJ full visibility into the business at a glance
+- Surface what needs attention without being asked
+- Think strategically about leads, projects, and money
+- Be proactive — if you see a problem or opportunity in the data, say it
 
-  for (const [pattern, intent] of INTENT_PATTERNS) {
-    if (pattern.test(cleaned)) {
-      return { intent, raw: cleaned }
-    }
-  }
+Style:
+- Concise. No walls of text. Use bullet points and bold for key numbers.
+- Dollar amounts always formatted ($X,XXX)
+- When something needs action, say what to do, don't just report it
+- Use emoji sparingly and only when it adds clarity (🔴 for blocked, 🟢 for good, 💰 for money)
+- You're talking in Slack, format accordingly with *bold*, _italic_, and line breaks
 
-  return { intent: 'unknown', raw: cleaned }
-}
+Context:
+- L7 Shift builds web platforms for service businesses using Claude Code agents
+- ShiftBoard is the internal project management system (Supabase)
+- Lead tiers: SOFTBALL (easy win), MEDIUM, HARD, DISQUALIFY
+- Lead sources: website contact form, referrals
+- The SymbAIotic Shift™ is L7's methodology
 
-// ---- Handlers ----
+Current date: ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
 
-export async function handleIntent(
-  parsed: ParsedIntent,
-  channel: string,
-  threadTs?: string
-): Promise<void> {
-  const respond = async (text: string, blocks?: unknown[]) => {
-    if (threadTs) {
-      await replyInThread(channel, threadTs, text, blocks as Parameters<typeof replyInThread>[3])
-    } else {
-      await postMessage(channel, text, blocks as Parameters<typeof postMessage>[2])
-    }
-  }
+You have access to ShiftBoard data that will be provided with each message. Use it to answer KJ's questions accurately. If the data doesn't cover what he's asking, say so — don't make things up.`
 
-  switch (parsed.intent) {
-    case 'briefing':
-    case 'status':
-      return handleBriefing(respond)
-    case 'pipeline':
-      return handlePipeline(respond)
-    case 'money':
-      return handleMoney(respond)
-    case 'projects':
-      return handleProjects(respond)
-    case 'tasks':
-      return handleTasks(respond)
-    case 'approve':
-      return handleApprovalCheck(respond)
-    case 'help':
-      return handleHelp(respond)
-    case 'unknown':
-      return handleUnknown(parsed.raw, respond)
-  }
-}
+// ---- ShiftBoard Context Loader ----
 
-type Responder = (text: string, blocks?: unknown[]) => Promise<void>
-
-// ---- Briefing / Status ----
-
-async function handleBriefing(respond: Responder) {
+async function loadShiftBoardContext(): Promise<string> {
   const supabase = createServerClient()
 
-  // Parallel queries for speed
   const [
     projectsRes,
     leadsRes,
     tasksRes,
-    pendingApprovalsRes,
+    approvalsRes,
     revenueRes,
     expenseRes,
   ] = await Promise.all([
-    supabase.from('projects').select('id, name, status, phase').eq('status', 'active'),
-    supabase.from('leads').select('id, name, status, tier, created_at').order('created_at', { ascending: false }).limit(10),
-    supabase.from('tasks').select('id, title, status, priority, project_id').in('status', ['pending', 'in_progress', 'blocked']),
-    (supabase.from('approval_queue') as ReturnType<typeof supabase.from>).select('id, action_type, description, risk_level').eq('status', 'pending'),
-    (supabase.from('revenue_entries') as ReturnType<typeof supabase.from>).select('amount, collected').eq('collected', true),
-    (supabase.from('expense_entries') as ReturnType<typeof supabase.from>).select('amount'),
+    supabase.from('projects').select('id, name, status, phase, type, contract_value').in('status', ['planning', 'active', 'paused']),
+    supabase.from('leads').select('id, name, email, company, status, tier, source, created_at, ai_assessment').order('created_at', { ascending: false }).limit(20),
+    supabase.from('tasks').select('id, title, status, priority, project_id').in('status', ['pending', 'in_progress', 'blocked']).order('priority').limit(30),
+    (supabase.from('approval_queue') as ReturnType<typeof supabase.from>).select('id, action_type, description, risk_level, status, created_at').eq('status', 'pending'),
+    (supabase.from('revenue_entries') as ReturnType<typeof supabase.from>).select('amount, collected, source, description, date').order('date', { ascending: false }).limit(15),
+    (supabase.from('expense_entries') as ReturnType<typeof supabase.from>).select('amount, category, vendor, description, date').order('date', { ascending: false }).limit(15),
   ])
 
-  const activeProjects = projectsRes.data?.length || 0
-  const leads = leadsRes.data as any[] || []
-  const tasks = tasksRes.data as any[] || []
-  const incomingLeads = leads.filter(l => l.status === 'incoming').length
-  const softballs = leads.filter(l => l.tier === 'SOFTBALL').length
-  const openTasks = tasks.length
-  const blockedTasks = tasks.filter(t => t.status === 'blocked').length
-  const pendingApprovals = pendingApprovalsRes.data?.length || 0
-
-  const revData = revenueRes.data as any[] || []
-  const expData = expenseRes.data as any[] || []
-  const totalRevenue = revData.reduce((sum: number, r: any) => sum + (r.amount || 0), 0)
-  const totalExpenses = expData.reduce((sum: number, e: any) => sum + (e.amount || 0), 0)
-
-  const blocks = [
-    headerBlock('Artemis Briefing'),
-    dividerBlock(),
-    fieldsBlock([
-      `*Active Projects*\n${activeProjects}`,
-      `*Open Tasks*\n${openTasks}${blockedTasks > 0 ? ` (${blockedTasks} blocked)` : ''}`,
-      `*Incoming Leads*\n${incomingLeads}${softballs > 0 ? ` (${softballs} softballs)` : ''}`,
-      `*Pending Approvals*\n${pendingApprovals}`,
-    ]),
-    dividerBlock(),
-    fieldsBlock([
-      `*Revenue (Collected)*\n$${totalRevenue.toLocaleString()}`,
-      `*Expenses*\n$${totalExpenses.toLocaleString()}`,
-      `*Net*\n$${(totalRevenue - totalExpenses).toLocaleString()}`,
-      `*Margin*\n${totalRevenue > 0 ? Math.round(((totalRevenue - totalExpenses) / totalRevenue) * 100) : 0}%`,
-    ]),
-  ]
-
-  // Add alerts
-  const alerts: string[] = []
-  if (blockedTasks > 0) alerts.push(`${blockedTasks} task${blockedTasks > 1 ? 's' : ''} blocked`)
-  if (pendingApprovals > 0) alerts.push(`${pendingApprovals} approval${pendingApprovals > 1 ? 's' : ''} waiting on you`)
-  if (softballs > 0) alerts.push(`${softballs} softball lead${softballs > 1 ? 's' : ''} — follow up`)
-
-  if (alerts.length > 0) {
-    blocks.push(dividerBlock())
-    blocks.push(sectionBlock(`*Needs Attention:*\n${alerts.map(a => `• ${a}`).join('\n')}`))
-  }
-
-  blocks.push(contextBlock(`Artemis • ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}`))
-
-  await respond('Artemis Briefing', blocks)
-}
-
-// ---- Pipeline ----
-
-async function handlePipeline(respond: Responder) {
-  const supabase = createServerClient()
-  const { data: leads } = await supabase
-    .from('leads')
-    .select('id, name, email, company, status, tier, source, created_at')
-    .order('created_at', { ascending: false })
-    .limit(15)
-
-  const allLeads = (leads || []) as any[]
-  if (allLeads.length === 0) {
-    await respond('Pipeline is empty. No leads in ShiftBoard.')
-    return
-  }
-
-  const tierEmoji: Record<string, string> = {
-    SOFTBALL: ':large_green_circle:',
-    MEDIUM: ':large_yellow_circle:',
-    HARD: ':red_circle:',
-    DISQUALIFY: ':black_circle:',
-  }
-
-  const lines = allLeads.map((l: any) => {
-    const emoji = tierEmoji[l.tier || ''] || ':white_circle:'
-    const company = l.company ? ` (${l.company})` : ''
-    return `${emoji} *${l.name}*${company} — ${l.status || 'incoming'} via ${l.source || '?'}`
-  })
-
-  const blocks = [
-    headerBlock('Lead Pipeline'),
-    sectionBlock(lines.join('\n')),
-    contextBlock(`${allLeads.length} leads shown • Artemis`),
-  ]
-
-  await respond('Lead Pipeline', blocks)
-}
-
-// ---- Money ----
-
-async function handleMoney(respond: Responder) {
-  const supabase = createServerClient()
-
-  const [revenueRes, expenseRes] = await Promise.all([
-    (supabase.from('revenue_entries') as ReturnType<typeof supabase.from>).select('amount, collected, source, description, date').order('date', { ascending: false }).limit(10),
-    (supabase.from('expense_entries') as ReturnType<typeof supabase.from>).select('amount, category, vendor, description, date').order('date', { ascending: false }).limit(10),
-  ])
-
+  const projects = (projectsRes.data || []) as any[]
+  const leads = (leadsRes.data || []) as any[]
+  const tasks = (tasksRes.data || []) as any[]
+  const approvals = (approvalsRes.data || []) as any[]
   const revenue = (revenueRes.data || []) as any[]
   const expenses = (expenseRes.data || []) as any[]
 
-  const totalIn = revenue.reduce((s: number, r: any) => s + (r.amount || 0), 0)
-  const totalCollected = revenue.filter((r: any) => r.collected).reduce((s: number, r: any) => s + (r.amount || 0), 0)
-  const totalOut = expenses.reduce((s: number, e: any) => s + (e.amount || 0), 0)
+  const totalRevenue = revenue.filter((r: any) => r.collected).reduce((s: number, r: any) => s + (r.amount || 0), 0)
+  const totalExpenses = expenses.reduce((s: number, e: any) => s + (e.amount || 0), 0)
 
-  const blocks = [
-    headerBlock('Money Report'),
-    fieldsBlock([
-      `*Total Revenue*\n$${totalIn.toLocaleString()}`,
-      `*Collected*\n$${totalCollected.toLocaleString()}`,
-      `*Expenses*\n$${totalOut.toLocaleString()}`,
-      `*Net*\n$${(totalCollected - totalOut).toLocaleString()}`,
-    ]),
-  ]
+  return `=== SHIFTBOARD LIVE DATA ===
 
-  if (revenue.length > 0) {
-    blocks.push(dividerBlock())
-    blocks.push(sectionBlock('*Recent Revenue:*'))
-    const revenueLines = revenue.slice(0, 5).map((r: any) =>
-      `• $${r.amount?.toLocaleString()} — ${r.description || r.source || 'unlabeled'} ${r.collected ? ':white_check_mark:' : ':hourglass_flowing_sand:'}`
-    )
-    blocks.push(sectionBlock(revenueLines.join('\n')))
-  }
+PROJECTS (${projects.length} total):
+${projects.length > 0 ? projects.map((p: any) => `- ${p.name} | status: ${p.status} | phase: ${p.phase || 'n/a'} | type: ${p.type || 'n/a'} | value: ${p.contract_value ? '$' + p.contract_value.toLocaleString() : 'n/a'}`).join('\n') : 'No active projects.'}
 
-  if (expenses.length > 0) {
-    blocks.push(dividerBlock())
-    blocks.push(sectionBlock('*Recent Expenses:*'))
-    const expenseLines = expenses.slice(0, 5).map((e: any) =>
-      `• $${e.amount?.toLocaleString()} — ${e.vendor || e.category || 'unlabeled'}`
-    )
-    blocks.push(sectionBlock(expenseLines.join('\n')))
-  }
+LEADS (${leads.length} in pipeline):
+${leads.length > 0 ? leads.map((l: any) => `- ${l.name}${l.company ? ' (' + l.company + ')' : ''} | status: ${l.status} | tier: ${l.tier || 'unclassified'} | source: ${l.source || '?'} | created: ${l.created_at?.split('T')[0] || '?'}`).join('\n') : 'No leads.'}
 
-  blocks.push(contextBlock('Artemis • Finance'))
+TASKS (${tasks.length} open):
+${tasks.length > 0 ? tasks.map((t: any) => `- ${t.title} | status: ${t.status} | priority: ${t.priority || 'n/a'}`).join('\n') : 'No open tasks.'}
 
-  await respond('Money Report', blocks)
+PENDING APPROVALS (${approvals.length}):
+${approvals.length > 0 ? approvals.map((a: any) => `- ${a.action_type}: ${a.description || 'no description'} | risk: ${a.risk_level || 'low'}`).join('\n') : 'None.'}
+
+FINANCIALS:
+- Revenue (collected): $${totalRevenue.toLocaleString()}
+- Expenses: $${totalExpenses.toLocaleString()}
+- Net: $${(totalRevenue - totalExpenses).toLocaleString()}
+${revenue.length > 0 ? '\nRecent revenue:\n' + revenue.slice(0, 5).map((r: any) => `- $${r.amount?.toLocaleString()} — ${r.description || r.source || 'unlabeled'} ${r.collected ? '(collected)' : '(pending)'}`).join('\n') : ''}
+${expenses.length > 0 ? '\nRecent expenses:\n' + expenses.slice(0, 5).map((e: any) => `- $${e.amount?.toLocaleString()} — ${e.vendor || e.category || 'unlabeled'}`).join('\n') : ''}
+
+=== END SHIFTBOARD DATA ===`
 }
 
-// ---- Projects ----
+// ---- Main Handler ----
 
-async function handleProjects(respond: Responder) {
-  const supabase = createServerClient()
-  const { data: projects } = await supabase
-    .from('projects')
-    .select('id, name, status, phase, type, contract_value')
-    .in('status', ['planning', 'active', 'paused'])
-    .order('status')
+export async function handleMessage(
+  userMessage: string,
+  channel: string,
+  threadTs?: string
+): Promise<void> {
+  // Load ShiftBoard context
+  const context = await loadShiftBoardContext()
 
-  const allProjects = (projects || []) as any[]
-  if (allProjects.length === 0) {
-    await respond('No active projects in ShiftBoard.')
-    return
-  }
-
-  const statusEmoji: Record<string, string> = {
-    active: ':rocket:',
-    planning: ':pencil:',
-    paused: ':double_vertical_bar:',
-  }
-
-  const lines = allProjects.map((p: any) => {
-    const emoji = statusEmoji[p.status || ''] || ':folder:'
-    const value = p.contract_value ? ` • $${p.contract_value.toLocaleString()}` : ''
-    return `${emoji} *${p.name}* — ${p.phase || p.status}${value}`
+  // Ask Claude
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1024,
+    system: SYSTEM_PROMPT,
+    messages: [
+      {
+        role: 'user',
+        content: `${context}\n\nKJ says: "${userMessage}"`,
+      },
+    ],
   })
 
-  const blocks = [
-    headerBlock('Active Projects'),
-    sectionBlock(lines.join('\n')),
-    contextBlock(`${allProjects.length} projects • Artemis`),
-  ]
+  // Extract text response
+  const reply = response.content
+    .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+    .map(block => block.text)
+    .join('\n')
 
-  await respond('Active Projects', blocks)
+  if (!reply) return
+
+  // Post to Slack
+  if (threadTs) {
+    await replyInThread(channel, threadTs, reply)
+  } else {
+    await postMessage(channel, reply)
+  }
 }
 
-// ---- Tasks ----
-
-async function handleTasks(respond: Responder) {
-  const supabase = createServerClient()
-  const { data: tasks } = await supabase
-    .from('tasks')
-    .select('id, title, status, priority, project_id')
-    .in('status', ['pending', 'in_progress', 'blocked'])
-    .order('priority')
-    .limit(20)
-
-  const allTasks = (tasks || []) as any[]
-  if (allTasks.length === 0) {
-    await respond('No open tasks. Clear plate.')
-    return
-  }
-
-  const priorityEmoji: Record<string, string> = {
-    urgent: ':rotating_light:',
-    high: ':fire:',
-    medium: ':large_yellow_circle:',
-    low: ':white_circle:',
-  }
-
-  const statusEmoji: Record<string, string> = {
-    blocked: ':no_entry:',
-    in_progress: ':hammer_and_wrench:',
-    pending: ':inbox_tray:',
-  }
-
-  const lines = allTasks.map((t: any) => {
-    const pEmoji = priorityEmoji[t.priority || ''] || ''
-    const sEmoji = statusEmoji[t.status || ''] || ''
-    return `${sEmoji} ${pEmoji} ${t.title}`
-  })
-
-  const blocked = allTasks.filter((t: any) => t.status === 'blocked')
-  const inProgress = allTasks.filter((t: any) => t.status === 'in_progress')
-  const pendingTasks = allTasks.filter((t: any) => t.status === 'pending')
-
-  const blocks = [
-    headerBlock('Open Tasks'),
-    fieldsBlock([
-      `*In Progress*\n${inProgress.length}`,
-      `*Pending*\n${pendingTasks.length}`,
-      `*Blocked*\n${blocked.length}`,
-      `*Total Open*\n${allTasks.length}`,
-    ]),
-    dividerBlock(),
-    sectionBlock(lines.join('\n')),
-    contextBlock('Artemis • Tasks'),
-  ]
-
-  await respond('Open Tasks', blocks)
-}
-
-// ---- Approval Check ----
-
-async function handleApprovalCheck(respond: Responder) {
-  const supabase = createServerClient()
-  const { data: pendingData } = await (supabase
-    .from('approval_queue') as ReturnType<typeof supabase.from>)
-    .select('id, action_type, description, risk_level, payload, created_at')
-    .eq('status', 'pending')
-    .order('created_at')
-
-  const pendingItems = (pendingData || []) as any[]
-  if (pendingItems.length === 0) {
-    await respond('Nothing pending approval. All clear.')
-    return
-  }
-
-  const blocks = [headerBlock(`${pendingItems.length} Pending Approval${pendingItems.length > 1 ? 's' : ''}`)]
-
-  for (const item of pendingItems) {
-    const riskEmoji = item.risk_level === 'high' ? ':rotating_light:' : item.risk_level === 'medium' ? ':warning:' : ':information_source:'
-
-    blocks.push(dividerBlock())
-    blocks.push(sectionBlock(`${riskEmoji} *${item.action_type}*\n${item.description || 'No description'}`))
-    blocks.push(actionsBlock([
-      { text: 'Approve', actionId: `approve_${item.id}`, value: String(item.id), style: 'primary' },
-      { text: 'Reject', actionId: `reject_${item.id}`, value: String(item.id), style: 'danger' },
-    ]))
-  }
-
-  blocks.push(contextBlock('Artemis • Approvals'))
-
-  await respond('Pending Approvals', blocks)
-}
-
-// ---- Help ----
-
-async function handleHelp(respond: Responder) {
-  const blocks = [
-    headerBlock('Artemis Commands'),
-    sectionBlock(
-      '*Just talk to me naturally. Here\'s what I understand:*\n\n' +
-      ':clipboard: *"briefing"* or *"status"* — Full business overview\n' +
-      ':dart: *"pipeline"* or *"leads"* — Lead pipeline\n' +
-      ':money_with_wings: *"money"* or *"revenue"* — Financial report\n' +
-      ':rocket: *"projects"* — Active projects\n' +
-      ':hammer_and_wrench: *"tasks"* — Open tasks\n' +
-      ':white_check_mark: *"approve"* — Pending approvals\n' +
-      ':question: *"help"* — This message'
-    ),
-    contextBlock('Artemis • L7 Shift Chief Architect'),
-  ]
-
-  await respond('Artemis Commands', blocks)
-}
-
-// ---- Unknown ----
-
-async function handleUnknown(raw: string, respond: Responder) {
-  await respond(
-    `I caught that but I'm not sure what you need. Try *"briefing"*, *"pipeline"*, *"money"*, *"projects"*, *"tasks"*, or *"help"*.\n\n_You said: "${raw}"_`
-  )
+// Keep for cron briefing — sends a briefing without a user message
+export async function sendBriefing(channel: string): Promise<void> {
+  await handleMessage('Give me the morning briefing. Full overview — projects, leads, tasks, money, anything that needs my attention.', channel)
 }

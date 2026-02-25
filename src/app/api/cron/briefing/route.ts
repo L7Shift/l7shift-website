@@ -1,20 +1,12 @@
 /**
  * /api/cron/briefing — Scheduled Artemis Briefing
  *
- * Called by Vercel Cron to deliver morning briefings to #artemis.
- * Schedule: Every weekday at 8am ET
- *
- * vercel.json:
- * {
- *   "crons": [{
- *     "path": "/api/cron/briefing",
- *     "schedule": "0 13 * * 1-5"  // 8am ET = 1pm UTC
- *   }]
- * }
+ * Called by Vercel Cron to deliver morning briefings to #artemis-hq.
+ * Schedule: Every weekday at 8am ET (1pm UTC)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { parseIntent, handleIntent } from '@/lib/artemis'
+import { sendBriefing } from '@/lib/artemis'
 import { CHANNELS } from '@/lib/slack'
 
 export async function GET(request: NextRequest) {
@@ -27,8 +19,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const parsed = parseIntent('briefing')
-    await handleIntent(parsed, CHANNELS.artemis)
+    await sendBriefing(CHANNELS.artemis)
 
     return NextResponse.json({
       success: true,

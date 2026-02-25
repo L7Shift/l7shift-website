@@ -6,14 +6,14 @@
  * 2. App mentions (@Artemis)
  * 3. Direct messages to the bot
  *
- * Artemis receives the message, parses intent, queries ShiftBoard, responds.
+ * Every message goes to Claude. Claude IS Artemis.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { verifySlackSignature } from '@/lib/slack'
-import { parseIntent, handleIntent } from '@/lib/artemis'
+import { handleMessage } from '@/lib/artemis'
 
-export const maxDuration = 30 // Allow up to 30s for Vercel function
+export const maxDuration = 30
 
 export async function POST(request: NextRequest) {
   // Ignore Slack retries — cold starts cause timeouts, retries cause duplicates
@@ -53,27 +53,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true })
     }
 
-    // Handle app_mention events (@Artemis what's the status?)
-    if (event.type === 'app_mention') {
-      const parsed = parseIntent(event.text)
+    // Strip @mention from text
+    const text = (event.text || '').replace(/<@[A-Z0-9]+>/g, '').trim()
 
-      try {
-        await handleIntent(parsed, event.channel, event.ts)
-      } catch (err) {
-        console.error('Artemis handler error:', err)
-      }
-
+    if (!text) {
       return NextResponse.json({ ok: true })
     }
 
-    // Handle direct messages
-    if (event.type === 'message' && event.channel_type === 'im') {
-      const parsed = parseIntent(event.text)
-
+    // App mentions or DMs — send everything to Claude
+    if (event.type === 'app_mention' || (event.type === 'message' && event.channel_type === 'im')) {
       try {
-        await handleIntent(parsed, event.channel, event.ts)
+        await handleMessage(text, event.channel, event.ts)
       } catch (err) {
-        console.error('Artemis handler error:', err)
+        console.error('Artemis error:', err)
       }
 
       return NextResponse.json({ ok: true })
