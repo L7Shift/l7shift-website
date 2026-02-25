@@ -14,6 +14,12 @@ import { verifySlackSignature } from '@/lib/slack'
 import { parseIntent, handleIntent } from '@/lib/artemis'
 
 export async function POST(request: NextRequest) {
+  // Ignore Slack retries — cold starts cause timeouts, retries cause duplicates
+  const retryNum = request.headers.get('x-slack-retry-num')
+  if (retryNum) {
+    return NextResponse.json({ ok: true })
+  }
+
   // Read raw body for signature verification
   const rawBody = await request.text()
   const timestamp = request.headers.get('x-slack-request-timestamp') || ''
