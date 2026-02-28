@@ -131,7 +131,7 @@ async function getEnvUser(email: string): Promise<User | null> {
       envPassword: process.env.SHARIELS_CLIENT_PASSWORD || '',
       role: 'client',
       client_slug: 'shariels-lashes',
-      name: 'Shariel',
+      name: 'Dominique',
     },
   }
 

@@ -38,7 +38,7 @@ export const CLIENT_SLUG_MAP: Record<string, {
   },
   'shariels-lashes': {
     projectName: 'Shariels Lashes',
-    clientName: 'Shariel',
+    clientName: 'Dominique',
     primaryColor: '#C6993A',
     accentColor: '#F8C8D4',
   },
