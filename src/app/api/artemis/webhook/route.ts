@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-const anthropicKey = process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY_V2 || ''
+const anthropicKey = process.env.ANTHROPIC_API_KEY || ''
 const resendKey = (process.env.RESEND_API_KEY || '').trim()
 
 // Webhook secret to prevent unauthorized calls
