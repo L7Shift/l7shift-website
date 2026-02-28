@@ -31,7 +31,7 @@ const ARTEMIS_TOOLS: Anthropic.Tool[] = [
         table: { type: 'string', description: 'Table name: projects, tasks, clients, activity_log, deliverables, requirements_docs, leads' },
         filters: {
           type: 'object',
-          description: 'Key-value pairs for filtering. Key format: "column=eq.value" or "column=ilike.%value%"',
+          description: 'Key-value pairs for filtering. Key is the column name. Value is either a plain value (exact match) or "operator.value". Operators: eq, ilike, gt, lt, gte, neq, in. Examples: {"id": "some-uuid"}, {"name": "ilike.%Shariel%"}, {"status": "active"}',
           additionalProperties: { type: 'string' },
         },
         select: { type: 'string', description: 'Columns to select (comma-separated). Default: *' },
@@ -140,18 +140,24 @@ async function executeTool(name: string, input: Record<string, unknown>): Promis
 
       if (filters) {
         for (const [key, value] of Object.entries(filters)) {
-          const [col, op] = key.includes('=') ? key.split('=', 2) : [key, `eq.${value}`]
-          const actualOp = op.split('.')[0]
-          const actualVal = op.includes('.') ? op.substring(op.indexOf('.') + 1) : value
-
-          switch (actualOp) {
-            case 'eq': query = query.eq(col, actualVal); break
-            case 'ilike': query = query.ilike(col, actualVal); break
-            case 'gt': query = query.gt(col, actualVal); break
-            case 'lt': query = query.lt(col, actualVal); break
-            case 'gte': query = query.gte(col, actualVal); break
-            case 'in': query = query.in(col, (actualVal as string).split(',')); break
-            default: query = query.eq(col, actualVal)
+          // Simple format: key is column name, value is "operator.value" or just "value" (defaults to eq)
+          if (value.startsWith('eq.')) {
+            query = query.eq(key, value.substring(3))
+          } else if (value.startsWith('ilike.')) {
+            query = query.ilike(key, value.substring(6))
+          } else if (value.startsWith('gt.')) {
+            query = query.gt(key, value.substring(3))
+          } else if (value.startsWith('lt.')) {
+            query = query.lt(key, value.substring(3))
+          } else if (value.startsWith('gte.')) {
+            query = query.gte(key, value.substring(4))
+          } else if (value.startsWith('neq.')) {
+            query = query.neq(key, value.substring(4))
+          } else if (value.startsWith('in.')) {
+            query = query.in(key, value.substring(3).split(','))
+          } else {
+            // Default: exact match
+            query = query.eq(key, value)
           }
         }
       }
