@@ -377,8 +377,8 @@ export async function POST(req: NextRequest) {
       iterations++
 
       const response = await claude.messages.create({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2048,
+        model: 'claude-opus-4-20250514',
+        max_tokens: 4096,
         system: ARTEMIS_SYSTEM,
         tools: ARTEMIS_TOOLS,
         messages,
