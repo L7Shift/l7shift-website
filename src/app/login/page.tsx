@@ -11,6 +11,7 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const [turnstileError, setTurnstileError] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -193,13 +194,18 @@ function LoginForm() {
           )}
 
           {/* Turnstile Widget */}
-          <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'center' }}>
-            <TurnstileWidget
-              onVerify={(token) => setTurnstileToken(token)}
-              onExpired={() => setTurnstileToken(null)}
-              onError={() => setTurnstileToken(null)}
-            />
-          </div>
+          {!turnstileError && (
+            <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'center' }}>
+              <TurnstileWidget
+                onVerify={(token) => setTurnstileToken(token)}
+                onExpired={() => setTurnstileToken(null)}
+                onError={() => {
+                  setTurnstileToken(null)
+                  setTurnstileError(true)
+                }}
+              />
+            </div>
+          )}
 
           <button
             type="submit"

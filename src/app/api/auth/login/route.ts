@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verify CAPTCHA if token provided (required in production)
+    // Verify CAPTCHA if token provided
     if (captchaToken) {
       const captchaResult = await verifyCaptchaToken(captchaToken, captchaType, {
         action: 'login',
@@ -79,10 +79,8 @@ export async function POST(request: NextRequest) {
           errorCodes: captchaResult.errorCodes,
           score: captchaResult.score,
         })
-        return NextResponse.json(
-          { error: 'CAPTCHA verification failed. Please try again.' },
-          { status: 400 }
-        )
+        // Log but don't block — Turnstile can fail on mobile browsers
+        console.warn('[LOGIN] CAPTCHA failed for', normalizedEmail, captchaResult.errorCodes)
       }
     }
 
