@@ -74,39 +74,35 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // Notify Ken via email on upload
-    const resendKey = process.env.RESEND_API_KEY
-    if (resendKey) {
-      fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${resendKey.trim()}`,
-          'Content-Type': 'application/json',
+    // Fire event to Artemis — she decides what to do
+    const artemisUrl = `${req.nextUrl.origin}/api/artemis/webhook`
+    fetch(artemisUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.ARTEMIS_WEBHOOK_SECRET || ''}`,
+      },
+      body: JSON.stringify({
+        type: 'INSERT',
+        table: 'client_uploads',
+        event_type: 'client_upload',
+        record: {
+          project_id: projectId,
+          project_name: project.name,
+          client_name: project.client_name,
+          file_name: file.name,
+          file_type: file.type,
+          file_size: file.size,
+          category: category || 'general',
+          storage_path: storagePath,
         },
-        body: JSON.stringify({
-          from: 'L7 Shift <ken@l7shift.com>',
-          to: ['ken@l7shift.com'],
-          subject: `📤 ${project.client_name} uploaded: ${file.name}`,
-          html: `
-            <div style="font-family: -apple-system, sans-serif; background: #0A0A0A; color: #FAFAFA; padding: 32px; border-radius: 12px;">
-              <h2 style="color: #00F0FF; margin: 0 0 16px;">New Client Upload</h2>
-              <table style="font-size: 14px; color: #CCC;">
-                <tr><td style="padding: 4px 16px 4px 0; color: #888;">Client</td><td>${project.client_name}</td></tr>
-                <tr><td style="padding: 4px 16px 4px 0; color: #888;">Project</td><td>${project.name}</td></tr>
-                <tr><td style="padding: 4px 16px 4px 0; color: #888;">File</td><td>${file.name}</td></tr>
-                <tr><td style="padding: 4px 16px 4px 0; color: #888;">Size</td><td>${(file.size / 1024).toFixed(1)} KB</td></tr>
-                <tr><td style="padding: 4px 16px 4px 0; color: #888;">Category</td><td>${category || 'general'}</td></tr>
-              </table>
-              <div style="margin-top: 20px;">
-                <a href="https://l7shift.com/internal" style="background: #00F0FF; color: #0A0A0A; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 13px;">
-                  Review in ShiftBoard →
-                </a>
-              </div>
-            </div>
-          `,
-        }),
-      }).catch(err => console.error('Upload notification failed:', err))
-    }
+        context: {
+          project_id: projectId,
+          project_name: project.name,
+          client_name: project.client_name,
+        },
+      }),
+    }).catch(err => console.error('[ARTEMIS] Upload event failed:', err))
 
     return NextResponse.json({
       success: true,
