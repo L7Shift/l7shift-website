@@ -39,6 +39,11 @@ const clientConfigs: Record<string, {
     primaryColor: '#8B5CF6',
     accentColor: '#F59E0B',
   },
+  'shariels-lashes': {
+    name: "Shariel's Lashes",
+    primaryColor: '#C6993A',
+    accentColor: '#F8C8D4',
+  },
 }
 
 export default function PortalLayout({ children }: PortalLayoutProps) {
@@ -70,6 +75,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
     { href: `/portal/${clientSlug}/deliverables`, icon: '📁', label: 'Deliverables' },
     { href: `/portal/${clientSlug}/requirements`, icon: '📝', label: 'Requirements' },
     { href: `/portal/${clientSlug}/activity`, icon: '🕐', label: 'Activity' },
+    { href: `/portal/${clientSlug}/assets`, icon: '📤', label: 'Upload Assets' },
   ]
 
   return (

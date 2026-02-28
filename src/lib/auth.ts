@@ -125,6 +125,14 @@ async function getEnvUser(email: string): Promise<User | null> {
       client_slug: 'stitchwichs',
       name: 'Nicole',
     },
+    'shariels.lashes@gmail.com': {
+      email: 'shariels.lashes@gmail.com',
+      password_hash: '',
+      envPassword: process.env.SHARIELS_CLIENT_PASSWORD || '',
+      role: 'client',
+      client_slug: 'shariels-lashes',
+      name: 'Shariel',
+    },
   }
 
   const envUser = envUsers[normalizedEmail]

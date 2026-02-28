@@ -36,6 +36,12 @@ export const CLIENT_SLUG_MAP: Record<string, {
     primaryColor: '#8B5CF6',
     accentColor: '#F59E0B',
   },
+  'shariels-lashes': {
+    projectName: 'Shariels Lashes',
+    clientName: 'Shariel',
+    primaryColor: '#C6993A',
+    accentColor: '#F8C8D4',
+  },
 }
 
 export interface PortalProject {
