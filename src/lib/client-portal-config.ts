@@ -22,7 +22,7 @@ const CONFIGS: Record<string, ClientPortalConfig> = {
     primaryColor: '#8B5CF6',
     accentColor: '#F59E0B',
     assetRequests: [
-      { icon: 'camera', title: 'Garment Style Photos for Order Page', description: 'We need photos of your actual blank garments for the custom order flow. Tops: T-Shirt, Long Sleeve, Hoodie, Crewneck Sweatshirt, Tank Top, Polo Shirt (currently stock photos). Hats: Dad Cap, Snapback, Beanie, Visor, Bucket Hat (currently no photos at all).', priority: true, category: 'photos' },
+      { icon: 'camera', title: 'Garment Style Photos for Order Page', description: 'We need photos of your actual blank garments (no designs) for the order flow. Tops: T-Shirt, Long Sleeve, Hoodie, Crewneck, Tank Top, Polo (currently generic stock photos). Hats: Dad Cap, Snapback, Beanie, Visor, Bucket Hat (currently no photos at all). Jacket photos are done — we already have those.', priority: true, category: 'photos' },
       { icon: 'palette', title: 'Color Options Per Hat Style', description: 'What colors do you offer for each hat type? We need a list per style — Dad Cap, Snapback, Beanie, Visor, Bucket Hat. Example: Dad Cap → Black, White, Navy, Pink, etc.', priority: true, category: 'documents' },
       { icon: 'image', title: 'New Collection Inspiration', description: 'Mood boards, design references, or inspiration images for upcoming collections.', priority: false, category: 'content' },
     ],
