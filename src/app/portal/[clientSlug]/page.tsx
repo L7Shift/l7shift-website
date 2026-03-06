@@ -35,6 +35,12 @@ export default function ClientPortalDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [expandedTask, setExpandedTask] = useState<string | null>(null)
+  const [showRequestForm, setShowRequestForm] = useState(false)
+  const [requestTitle, setRequestTitle] = useState('')
+  const [requestDescription, setRequestDescription] = useState('')
+  const [requestPriority, setRequestPriority] = useState<'normal' | 'urgent'>('normal')
+  const [requestSubmitting, setRequestSubmitting] = useState(false)
+  const [requestSuccess, setRequestSuccess] = useState(false)
   const [portalData, setPortalData] = useState<PortalProject | null>(null)
   const [requirements, setRequirements] = useState<RequirementDoc[]>([])
   const [deliverables, setDeliverables] = useState<Deliverable[]>([])
@@ -74,6 +80,39 @@ export default function ClientPortalDashboard() {
       setError('Failed to load project data')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function submitRequest() {
+    if (!portalData || !requestTitle.trim()) return
+    setRequestSubmitting(true)
+    try {
+      const res = await fetch('/api/client/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectId: portalData.project.id,
+          title: requestTitle,
+          description: requestDescription,
+          priority: requestPriority,
+          clientName: portalData.project.client_name || 'Client',
+        }),
+      })
+      if (res.ok) {
+        setRequestSuccess(true)
+        setTimeout(() => {
+          setShowRequestForm(false)
+          setRequestTitle('')
+          setRequestDescription('')
+          setRequestPriority('normal')
+          setRequestSuccess(false)
+          loadData()
+        }, 2000)
+      }
+    } catch (err) {
+      console.error('Request submission error:', err)
+    } finally {
+      setRequestSubmitting(false)
     }
   }
 
@@ -195,13 +234,35 @@ export default function ClientPortalDashboard() {
   return (
     <div>
       {/* Welcome */}
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#FAFAFA' }}>
-          Welcome, {clientName}
-        </h1>
-        <p style={{ margin: '6px 0 0', color: '#888', fontSize: 14 }}>
-          Your project dashboard. Here&apos;s where everything stands.
-        </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#FAFAFA' }}>
+            Welcome, {clientName}
+          </h1>
+          <p style={{ margin: '6px 0 0', color: '#888', fontSize: 14 }}>
+            Your project dashboard. Here&apos;s where everything stands.
+          </p>
+        </div>
+        <button
+          onClick={() => setShowRequestForm(true)}
+          style={{
+            padding: '10px 18px',
+            background: `${primaryColor}20`,
+            border: `1px solid ${primaryColor}44`,
+            borderRadius: 10,
+            color: primaryColor,
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+          }}
+        >
+          + New Request
+        </button>
       </div>
 
       {/* Project Status Card */}
@@ -652,6 +713,186 @@ export default function ClientPortalDashboard() {
           Email Ken
         </a>
       </div>
+
+      {/* New Request Modal */}
+      {showRequestForm && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.85)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px 16px',
+          }}
+          onClick={() => !requestSubmitting && setShowRequestForm(false)}
+        >
+          <div
+            style={{
+              background: '#0A0A0A',
+              border: requestSuccess ? '1px solid rgba(74,222,128,0.5)' : `1px solid ${primaryColor}33`,
+              borderRadius: 16,
+              maxWidth: 520,
+              width: '100%',
+              padding: 28,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {requestSuccess ? (
+              <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                <div
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: '50%',
+                    background: 'rgba(74,222,128,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px',
+                    fontSize: 24,
+                    color: '#4ADE80',
+                  }}
+                >
+                  {'\u2713'}
+                </div>
+                <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 600, color: '#4ADE80' }}>
+                  Request Submitted
+                </h3>
+                <p style={{ margin: 0, fontSize: 13, color: '#888' }}>
+                  Ken has been notified and will follow up.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                  <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: '#FAFAFA' }}>
+                    New Request
+                  </h3>
+                  <button
+                    onClick={() => setShowRequestForm(false)}
+                    style={{ background: 'none', border: 'none', color: '#888', fontSize: 22, cursor: 'pointer', padding: '0 4px' }}
+                  >
+                    {'\u00D7'}
+                  </button>
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: 12, color: '#888', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>
+                    What do you need?
+                  </label>
+                  <input
+                    type="text"
+                    value={requestTitle}
+                    onChange={(e) => setRequestTitle(e.target.value)}
+                    placeholder="e.g., Add new product photos, Change color options..."
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: 8,
+                      color: '#FAFAFA',
+                      fontSize: 14,
+                      fontFamily: 'inherit',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: 12, color: '#888', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>
+                    Details (optional)
+                  </label>
+                  <textarea
+                    value={requestDescription}
+                    onChange={(e) => setRequestDescription(e.target.value)}
+                    placeholder="Add any context, links, or specifics..."
+                    rows={4}
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: 8,
+                      color: '#FAFAFA',
+                      fontSize: 14,
+                      fontFamily: 'inherit',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      resize: 'vertical',
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: 20 }}>
+                  <label style={{ display: 'block', fontSize: 12, color: '#888', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>
+                    Priority
+                  </label>
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <button
+                      onClick={() => setRequestPriority('normal')}
+                      style={{
+                        flex: 1,
+                        padding: '10px 16px',
+                        background: requestPriority === 'normal' ? `${primaryColor}20` : 'rgba(255,255,255,0.03)',
+                        border: `1px solid ${requestPriority === 'normal' ? primaryColor + '55' : 'rgba(255,255,255,0.1)'}`,
+                        borderRadius: 8,
+                        color: requestPriority === 'normal' ? primaryColor : '#888',
+                        fontSize: 13,
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Normal
+                    </button>
+                    <button
+                      onClick={() => setRequestPriority('urgent')}
+                      style={{
+                        flex: 1,
+                        padding: '10px 16px',
+                        background: requestPriority === 'urgent' ? 'rgba(255,107,107,0.15)' : 'rgba(255,255,255,0.03)',
+                        border: `1px solid ${requestPriority === 'urgent' ? 'rgba(255,107,107,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                        borderRadius: 8,
+                        color: requestPriority === 'urgent' ? '#FF6B6B' : '#888',
+                        fontSize: 13,
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Urgent
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  onClick={submitRequest}
+                  disabled={requestSubmitting || !requestTitle.trim()}
+                  style={{
+                    width: '100%',
+                    padding: '14px 24px',
+                    background: !requestTitle.trim()
+                      ? 'rgba(255,255,255,0.1)'
+                      : `linear-gradient(135deg, ${primaryColor}, ${accentColor})`,
+                    border: 'none',
+                    borderRadius: 10,
+                    color: !requestTitle.trim() ? '#666' : '#0A0A0A',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    cursor: !requestTitle.trim() ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {requestSubmitting ? 'Submitting...' : 'Submit Request'}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
