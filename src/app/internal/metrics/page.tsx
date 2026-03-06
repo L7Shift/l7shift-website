@@ -176,13 +176,13 @@ export default function MetricsPage() {
           borderRadius: 16,
         }}>
           <div style={{ fontSize: 11, color: '#888', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Active Projects
+            Projects
           </div>
           <div style={{ fontSize: 36, fontWeight: 700, color: '#FF00AA' }}>
             {stats?.projectsCompleted || 0}
           </div>
           <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
-            delivering results
+            active &amp; completed
           </div>
         </div>
       </div>

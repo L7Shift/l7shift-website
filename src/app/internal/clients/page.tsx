@@ -38,6 +38,19 @@ function formatCurrency(amount: number): string {
   }).format(amount)
 }
 
+// Map company names to their correct portal slugs
+const PORTAL_SLUG_MAP: Record<string, string> = {
+  'Stitchwichs': 'stitchwichs',
+  "Shariel's Lashes": 'shariels-lashes',
+  'Shariels Lashes': 'shariels-lashes',
+  'Scat Pack CLT': 'scat-pack-clt',
+  'Pretty Paid Closet': 'prettypaidcloset',
+}
+
+function getPortalSlug(company: string): string {
+  return PORTAL_SLUG_MAP[company] || company.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+}
+
 export default function ClientsPage() {
   const [filter, setFilter] = useState<'all' | ClientStatus>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -356,7 +369,7 @@ export default function ClientsPage() {
             {/* Actions */}
             <div style={{ display: 'flex', gap: 8 }}>
               <Link
-                href={`/portal/${client.company.toLowerCase().replace(/\s+/g, '-')}`}
+                href={`/portal/${getPortalSlug(client.company)}`}
                 style={{
                   padding: '6px 12px',
                   background: 'rgba(255, 255, 255, 0.1)',

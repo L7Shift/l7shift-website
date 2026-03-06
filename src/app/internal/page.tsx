@@ -235,7 +235,7 @@ export default function InternalDashboard() {
                 Active Projects
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {projects.map((project) => {
+                {projects.filter(p => p.status === 'active').map((project) => {
                   const completion = project.total_tasks > 0
                     ? Math.round((project.shipped_tasks / project.total_tasks) * 100)
                     : 0

@@ -391,7 +391,7 @@ export default function RequirementsPage() {
                 >
                   <span>v{req.version}</span>
                   <span>•</span>
-                  <span>{sections.length} sections</span>
+                  <span>{sections.length} {sections.length === 1 ? 'section' : 'sections'}</span>
                   <span>•</span>
                   <span>Updated {new Date(req.updated_at).toLocaleDateString()}</span>
                 </div>

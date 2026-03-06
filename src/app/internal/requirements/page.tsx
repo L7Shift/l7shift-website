@@ -1,10 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { StatusPill } from '@/components/dashboard'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
+import type { RequirementStatus } from '@/lib/database.types'
 
-type RequirementStatus = 'draft' | 'review' | 'approved' | 'implemented'
+interface RequirementRow {
+  id: string
+  project_id: string
+  title: string
+  content: string
+  version: number
+  status: RequirementStatus
+  created_by: string
+  created_at: string
+  updated_at: string
+}
 
 interface Requirement {
   id: string
@@ -12,94 +24,18 @@ interface Requirement {
   projectName: string
   clientName: string
   title: string
-  phase: string
   status: RequirementStatus
   version: number
-  createdAt: Date
-  updatedAt: Date
-  sentForReview?: Date
-  signedOff: boolean
-  signedAt?: Date
-  signedBy?: string
+  createdAt: string
+  updatedAt: string
   sectionsCount: number
 }
 
-// Mock requirements data
-const mockRequirements: Requirement[] = [
-  {
-    id: '1',
-    projectId: '1',
-    projectName: 'Scat Pack CLT',
-    clientName: 'Ken Leftwich',
-    title: 'Phase 1: Core Platform Requirements',
-    phase: 'Phase 1',
-    status: 'review',
-    version: 2,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 4),
-    sentForReview: new Date(Date.now() - 1000 * 60 * 60 * 4),
-    signedOff: false,
-    sectionsCount: 3,
-  },
-  {
-    id: '2',
-    projectId: '1',
-    projectName: 'Scat Pack CLT',
-    clientName: 'Ken Leftwich',
-    title: 'Phase 2: Crew Management Requirements',
-    phase: 'Phase 2',
-    status: 'draft',
-    version: 1,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    signedOff: false,
-    sectionsCount: 2,
-  },
-  {
-    id: '3',
-    projectId: '1',
-    projectName: 'Scat Pack CLT',
-    clientName: 'Ken Leftwich',
-    title: 'Brand Identity Guidelines',
-    phase: 'Design',
-    status: 'approved',
-    version: 1,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 21),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
-    signedOff: true,
-    signedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5),
-    signedBy: 'Ken Leftwich',
-    sectionsCount: 2,
-  },
-  {
-    id: '4',
-    projectId: '2',
-    projectName: 'Pretty Paid Closet',
-    clientName: 'Jazz',
-    title: 'Platform Requirements',
-    phase: 'Phase 1',
-    status: 'draft',
-    version: 1,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2),
-    signedOff: false,
-    sectionsCount: 4,
-  },
-  {
-    id: '5',
-    projectId: '3',
-    projectName: 'Stitchwichs',
-    clientName: 'Nicole',
-    title: 'Shopify Optimization Requirements',
-    phase: 'Discovery',
-    status: 'draft',
-    version: 1,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 12),
-    signedOff: false,
-    sectionsCount: 3,
-  },
-]
+interface ProjectOption {
+  id: string
+  name: string
+  clientName: string
+}
 
 const statusConfig: Record<RequirementStatus, { label: string; color: string; bgColor: string }> = {
   draft: { label: 'Draft', color: '#888', bgColor: 'rgba(136, 136, 136, 0.1)' },
@@ -108,20 +44,138 @@ const statusConfig: Record<RequirementStatus, { label: string; color: string; bg
   implemented: { label: 'Implemented', color: '#00F0FF', bgColor: 'rgba(0, 240, 255, 0.1)' },
 }
 
+function countSections(content: string): number {
+  const matches = content.match(/^##\s+.+$/gm) || content.match(/^###\s+.+$/gm)
+  return matches ? matches.length : (content.trim() ? 1 : 0)
+}
+
 type FilterStatus = 'all' | RequirementStatus
 
 export default function InternalRequirementsPage() {
+  const router = useRouter()
+  const [requirements, setRequirements] = useState<Requirement[]>([])
+  const [projectOptions, setProjectOptions] = useState<ProjectOption[]>([])
+  const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<FilterStatus>('all')
   const [projectFilter, setProjectFilter] = useState<string>('all')
   const [showNewModal, setShowNewModal] = useState(false)
+  const [newTitle, setNewTitle] = useState('')
+  const [newProjectId, setNewProjectId] = useState('')
+  const [creating, setCreating] = useState(false)
 
-  // Get unique projects
-  const projects = Array.from(new Set(mockRequirements.map(r => r.projectId))).map(id => {
-    const req = mockRequirements.find(r => r.projectId === id)!
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  async function fetchData() {
+    if (!supabase) { setLoading(false); return }
+
+    try {
+      // Fetch requirements docs
+      const { data: docs, error: docsError } = await (supabase as ReturnType<typeof Object>)
+        .from('requirements_docs')
+        .select('*')
+        .order('updated_at', { ascending: false })
+
+      if (docsError) throw docsError
+
+      // Fetch projects for name lookup and for the create modal
+      const { data: projects, error: projError } = await (supabase as ReturnType<typeof Object>)
+        .from('projects')
+        .select('id, name, client_name, status')
+
+      if (projError) throw projError
+
+      const projectMap = new Map<string, { name: string; clientName: string }>()
+      const options: ProjectOption[] = []
+      for (const p of (projects || [])) {
+        projectMap.set(p.id, { name: p.name, clientName: p.client_name })
+        if (p.status === 'active') {
+          options.push({ id: p.id, name: p.name, clientName: p.client_name })
+        }
+      }
+      setProjectOptions(options)
+
+      const reqs: Requirement[] = (docs || []).map((doc: RequirementRow) => {
+        const project = projectMap.get(doc.project_id)
+        return {
+          id: doc.id,
+          projectId: doc.project_id,
+          projectName: project?.name || 'Unknown Project',
+          clientName: project?.clientName || '',
+          title: doc.title,
+          status: doc.status,
+          version: doc.version,
+          createdAt: doc.created_at,
+          updatedAt: doc.updated_at,
+          sectionsCount: countSections(doc.content || ''),
+        }
+      })
+      setRequirements(reqs)
+    } catch (err) {
+      console.error('Error fetching requirements:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleSendForReview(reqId: string) {
+    if (!supabase) return
+
+    try {
+      const { error } = await (supabase as ReturnType<typeof Object>)
+        .from('requirements_docs')
+        .update({ status: 'review', updated_at: new Date().toISOString() })
+        .eq('id', reqId)
+
+      if (error) throw error
+      setRequirements(prev => prev.map(r =>
+        r.id === reqId ? { ...r, status: 'review' as RequirementStatus, updatedAt: new Date().toISOString() } : r
+      ))
+    } catch (err) {
+      console.error('Error sending for review:', err)
+    }
+  }
+
+  async function handleCreateDoc() {
+    if (!supabase || !newProjectId || !newTitle.trim()) return
+    setCreating(true)
+
+    try {
+      const { data, error } = await (supabase as ReturnType<typeof Object>)
+        .from('requirements_docs')
+        .insert({
+          project_id: newProjectId,
+          title: newTitle.trim(),
+          content: '',
+          status: 'draft',
+          version: 1,
+          created_by: 'internal',
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      setShowNewModal(false)
+      setNewTitle('')
+      setNewProjectId('')
+      // Navigate to the new doc editor
+      router.push(`/internal/requirements/${data.id}`)
+    } catch (err) {
+      console.error('Error creating requirement:', err)
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  // Get unique projects from actual data
+  const projects = Array.from(new Set(requirements.map(r => r.projectId))).map(id => {
+    const req = requirements.find(r => r.projectId === id)!
     return { id, name: req.projectName }
   })
 
-  const filteredRequirements = mockRequirements.filter((r) => {
+  const filteredRequirements = requirements.filter((r) => {
     if (filter !== 'all' && r.status !== filter) return false
     if (projectFilter !== 'all' && r.projectId !== projectFilter) return false
     return true
@@ -129,10 +183,18 @@ export default function InternalRequirementsPage() {
 
   // Stats
   const stats = {
-    total: mockRequirements.length,
-    draft: mockRequirements.filter(r => r.status === 'draft').length,
-    awaitingSignoff: mockRequirements.filter(r => r.status === 'review').length,
-    approved: mockRequirements.filter(r => r.status === 'approved' || r.status === 'implemented').length,
+    total: requirements.length,
+    draft: requirements.filter(r => r.status === 'draft').length,
+    awaitingSignoff: requirements.filter(r => r.status === 'review').length,
+    approved: requirements.filter(r => r.status === 'approved' || r.status === 'implemented').length,
+  }
+
+  if (loading) {
+    return (
+      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '60px 0', textAlign: 'center' }}>
+        <div style={{ color: '#888', fontSize: 14 }}>Loading requirements...</div>
+      </div>
+    )
   }
 
   return (
@@ -353,18 +415,6 @@ export default function InternalRequirementsPage() {
             {/* Document Info */}
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                <span
-                  style={{
-                    padding: '2px 8px',
-                    background: 'rgba(0, 240, 255, 0.1)',
-                    borderRadius: 4,
-                    fontSize: 10,
-                    fontWeight: 600,
-                    color: '#00F0FF',
-                  }}
-                >
-                  {req.phase}
-                </span>
                 <span style={{ fontSize: 11, color: '#666' }}>v{req.version}</span>
               </div>
               <div style={{ fontSize: 14, fontWeight: 600, color: '#FAFAFA' }}>
@@ -396,21 +446,16 @@ export default function InternalRequirementsPage() {
                   color: statusConfig[req.status].color,
                 }}
               >
-                {req.status === 'approved' && '✓ '}
+                {req.status === 'approved' && '\u2713 '}
                 {statusConfig[req.status].label}
               </div>
-              {req.signedOff && req.signedAt && (
-                <div style={{ fontSize: 10, color: '#666', marginTop: 4 }}>
-                  by {req.signedBy} on {req.signedAt.toLocaleDateString()}
-                </div>
-              )}
             </div>
 
             {/* Last Updated */}
             <div style={{ fontSize: 13, color: '#888' }}>
-              {req.updatedAt.toLocaleDateString()}
+              {new Date(req.updatedAt).toLocaleDateString()}
               <div style={{ fontSize: 10, color: '#666' }}>
-                {req.updatedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {new Date(req.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
 
@@ -434,6 +479,7 @@ export default function InternalRequirementsPage() {
               </Link>
               {req.status === 'draft' && (
                 <button
+                  onClick={() => handleSendForReview(req.id)}
                   style={{
                     padding: '6px 12px',
                     background: 'linear-gradient(135deg, #00F0FF, #FF00AA)',
@@ -463,7 +509,9 @@ export default function InternalRequirementsPage() {
             <span style={{ fontSize: 48, display: 'block', marginBottom: 16 }}>📄</span>
             <p style={{ fontSize: 15, margin: 0 }}>No requirements found</p>
             <p style={{ fontSize: 13, color: '#555', marginTop: 8 }}>
-              Try adjusting your filters or create a new document
+              {requirements.length === 0
+                ? 'Create your first requirement document to get started'
+                : 'Try adjusting your filters'}
             </p>
           </div>
         )}
@@ -506,6 +554,8 @@ export default function InternalRequirementsPage() {
                   Project
                 </label>
                 <select
+                  value={newProjectId}
+                  onChange={(e) => setNewProjectId(e.target.value)}
                   style={{
                     width: '100%',
                     padding: '12px 16px',
@@ -517,7 +567,7 @@ export default function InternalRequirementsPage() {
                   }}
                 >
                   <option value="">Select a project...</option>
-                  {projects.map((p) => (
+                  {projectOptions.map((p) => (
                     <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
                 </select>
@@ -530,6 +580,8 @@ export default function InternalRequirementsPage() {
                 </label>
                 <input
                   type="text"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="e.g., Phase 1: Core Requirements"
                   style={{
                     width: '100%',
@@ -539,26 +591,7 @@ export default function InternalRequirementsPage() {
                     borderRadius: 8,
                     color: '#FAFAFA',
                     fontSize: 14,
-                  }}
-                />
-              </div>
-
-              {/* Phase */}
-              <div>
-                <label style={{ display: 'block', fontSize: 12, color: '#888', marginBottom: 8 }}>
-                  Phase / Category
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g., Phase 1, Design, Discovery"
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: 8,
-                    color: '#FAFAFA',
-                    fontSize: 14,
+                    boxSizing: 'border-box',
                   }}
                 />
               </div>
@@ -582,19 +615,21 @@ export default function InternalRequirementsPage() {
                   Cancel
                 </button>
                 <button
+                  onClick={handleCreateDoc}
+                  disabled={creating || !newProjectId || !newTitle.trim()}
                   style={{
                     flex: 1,
                     padding: '12px 24px',
-                    background: 'linear-gradient(135deg, #00F0FF, #FF00AA)',
+                    background: (!newProjectId || !newTitle.trim()) ? 'rgba(255, 255, 255, 0.1)' : 'linear-gradient(135deg, #00F0FF, #FF00AA)',
                     border: 'none',
                     borderRadius: 8,
-                    color: '#0A0A0A',
+                    color: (!newProjectId || !newTitle.trim()) ? '#666' : '#0A0A0A',
                     fontSize: 14,
                     fontWeight: 600,
-                    cursor: 'pointer',
+                    cursor: (!newProjectId || !newTitle.trim()) ? 'not-allowed' : 'pointer',
                   }}
                 >
-                  Create Document
+                  {creating ? 'Creating...' : 'Create Document'}
                 </button>
               </div>
             </div>

@@ -63,9 +63,32 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Fetch project counts per client
+    const clientIds = (data || []).map((c: { id: string }) => c.id)
+    let projectCounts: Record<string, number> = {}
+
+    if (clientIds.length > 0) {
+      const { data: projects } = await (supabase.from('projects') as any)
+        .select('client_id')
+        .in('client_id', clientIds)
+
+      if (projects) {
+        for (const p of projects) {
+          if (p.client_id) {
+            projectCounts[p.client_id] = (projectCounts[p.client_id] || 0) + 1
+          }
+        }
+      }
+    }
+
+    const dataWithCounts = (data || []).map((c: { id: string }) => ({
+      ...c,
+      project_count: projectCounts[c.id] || 0,
+    }))
+
     return NextResponse.json({
       success: true,
-      data,
+      data: dataWithCounts,
       pagination: {
         total: count,
         limit,
