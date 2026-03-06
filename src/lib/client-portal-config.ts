@@ -22,10 +22,8 @@ const CONFIGS: Record<string, ClientPortalConfig> = {
     primaryColor: '#8B5CF6',
     accentColor: '#F59E0B',
     assetRequests: [
-      { icon: 'palette', title: 'Logo & Brand Files', description: 'Your current logo, any design files, fonts you use.', priority: true, category: 'logos' },
-      { icon: 'camera', title: 'Product Photos', description: 'Photos of finished garments, mockups, or design references.', priority: true, category: 'photos' },
-      { icon: 'image', title: 'Design References', description: 'Inspiration images, color palettes, mood boards.', priority: false, category: 'content' },
-      { icon: 'file', title: 'Product Catalog', description: 'Product list, pricing sheet, or inventory if available.', priority: false, category: 'documents' },
+      { icon: 'image', title: 'New Collection Inspiration', description: 'Mood boards, design references, or inspiration images for upcoming collections.', priority: false, category: 'content' },
+      { icon: 'camera', title: 'New Product Photos', description: 'Photos for any new products or designs not yet on the site.', priority: false, category: 'photos' },
     ],
   },
   'shariels-lashes': {
