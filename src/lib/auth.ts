@@ -141,7 +141,8 @@ async function getEnvUser(email: string): Promise<User | null> {
   }
 
   // Hash the env password with bcrypt so all users use the same comparison path
-  const hashedPassword = await hashPassword(envUser.envPassword)
+  // Trim to handle trailing newlines in env vars
+  const hashedPassword = await hashPassword(envUser.envPassword.trim())
 
   return {
     id: `env_${normalizedEmail}`,
