@@ -111,12 +111,17 @@ export async function POST(
     }
 
     // Create the signoff record
-    const signoffData = {
+    const clientResponse = body.response && typeof body.response === 'string'
+      ? body.response.trim()
+      : null
+
+    const signoffData: Record<string, unknown> = {
       doc_id: id,
       client_id,
       signed_at: new Date().toISOString(),
       ip_address: ipAddress,
       user_agent: userAgent,
+      client_response: clientResponse,
     }
 
     const { data: signoff, error: signoffError } = await (supabase
