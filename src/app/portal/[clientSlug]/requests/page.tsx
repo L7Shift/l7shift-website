@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { getProjectBySlug } from '@/lib/portal-utils'
@@ -12,9 +12,10 @@ interface ClientRequest {
   title: string
   description: string | null
   priority: 'low' | 'normal' | 'high' | 'urgent'
-  status: 'open' | 'in_review' | 'accepted' | 'in_progress' | 'completed' | 'declined'
+  status: 'open' | 'in_review' | 'accepted' | 'in_progress' | 'completed' | 'declined' | 'withdrawn'
   requested_by: string
   requested_by_type: string
+  attachments: string[]
   response_notes: string | null
   responded_at: string | null
   created_at: string
@@ -37,6 +38,7 @@ const statusLabels: Record<string, string> = {
   in_progress: 'In Progress',
   completed: 'Completed',
   declined: 'Declined',
+  withdrawn: 'Withdrawn',
 }
 
 const statusColors: Record<string, { bg: string; text: string }> = {
@@ -46,6 +48,7 @@ const statusColors: Record<string, { bg: string; text: string }> = {
   in_progress: { bg: 'rgba(234,179,8,0.15)', text: '#EAB308' },
   completed: { bg: 'rgba(34,197,94,0.15)', text: '#22C55E' },
   declined: { bg: 'rgba(156,163,175,0.15)', text: '#9CA3AF' },
+  withdrawn: { bg: 'rgba(156,163,175,0.15)', text: '#9CA3AF' },
 }
 
 function formatDate(dateStr: string): string {
@@ -85,14 +88,30 @@ function RequestSubmitModal({
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<'low' | 'normal' | 'high' | 'urgent'>('normal')
+  const [files, setFiles] = useState<File[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   async function handleSubmit() {
     if (!title.trim()) return
     setSubmitting(true)
 
     try {
+      // Upload files first
+      const uploadedPaths: string[] = []
+      for (const file of files) {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('projectId', projectId)
+        formData.append('category', 'request')
+        const uploadRes = await fetch('/api/assets', { method: 'POST', body: formData })
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json()
+          uploadedPaths.push(uploadData.file?.path || file.name)
+        }
+      }
+
       const res = await fetch('/api/client/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -102,6 +121,7 @@ function RequestSubmitModal({
           description: description.trim() || null,
           priority,
           clientName,
+          attachments: uploadedPaths,
         }),
       })
 
@@ -117,6 +137,16 @@ function RequestSubmitModal({
     } finally {
       setSubmitting(false)
     }
+  }
+
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    if (e.target.files) {
+      setFiles(prev => [...prev, ...Array.from(e.target.files!)])
+    }
+  }
+
+  function removeFile(index: number) {
+    setFiles(prev => prev.filter((_, i) => i !== index))
   }
 
   const priorityOptions: Array<{ value: 'low' | 'normal' | 'high' | 'urgent'; label: string }> = [
@@ -222,6 +252,64 @@ function RequestSubmitModal({
                   )
                 })}
               </div>
+            </div>
+
+            {/* File Upload */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: 'block', fontSize: 12, color: '#888', marginBottom: 8, fontWeight: 500 }}>
+                Attachments (optional)
+              </label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*,.pdf,.doc,.docx,.txt"
+                onChange={handleFileSelect}
+                style={{ display: 'none' }}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  padding: '10px 16px',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px dashed rgba(255,255,255,0.2)',
+                  borderRadius: 10,
+                  color: '#888',
+                  fontSize: 13,
+                  cursor: 'pointer',
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                }}
+              >
+                <span style={{ fontSize: 16 }}>📎</span>
+                Upload screenshots, mockups, or documents
+              </button>
+              {files.length > 0 && (
+                <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {files.map((file, i) => (
+                    <div key={i} style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      padding: '6px 10px', background: 'rgba(255,255,255,0.05)',
+                      borderRadius: 6, fontSize: 12,
+                    }}>
+                      <span style={{ color: '#CCC' }}>{file.name}</span>
+                      <button
+                        onClick={() => removeFile(i)}
+                        style={{
+                          background: 'none', border: 'none', color: '#666',
+                          cursor: 'pointer', fontSize: 14, padding: '0 4px',
+                        }}
+                      >
+                        x
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Submit */}
@@ -509,9 +597,54 @@ export default function RequestsPage() {
                       </div>
                     )}
 
-                    {/* Submitted by */}
-                    <div style={{ paddingTop: 8, fontSize: 11, color: '#555' }}>
-                      Submitted by {request.requested_by} on {new Date(request.created_at).toLocaleDateString()}
+                    {/* Attachments */}
+                    {request.attachments && request.attachments.length > 0 && (
+                      <div style={{ margin: '8px 0' }}>
+                        <span style={{ fontSize: 11, color: '#888', fontWeight: 500 }}>Attachments:</span>
+                        <div style={{ display: 'flex', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
+                          {request.attachments.map((path, i) => (
+                            <span key={i} style={{
+                              padding: '4px 8px', background: 'rgba(255,255,255,0.05)',
+                              border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4,
+                              fontSize: 11, color: '#AAA',
+                            }}>
+                              📎 {path.split('/').pop()}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Submitted by + actions */}
+                    <div style={{ paddingTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: 11, color: '#555' }}>
+                        Submitted by {request.requested_by} on {new Date(request.created_at).toLocaleDateString()}
+                      </span>
+                      {request.status === 'open' && (
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation()
+                            if (!confirm('Withdraw this request? This cannot be undone.')) return
+                            try {
+                              const res = await fetch('/api/client/request', {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ requestId: request.id, status: 'withdrawn' }),
+                              })
+                              if (res.ok) loadRequests()
+                            } catch (err) {
+                              console.error('Error withdrawing request:', err)
+                            }
+                          }}
+                          style={{
+                            padding: '6px 12px', background: 'rgba(239,68,68,0.1)',
+                            border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6,
+                            color: '#EF4444', fontSize: 11, fontWeight: 500, cursor: 'pointer',
+                          }}
+                        >
+                          Withdraw Request
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}

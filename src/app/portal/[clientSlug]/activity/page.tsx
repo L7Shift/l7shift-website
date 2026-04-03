@@ -3,11 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import {
-  getProjectBySlug,
-  getProjectActivity,
-  transformActivityEntry,
-} from '@/lib/portal-utils'
+import { getProjectBySlug } from '@/lib/portal-utils'
 import { getClientConfig } from '@/lib/client-portal-config'
 
 interface ActivityItem {
@@ -31,7 +27,10 @@ const activityConfig: Record<string, { icon: string; color: string; bgColor: str
   requirement_approved: { icon: '✍️', color: '#BFFF00', bgColor: 'rgba(191, 255, 0, 0.1)' },
   feedback_received: { icon: '💬', color: '#FF00AA', bgColor: 'rgba(255, 0, 170, 0.1)' },
   milestone_reached: { icon: '🎯', color: '#00F0FF', bgColor: 'rgba(0, 240, 255, 0.1)' },
-  bug_report_bug_reported: { icon: '🐛', color: '#EF4444', bgColor: 'rgba(239, 68, 68, 0.1)' },
+  bug_reported: { icon: '🐛', color: '#EF4444', bgColor: 'rgba(239, 68, 68, 0.1)' },
+  bug_updated: { icon: '🔧', color: '#F97316', bgColor: 'rgba(249, 115, 22, 0.1)' },
+  bug_resolved: { icon: '✅', color: '#22C55E', bgColor: 'rgba(34, 197, 94, 0.1)' },
+  client_request: { icon: '✨', color: '#A855F7', bgColor: 'rgba(168, 85, 247, 0.1)' },
   project_update: { icon: '📢', color: '#888', bgColor: 'rgba(136, 136, 136, 0.1)' },
 }
 
@@ -89,8 +88,14 @@ export default function ActivityPage() {
         return
       }
 
-      const activityData = await getProjectActivity(projectData.project.id, 50)
-      setActivity(activityData.map(transformActivityEntry))
+      const res = await fetch(`/api/client/activity?projectId=${projectData.project.id}&limit=50`)
+      if (!res.ok) {
+        setError('Failed to load activity')
+        setLoading(false)
+        return
+      }
+      const { activity: entries } = await res.json()
+      setActivity((entries || []).map(transformEntry))
     } catch (err) {
       console.error('Error loading activity:', err)
       setError('Failed to load activity')
@@ -99,11 +104,58 @@ export default function ActivityPage() {
     }
   }
 
+  // Transform raw activity_log entry into display item
+  function transformEntry(entry: { id: string; action: string; entity_type: string; actor: string; actor_type: string; metadata: Record<string, unknown> | null; created_at: string }): ActivityItem {
+    const meta = entry.metadata || {}
+    const metaTitle = meta.title as string | undefined
+    const metaNotes = meta.agent_notes as string | undefined
+    const metaStatus = meta.status as string | undefined
+    const bugNumber = meta.bug_number as string | undefined
+
+    // Derive display type from raw action + entity_type
+    let type = 'project_update'
+    if (entry.entity_type === 'bug_report') {
+      if (entry.action === 'bug_reported') type = 'bug_reported'
+      else if (metaStatus === 'resolved' || metaStatus === 'closed') type = 'bug_resolved'
+      else type = 'bug_updated'
+    } else if (entry.entity_type === 'client_request') {
+      type = 'client_request'
+    } else if (entry.entity_type === 'task') {
+      if (entry.action === 'created') type = 'task_created'
+      else if (metaStatus === 'shipped') type = 'task_shipped'
+      else type = 'task_updated'
+    } else if (entry.entity_type === 'deliverable') {
+      type = entry.action === 'approved' ? 'deliverable_approved' : 'deliverable_uploaded'
+    } else if (entry.entity_type === 'requirement') {
+      type = entry.action === 'approved' ? 'requirement_approved' : 'requirement_created'
+    }
+
+    // Derive title
+    let title = metaTitle || `${entry.entity_type} ${entry.action}`
+    if (bugNumber) title = `${bugNumber}: ${metaTitle || 'Bug update'}`
+    if (type === 'task_shipped') title = metaTitle || 'Task completed'
+    if (type === 'bug_resolved') title = bugNumber ? `${bugNumber} resolved` : 'Bug resolved'
+
+    // Description — show agent notes or resolution
+    const description = (meta.resolution_notes as string) || (metaNotes && metaNotes.length > 120 ? metaNotes.substring(0, 120) + '...' : metaNotes) || (meta.description as string) || undefined
+
+    return {
+      id: entry.id,
+      type,
+      title,
+      description,
+      actor: entry.actor === 'artemis' ? 'L7 Shift' : entry.actor,
+      actorType: entry.actor_type === 'system' ? 'internal' : entry.actor_type as 'internal' | 'client',
+      timestamp: new Date(entry.created_at),
+      metadata: meta,
+    }
+  }
+
   const filteredActivity = activity.filter((item) => {
     if (filter === 'all') return true
     if (filter === 'shipped') return item.type === 'task_shipped' || item.type === 'milestone_reached'
-    if (filter === 'approvals') return item.type.includes('approved')
-    if (filter === 'feedback') return item.type === 'feedback_received' || item.type.includes('bug')
+    if (filter === 'approvals') return item.type.includes('approved') || item.type === 'requirement_approved'
+    if (filter === 'feedback') return item.type === 'feedback_received' || item.type === 'bug_reported' || item.type === 'bug_updated' || item.type === 'bug_resolved' || item.type === 'client_request'
     return true
   })
 

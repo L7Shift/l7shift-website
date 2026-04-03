@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { projectId, title, description, priority, clientName } = await req.json()
+    const { projectId, title, description, priority, clientName, attachments } = await req.json()
 
     if (!projectId || !title?.trim()) {
       return NextResponse.json({ error: 'Project ID and title are required' }, { status: 400 })
@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
       status: 'open',
       requested_by: clientName || 'Client',
       requested_by_type: 'client',
+      attachments: attachments || [],
     }).select().single()
 
     if (requestError) {
@@ -90,6 +91,41 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, requestId: request.id })
   } catch (err) {
     console.error('Client request error:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const { requestId, status } = await req.json()
+
+    if (!requestId) {
+      return NextResponse.json({ error: 'requestId is required' }, { status: 400 })
+    }
+
+    // Clients can only withdraw/cancel their own open requests
+    if (status !== 'withdrawn') {
+      return NextResponse.json({ error: 'Clients can only withdraw requests' }, { status: 403 })
+    }
+
+    const supabase = getSupabase()
+
+    const { data: request, error } = await supabase
+      .from('client_requests')
+      .update({ status: 'withdrawn', updated_at: new Date().toISOString() })
+      .eq('id', requestId)
+      .eq('status', 'open')
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Failed to update request:', error)
+      return NextResponse.json({ error: 'Failed to update request' }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true, request })
+  } catch (err) {
+    console.error('Request update error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
