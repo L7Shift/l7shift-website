@@ -232,22 +232,22 @@ export default function ClientPortalDashboard() {
 
   return (
     <div>
-      {/* Welcome */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+      {/* Welcome Hero */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#FAFAFA' }}>
+          <h1 style={{ margin: 0, fontSize: 28, fontWeight: 700, color: '#FAFAFA', letterSpacing: '-0.02em' }}>
             Welcome, {clientName}
           </h1>
-          <p style={{ margin: '6px 0 0', color: '#888', fontSize: 14 }}>
+          <p style={{ margin: '8px 0 0', color: '#666', fontSize: 14, fontWeight: 400 }}>
             Your project dashboard. Here&apos;s where everything stands.
           </p>
         </div>
         <button
           onClick={() => setShowRequestForm(true)}
           style={{
-            padding: '10px 18px',
-            background: `${primaryColor}20`,
-            border: `1px solid ${primaryColor}44`,
+            padding: '10px 20px',
+            background: 'transparent',
+            border: `1px solid ${primaryColor}50`,
             borderRadius: 10,
             color: primaryColor,
             fontSize: 13,
@@ -258,90 +258,117 @@ export default function ClientPortalDashboard() {
             gap: 6,
             whiteSpace: 'nowrap',
             flexShrink: 0,
+            transition: 'all 0.25s ease',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = `${primaryColor}15`
+            e.currentTarget.style.borderColor = `${primaryColor}80`
+            e.currentTarget.style.boxShadow = `0 0 20px ${primaryColor}15`
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = 'transparent'
+            e.currentTarget.style.borderColor = `${primaryColor}50`
+            e.currentTarget.style.boxShadow = 'none'
           }}
         >
           + New Request
         </button>
       </div>
 
-      {/* Project Status Card */}
+      {/* Project Status Card — Premium */}
       <div
         style={{
-          padding: 20,
-          background: `linear-gradient(135deg, ${primaryColor}18, ${primaryColor}08)`,
-          border: `1px solid ${primaryColor}33`,
+          padding: 24,
+          background: `linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))`,
+          border: `1px solid ${primaryColor}20`,
           borderRadius: 16,
-          marginBottom: 24,
+          marginBottom: 28,
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        {/* Accent glow */}
+        <div style={{
+          position: 'absolute',
+          top: -40,
+          right: -40,
+          width: 200,
+          height: 200,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${primaryColor}12, transparent 70%)`,
+          pointerEvents: 'none',
+        }} />
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, position: 'relative' }}>
           <div>
-            <div style={{ fontSize: 13, color: '#888', letterSpacing: '0.05em' }}>PROJECT</div>
-            <div style={{ fontSize: 17, fontWeight: 600, color: '#FAFAFA', marginTop: 2 }}>
+            <div style={{ fontSize: 11, color: '#555', letterSpacing: '0.1em', fontWeight: 500, textTransform: 'uppercase' }}>Project</div>
+            <div style={{ fontSize: 18, fontWeight: 600, color: '#FAFAFA', marginTop: 4, letterSpacing: '-0.01em' }}>
               {project.name}
             </div>
           </div>
           <div
             style={{
-              padding: '6px 14px',
-              background: `${primaryColor}25`,
-              border: `1px solid ${primaryColor}44`,
+              padding: '6px 16px',
+              background: `${primaryColor}15`,
+              border: `1px solid ${primaryColor}30`,
               borderRadius: 20,
               fontSize: 12,
               fontWeight: 600,
               color: primaryColor,
+              letterSpacing: '0.02em',
             }}
           >
             {completion}% Complete
           </div>
         </div>
+
         {/* Progress bar */}
-        <div style={{ height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 3, marginBottom: 14 }}>
+        <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, marginBottom: 20 }}>
           <div
             style={{
               height: '100%',
               width: `${Math.max(completion, 3)}%`,
               background: `linear-gradient(90deg, ${primaryColor}, ${accentColor})`,
-              borderRadius: 3,
-              transition: 'width 1s ease',
+              borderRadius: 2,
+              transition: 'width 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              boxShadow: `0 0 12px ${primaryColor}40`,
             }}
           />
         </div>
-        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-          <div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: primaryColor }}>{shippedTasks.length}</div>
-            <div style={{ fontSize: 11, color: '#888', letterSpacing: '0.05em' }}>SHIPPED</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: accentColor }}>{activeTasks.length}</div>
-            <div style={{ fontSize: 11, color: '#888', letterSpacing: '0.05em' }}>IN PROGRESS</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: '#FAFAFA' }}>{totalActive}</div>
-            <div style={{ fontSize: 11, color: '#888', letterSpacing: '0.05em' }}>TOTAL</div>
-          </div>
-          {timeSaved > 0 && (
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: '#4ADE80' }}>{Math.round(timeSaved)}h</div>
-              <div style={{ fontSize: 11, color: '#888', letterSpacing: '0.05em' }}>TIME SAVED</div>
+
+        {/* Stats grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 16 }}>
+          {[
+            { value: shippedTasks.length, label: 'SHIPPED', color: primaryColor },
+            { value: activeTasks.length, label: 'IN PROGRESS', color: accentColor },
+            { value: totalActive, label: 'TOTAL', color: '#FAFAFA' },
+            ...(timeSaved > 0 ? [{ value: `${Math.round(timeSaved)}h`, label: 'TIME SAVED', color: '#4ADE80' }] : []),
+          ].map((stat, i) => (
+            <div key={i} style={{
+              padding: '12px 0',
+              borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+              paddingLeft: i > 0 ? 16 : 0,
+            }}>
+              <div style={{ fontSize: 24, fontWeight: 700, color: stat.color, letterSpacing: '-0.02em' }}>{stat.value}</div>
+              <div style={{ fontSize: 10, color: '#555', letterSpacing: '0.1em', fontWeight: 500, marginTop: 4 }}>{stat.label}</div>
             </div>
-          )}
+          ))}
         </div>
       </div>
 
       {/* Action Required */}
       {priorityActions.length > 0 && (
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-            <h2 style={{ margin: 0, fontSize: 17, fontWeight: 600, color: '#FAFAFA' }}>
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: '#FAFAFA', letterSpacing: '-0.01em' }}>
               Action Required
             </h2>
             <span
               style={{
                 fontSize: 11,
                 fontWeight: 700,
-                color: '#FF6B6B',
-                background: 'rgba(255,107,107,0.15)',
+                color: primaryColor,
+                background: `${primaryColor}15`,
                 padding: '3px 10px',
                 borderRadius: 10,
               }}
@@ -349,7 +376,7 @@ export default function ClientPortalDashboard() {
               {priorityActions.length}
             </span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {priorityActions.map(item => (
               <Link
                 key={item.id}
@@ -358,40 +385,41 @@ export default function ClientPortalDashboard() {
                   display: 'flex',
                   gap: 14,
                   padding: '16px 18px',
-                  background: item.type === 'upload_asset'
-                    ? 'rgba(255,255,255,0.03)'
-                    : 'rgba(255,0,170,0.06)',
-                  border: item.type === 'upload_asset'
-                    ? `1px solid ${primaryColor}33`
-                    : '1px solid rgba(255,0,170,0.2)',
+                  background: 'rgba(255,255,255,0.02)',
+                  border: '1px solid rgba(255,255,255,0.08)',
                   borderRadius: 12,
                   textDecoration: 'none',
                   alignItems: 'center',
-                  transition: 'all 0.2s ease',
+                  transition: 'all 0.25s ease',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = `${primaryColor}35`
+                  e.currentTarget.style.background = `${primaryColor}06`
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.02)'
                 }}
               >
-                <span style={{ fontSize: 24, flexShrink: 0 }}>{ICON_MAP[item.icon] || '\u{1F4CB}'}</span>
+                <span style={{ fontSize: 22, flexShrink: 0, opacity: 0.9 }}>{ICON_MAP[item.icon] || '\u{1F4CB}'}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#FAFAFA' }}>{item.title}</div>
-                  <div style={{ fontSize: 12, color: '#888', marginTop: 2, lineHeight: 1.4 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#EAEAEA' }}>{item.title}</div>
+                  <div style={{ fontSize: 12, color: '#666', marginTop: 3, lineHeight: 1.5 }}>
                     {item.description}
                   </div>
                 </div>
                 <span
                   style={{
-                    padding: '8px 16px',
-                    background: item.type === 'upload_asset'
-                      ? `${primaryColor}25`
-                      : 'linear-gradient(135deg, #00F0FF, #FF00AA)',
-                    border: item.type === 'upload_asset'
-                      ? `1px solid ${primaryColor}44`
-                      : 'none',
+                    padding: '8px 18px',
+                    background: `${primaryColor}15`,
+                    border: `1px solid ${primaryColor}30`,
                     borderRadius: 8,
-                    color: item.type === 'upload_asset' ? primaryColor : '#0A0A0A',
+                    color: primaryColor,
                     fontSize: 12,
                     fontWeight: 600,
                     flexShrink: 0,
                     whiteSpace: 'nowrap',
+                    transition: 'all 0.2s',
                   }}
                 >
                   {item.ctaLabel}
@@ -453,14 +481,14 @@ export default function ClientPortalDashboard() {
       {activityItems.length > 0 && (
         <div
           style={{
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            background: 'rgba(255, 255, 255, 0.02)',
+            border: '1px solid rgba(255, 255, 255, 0.07)',
             borderRadius: 16,
-            padding: 20,
-            marginBottom: 20,
+            padding: 22,
+            marginBottom: 24,
           }}
         >
-          <h2 style={{ margin: '0 0 16px', fontSize: 17, fontWeight: 600, color: '#FAFAFA' }}>
+          <h2 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 600, color: '#FAFAFA', letterSpacing: '-0.01em' }}>
             Recent Activity
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -518,30 +546,31 @@ export default function ClientPortalDashboard() {
       {/* Contact */}
       <div
         style={{
-          padding: 20,
-          background: `linear-gradient(135deg, ${primaryColor}10, ${accentColor}08)`,
-          border: `1px solid ${primaryColor}20`,
+          padding: 22,
+          background: 'rgba(255,255,255,0.02)',
+          border: '1px solid rgba(255,255,255,0.07)',
           borderRadius: 16,
         }}
       >
-        <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#FAFAFA' }}>
+        <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#EAEAEA' }}>
           Questions? Need help?
         </h3>
-        <p style={{ margin: '6px 0 14px', fontSize: 13, color: '#AAA' }}>
+        <p style={{ margin: '6px 0 16px', fontSize: 13, color: '#666' }}>
           Reach out anytime &mdash; we&apos;re building this together.
         </p>
         <a
           href="mailto:ken@l7shift.com"
           style={{
             display: 'inline-block',
-            padding: '10px 20px',
-            background: 'rgba(255, 255, 255, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            padding: '10px 22px',
+            background: 'transparent',
+            border: `1px solid ${primaryColor}40`,
             borderRadius: 8,
-            color: '#FAFAFA',
+            color: primaryColor,
             textDecoration: 'none',
             fontSize: 13,
             fontWeight: 500,
+            transition: 'all 0.2s',
           }}
         >
           Email Ken

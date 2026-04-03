@@ -133,6 +133,14 @@ async function getEnvUser(email: string): Promise<User | null> {
       client_slug: 'shariels-lashes',
       name: 'Dominique',
     },
+    'panne001@ucr.edu': {
+      email: 'panne001@ucr.edu',
+      password_hash: '',
+      envPassword: process.env.C2C_CLIENT_PASSWORD || '',
+      role: 'client',
+      client_slug: 'c2c',
+      name: 'Pape Anne',
+    },
   }
 
   const envUser = envUsers[normalizedEmail]

@@ -46,8 +46,11 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
 
   const navItems = [
     { href: `/portal/${clientSlug}`, icon: '📊', label: 'Dashboard' },
+    { href: `/portal/${clientSlug}/plan`, icon: '📄', label: 'Build Plan' },
     { href: `/portal/${clientSlug}/deliverables`, icon: '📁', label: 'Deliverables' },
     { href: `/portal/${clientSlug}/requirements`, icon: '📝', label: 'Requirements' },
+    { href: `/portal/${clientSlug}/bugs`, icon: '🐛', label: 'Bugs' },
+    { href: `/portal/${clientSlug}/requests`, icon: '✨', label: 'Requests' },
     { href: `/portal/${clientSlug}/activity`, icon: '🕐', label: 'Activity' },
     { href: `/portal/${clientSlug}/assets`, icon: '📤', label: 'Upload Assets' },
   ]
@@ -58,38 +61,52 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
       className="client-portal"
       style={{
         minHeight: '100vh',
-        background: '#0A0A0A',
+        background: '#060608',
         color: '#FAFAFA',
         fontFamily: "'Inter', -apple-system, sans-serif",
+        position: 'relative',
       }}
     >
+      {/* Ambient gradient mesh */}
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        pointerEvents: 'none',
+        zIndex: 0,
+        background: `
+          radial-gradient(ellipse 80% 50% at 20% 0%, ${config.primaryColor}08 0%, transparent 50%),
+          radial-gradient(ellipse 60% 40% at 80% 100%, ${config.accentColor}06 0%, transparent 50%)
+        `,
+      }} />
+
       {/* Top Header */}
       <header
         style={{
-          padding: '12px 16px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          padding: '14px 20px',
+          borderBottom: `1px solid ${config.primaryColor}18`,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          background: 'rgba(10, 10, 10, 0.95)',
-          backdropFilter: 'blur(10px)',
+          background: 'rgba(6, 6, 8, 0.85)',
+          backdropFilter: 'blur(20px) saturate(180%)',
           position: 'sticky',
           top: 0,
           zIndex: 100,
         }}
       >
         {/* Logo & Client Name */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ fontSize: 18, fontWeight: 500, color: '#FAFAFA' }}>L7</span>
-            <span style={{ fontSize: 12, fontWeight: 300, color: '#888', letterSpacing: '0.15em' }}>SHIFT</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5 }}>
+            <span style={{ fontSize: 20, fontWeight: 600, color: '#FAFAFA', letterSpacing: '-0.02em' }}>L7</span>
+            <span style={{ fontSize: 11, fontWeight: 400, color: '#666', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Shift</span>
           </Link>
-          <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.2)' }} />
+          <div style={{ width: 1, height: 22, background: `linear-gradient(180deg, transparent, ${config.primaryColor}40, transparent)` }} />
           <span
             style={{
               fontSize: 13,
               fontWeight: 600,
               color: config.primaryColor,
+              letterSpacing: '0.01em',
             }}
           >
             {config.name}
@@ -97,29 +114,32 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
         </div>
 
         {/* Desktop Nav */}
-        <nav className="portal-desktop-nav" style={{ display: 'flex', gap: 4 }}>
+        <nav className="portal-desktop-nav" style={{ display: 'flex', gap: 2 }}>
           {navItems.map((item) => {
             const isActive = pathname === item.href
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                className="portal-nav-link"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: 6,
-                  padding: '8px 12px',
+                  padding: '7px 14px',
                   borderRadius: 8,
                   textDecoration: 'none',
-                  color: isActive ? config.primaryColor : '#888',
-                  background: isActive ? `${config.primaryColor}15` : 'transparent',
+                  color: isActive ? config.primaryColor : '#777',
+                  background: isActive ? `${config.primaryColor}12` : 'transparent',
+                  border: isActive ? `1px solid ${config.primaryColor}25` : '1px solid transparent',
                   fontSize: 13,
-                  fontWeight: isActive ? 600 : 400,
+                  fontWeight: isActive ? 600 : 450,
                   transition: 'all 0.2s ease',
                   whiteSpace: 'nowrap',
+                  letterSpacing: '0.01em',
                 }}
               >
-                <span>{item.icon}</span>
+                <span style={{ fontSize: 14 }}>{item.icon}</span>
                 <span>{item.label}</span>
               </Link>
             )
@@ -133,19 +153,23 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
             <button
               onClick={() => setShowDropdown(!showDropdown)}
               style={{
-                width: 34,
-                height: 34,
+                width: 36,
+                height: 36,
                 borderRadius: '50%',
                 background: `linear-gradient(135deg, ${config.primaryColor}, ${config.accentColor})`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 14,
-                fontWeight: 600,
-                color: '#0A0A0A',
+                fontWeight: 700,
+                color: '#060608',
                 border: 'none',
                 cursor: 'pointer',
+                boxShadow: `0 0 20px ${config.primaryColor}30`,
+                transition: 'box-shadow 0.3s ease',
               }}
+              onMouseEnter={e => e.currentTarget.style.boxShadow = `0 0 28px ${config.primaryColor}50`}
+              onMouseLeave={e => e.currentTarget.style.boxShadow = `0 0 20px ${config.primaryColor}30`}
             >
               {userName.charAt(0).toUpperCase()}
             </button>
@@ -271,31 +295,44 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
       )}
 
       {/* Main Content */}
-      <main style={{ padding: '24px 16px', maxWidth: 1400, margin: '0 auto' }}>
+      <main style={{ padding: '32px 24px', maxWidth: 1200, margin: '0 auto', position: 'relative', zIndex: 1 }}>
         {children}
       </main>
 
       {/* Footer */}
       <footer
         style={{
-          padding: '20px 16px',
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+          padding: '24px 24px',
+          borderTop: `1px solid ${config.primaryColor}10`,
           textAlign: 'center',
+          position: 'relative',
+          zIndex: 1,
         }}
       >
-        <p style={{ color: '#555', fontSize: 11, letterSpacing: '0.1em', margin: 0 }}>
+        <p style={{ color: '#444', fontSize: 11, letterSpacing: '0.12em', margin: 0, fontWeight: 400 }}>
           POWERED BY{' '}
-          <a href="https://l7shift.com" style={{ color: config.primaryColor, textDecoration: 'none' }}>
+          <a href="https://l7shift.com" style={{ color: config.primaryColor, textDecoration: 'none', fontWeight: 600 }}>
             L7 SHIFT
           </a>{' '}
-          • THE SYMB<span style={{ fontWeight: 700 }}>AI</span>OTIC METHOD™
+          <span style={{ opacity: 0.4 }}>|</span>{' '}
+          THE SYMB<span style={{ fontWeight: 700, color: config.primaryColor }}>AI</span>OTIC SHIFT&#8482;
         </p>
       </footer>
 
-      {/* Responsive CSS */}
+      {/* Responsive CSS + Premium Styles */}
       <style jsx global>{`
         .portal-desktop-nav { display: flex !important; }
         .portal-mobile-menu-btn { display: none !important; }
+
+        .portal-nav-link:hover {
+          color: ${config.primaryColor} !important;
+          background: ${config.primaryColor}0A !important;
+        }
+
+        /* Smooth scrollbar */
+        .client-portal::-webkit-scrollbar { width: 6px; }
+        .client-portal::-webkit-scrollbar-track { background: transparent; }
+        .client-portal::-webkit-scrollbar-thumb { background: ${config.primaryColor}30; border-radius: 3px; }
 
         @media (max-width: 768px) {
           .portal-desktop-nav { display: none !important; }

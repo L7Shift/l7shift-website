@@ -747,6 +747,23 @@ export interface Database {
   }
 }
 
+// Plan Document Status
+export type PlanDocumentStatus = 'draft' | 'review' | 'approved'
+
+export interface PlanDocument {
+  id: string
+  project_id: string
+  title: string
+  original_content: string
+  current_content: string
+  status: PlanDocumentStatus
+  last_edited_by: string | null
+  last_edited_at: string | null
+  version: number
+  created_at: string
+  updated_at: string
+}
+
 // User roles and permissions
 export type UserRole = 'admin' | 'internal' | 'client'
 

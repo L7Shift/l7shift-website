@@ -10,21 +10,9 @@ import {
 } from '@/lib/portal-utils'
 import { getClientConfig } from '@/lib/client-portal-config'
 
-type ActivityType =
-  | 'task_created'
-  | 'task_shipped'
-  | 'task_updated'
-  | 'deliverable_uploaded'
-  | 'deliverable_approved'
-  | 'requirement_created'
-  | 'requirement_approved'
-  | 'feedback_received'
-  | 'milestone_reached'
-  | 'project_update'
-
 interface ActivityItem {
   id: string
-  type: ActivityType
+  type: string
   title: string
   description?: string
   actor: string
@@ -43,8 +31,11 @@ const activityConfig: Record<string, { icon: string; color: string; bgColor: str
   requirement_approved: { icon: '✍️', color: '#BFFF00', bgColor: 'rgba(191, 255, 0, 0.1)' },
   feedback_received: { icon: '💬', color: '#FF00AA', bgColor: 'rgba(255, 0, 170, 0.1)' },
   milestone_reached: { icon: '🎯', color: '#00F0FF', bgColor: 'rgba(0, 240, 255, 0.1)' },
+  bug_report_bug_reported: { icon: '🐛', color: '#EF4444', bgColor: 'rgba(239, 68, 68, 0.1)' },
   project_update: { icon: '📢', color: '#888', bgColor: 'rgba(136, 136, 136, 0.1)' },
 }
+
+const defaultActivityConfig = { icon: '📋', color: '#888', bgColor: 'rgba(136, 136, 136, 0.1)' }
 
 function formatTimestamp(date: Date): string {
   const now = new Date()
@@ -99,7 +90,7 @@ export default function ActivityPage() {
       }
 
       const activityData = await getProjectActivity(projectData.project.id, 50)
-      setActivity(activityData.map(transformActivityEntry) as ActivityItem[])
+      setActivity(activityData.map(transformActivityEntry))
     } catch (err) {
       console.error('Error loading activity:', err)
       setError('Failed to load activity')
@@ -111,8 +102,8 @@ export default function ActivityPage() {
   const filteredActivity = activity.filter((item) => {
     if (filter === 'all') return true
     if (filter === 'shipped') return item.type === 'task_shipped' || item.type === 'milestone_reached'
-    if (filter === 'approvals') return item.type.includes('approved') || item.type === 'requirement_approved'
-    if (filter === 'feedback') return item.type === 'feedback_received'
+    if (filter === 'approvals') return item.type.includes('approved')
+    if (filter === 'feedback') return item.type === 'feedback_received' || item.type.includes('bug')
     return true
   })
 
@@ -283,7 +274,7 @@ export default function ActivityPage() {
 
               {/* Items for this date */}
               {items.map((item) => {
-                const itemConfig = activityConfig[item.type] || activityConfig.project_update
+                const itemConfig = activityConfig[item.type] || defaultActivityConfig
                 return (
                   <div
                     key={item.id}

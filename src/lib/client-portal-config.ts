@@ -59,6 +59,15 @@ const CONFIGS: Record<string, ClientPortalConfig> = {
       { icon: 'camera', title: 'Product Photos', description: 'Photos of inventory, closet setups, or styled looks.', priority: true, category: 'photos' },
     ],
   },
+  'c2c': {
+    name: 'College 2 Corporate',
+    primaryColor: '#D4A843',
+    accentColor: '#1A1A2E',
+    assetRequests: [
+      { icon: 'file', title: 'Event Details', description: 'Date, chapter, expected attendance for the next workshop.', priority: true, category: 'documents' },
+      { icon: 'image', title: 'Chapter Branding', description: 'Logo, colors, or theme for your chapter events.', priority: false, category: 'logos' },
+    ],
+  },
 }
 
 const DEFAULT_CONFIG: ClientPortalConfig = {

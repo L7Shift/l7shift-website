@@ -42,6 +42,12 @@ export const CLIENT_SLUG_MAP: Record<string, {
     primaryColor: '#C6993A',
     accentColor: '#F8C8D4',
   },
+  'c2c': {
+    projectName: 'College 2 Corporate',
+    clientName: 'Pape',
+    primaryColor: '#D4A843',
+    accentColor: '#1A1A2E',
+  },
 }
 
 export interface PortalProject {
@@ -329,10 +335,91 @@ export async function approveDeliverable(
   }
 }
 
+// Map DB action+entity_type to display types
+const ACTION_TYPE_MAP: Record<string, string> = {
+  'task_created': 'task_created',
+  'task_updated': 'task_updated',
+  'task_shipped': 'task_shipped',
+  'deliverable_uploaded': 'deliverable_uploaded',
+  'deliverable_approved': 'deliverable_approved',
+  'requirement_created': 'requirement_created',
+  'requirement_approved': 'requirement_approved',
+  'feedback_received': 'feedback_received',
+  'milestone_reached': 'milestone_reached',
+  'bug_reported': 'task_created',
+  'critical_bug_reported': 'task_created',
+  'bug_updated': 'task_updated',
+  'bug_note_added': 'feedback_received',
+  'client_request': 'task_created',
+  'urgent_request': 'task_created',
+}
+
+function deriveActivityType(action: string, entityType: string, metadata: Record<string, unknown> | null): string {
+  // Check direct match first (e.g., 'bug_reported', 'client_request')
+  if (ACTION_TYPE_MAP[action]) return ACTION_TYPE_MAP[action]
+
+  // Combine entity_type + action for standard CRUD entries
+  const combined = `${entityType}_${action}`
+  if (ACTION_TYPE_MAP[combined]) return ACTION_TYPE_MAP[combined]
+
+  // Handle status changes in metadata
+  if (action === 'updated' && metadata?.status === 'shipped') {
+    return 'task_shipped'
+  }
+
+  // Default combinationsif (action === 'created') return `${entityType}_created`
+  if (action === 'updated') return `${entityType}_updated`
+
+  return 'project_update'
+}
+
+function deriveTitle(action: string, entityType: string, metadata: Record<string, unknown> | null): string {
+  const metaTitle = metadata?.title as string | undefined
+  const metaNotes = metadata?.agent_notes as string | undefined
+  const metaStatus = metadata?.status as string | undefined
+  const bugNumber = metadata?.bug_number as string | undefined
+
+  // Bug reports
+  if (bugNumber) return `${bugNumber}: ${metaTitle || 'Bug reported'}`
+
+  // Client requests
+  if (action === 'client_request' || action === 'urgent_request') {
+    return metaTitle || 'New request submitted'
+  }
+
+  // Task created with title
+  if (action === 'created' && metaTitle) return metaTitle
+
+  // Task updated — describe what changed
+  if (action === 'updated') {
+    if (metaStatus === 'shipped') return metaTitle || 'Task completed'
+    if (metaStatus) return `Status changed to ${metaStatus}`
+    if (metaNotes) {
+      // Truncate long agent notes
+      return metaNotes.length > 80 ? metaNotes.substring(0, 80) + '...' : metaNotes
+    }
+    if (metaTitle) return metaTitle
+    return `${entityType} updated`
+  }
+
+  // Deliverables
+  if (entityType === 'deliverable') {
+    if (action === 'uploaded') return metaTitle || 'New deliverable uploaded'
+    if (action === 'approved') return metaTitle || 'Deliverable approved'
+  }
+
+  // Requirements
+  if (entityType === 'requirement') {
+    if (action === 'approved') return metaTitle || 'Requirement signed off'
+  }
+
+  return metaTitle || `${entityType} ${action}`
+}
+
 // Transform activity log entry to display format
 export function transformActivityEntry(entry: ActivityLogEntry): {
   id: string
-  type: 'task_created' | 'task_shipped' | 'deliverable_uploaded' | 'deliverable_approved' | 'requirement_created' | 'requirement_approved' | 'feedback_received' | 'milestone_reached' | 'project_update'
+  type: string
   title: string
   description?: string
   actor: string
@@ -341,14 +428,15 @@ export function transformActivityEntry(entry: ActivityLogEntry): {
   metadata?: Record<string, unknown>
 } {
   const metadata = entry.metadata as Record<string, unknown> | null
+  const actorType = entry.actor_type === 'system' ? 'internal' as const : entry.actor_type as 'internal' | 'client'
 
   return {
     id: entry.id,
-    type: entry.action as 'task_created' | 'task_shipped' | 'deliverable_uploaded' | 'deliverable_approved' | 'requirement_created' | 'requirement_approved' | 'feedback_received' | 'milestone_reached' | 'project_update',
-    title: (metadata?.title as string) || `${entry.entity_type} ${entry.action}`,
-    description: metadata?.description as string | undefined,
-    actor: entry.actor,
-    actorType: entry.actor_type,
+    type: deriveActivityType(entry.action, entry.entity_type, metadata),
+    title: deriveTitle(entry.action, entry.entity_type, metadata),
+    description: (metadata?.description as string) || (metadata?.agent_notes as string) || undefined,
+    actor: entry.actor === 'artemis' ? 'L7 Shift' : entry.actor,
+    actorType,
     timestamp: new Date(entry.created_at),
     metadata: metadata || undefined,
   }
