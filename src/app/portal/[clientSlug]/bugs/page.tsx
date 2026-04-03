@@ -496,14 +496,14 @@ export default function BugsPage() {
   }
 
   const filteredBugs = bugs.filter(b => {
-    if (filter === 'all') return true
+    if (filter === 'all') return b.status !== 'resolved' && b.status !== 'closed' && b.status !== 'wont_fix'
     if (filter === 'reported') return b.status === 'reported'
     if (filter === 'in_progress') return b.status === 'triaged' || b.status === 'in_progress'
-    if (filter === 'resolved') return b.status === 'resolved' || b.status === 'closed'
+    if (filter === 'resolved') return b.status === 'resolved' || b.status === 'closed' || b.status === 'wont_fix'
     return true
   })
 
-  const openCount = bugs.filter(b => b.status === 'reported' || b.status === 'triaged').length
+  const openCount = bugs.filter(b => b.status !== 'resolved' && b.status !== 'closed' && b.status !== 'wont_fix').length
 
   if (loading) {
     return (
@@ -601,10 +601,10 @@ export default function BugsPage() {
       {/* Filter Tabs */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
         {([
-          { key: 'all' as FilterType, label: 'All' },
+          { key: 'all' as FilterType, label: 'Active' },
           { key: 'reported' as FilterType, label: 'Reported' },
           { key: 'in_progress' as FilterType, label: 'In Progress' },
-          { key: 'resolved' as FilterType, label: 'Resolved' },
+          { key: 'resolved' as FilterType, label: 'Shipped' },
         ]).map(f => (
           <button
             key={f.key}

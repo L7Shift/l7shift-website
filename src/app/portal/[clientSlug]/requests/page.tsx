@@ -375,14 +375,14 @@ export default function RequestsPage() {
   }
 
   const filteredRequests = requests.filter(r => {
-    if (filter === 'all') return true
+    if (filter === 'all') return r.status !== 'completed' && r.status !== 'declined' && r.status !== 'withdrawn'
     if (filter === 'open') return r.status === 'open'
     if (filter === 'in_progress') return r.status === 'in_review' || r.status === 'accepted' || r.status === 'in_progress'
-    if (filter === 'completed') return r.status === 'completed' || r.status === 'declined'
+    if (filter === 'completed') return r.status === 'completed' || r.status === 'declined' || r.status === 'withdrawn'
     return true
   })
 
-  const openCount = requests.filter(r => r.status === 'open').length
+  const openCount = requests.filter(r => r.status !== 'completed' && r.status !== 'declined' && r.status !== 'withdrawn').length
 
   if (loading) {
     return (
@@ -471,10 +471,10 @@ export default function RequestsPage() {
       {/* Filter Tabs */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
         {([
-          { key: 'all' as FilterType, label: 'All' },
+          { key: 'all' as FilterType, label: 'Active' },
           { key: 'open' as FilterType, label: 'Open' },
           { key: 'in_progress' as FilterType, label: 'In Progress' },
-          { key: 'completed' as FilterType, label: 'Completed' },
+          { key: 'completed' as FilterType, label: 'Shipped' },
         ]).map(f => (
           <button
             key={f.key}
