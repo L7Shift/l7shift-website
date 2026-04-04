@@ -7,6 +7,7 @@ export interface AssetRequest {
   description: string
   priority: boolean
   category: string // maps to upload category slug
+  subcategory?: string // specific slot within a category (e.g., "tops-garments", "hats-styles")
 }
 
 export interface ClientPortalConfig {
@@ -22,9 +23,10 @@ const CONFIGS: Record<string, ClientPortalConfig> = {
     primaryColor: '#8B5CF6',
     accentColor: '#F59E0B',
     assetRequests: [
-      { icon: 'camera', title: 'Garment Style Photos for Order Page', description: 'We need photos of your actual blank garments (no designs) for the order flow. Tops: T-Shirt, Long Sleeve, Hoodie, Crewneck, Tank Top, Polo (currently generic stock photos). Hats: Dad Cap, Snapback, Beanie, Visor, Bucket Hat (currently no photos at all). Jacket photos are done — we already have those.', priority: true, category: 'photos' },
-      { icon: 'palette', title: 'Color Options Per Hat Style', description: 'What colors do you offer for each hat type? We need a list per style — Dad Cap, Snapback, Beanie, Visor, Bucket Hat. Example: Dad Cap → Black, White, Navy, Pink, etc.', priority: true, category: 'documents' },
-      { icon: 'image', title: 'New Collection Inspiration', description: 'Mood boards, design references, or inspiration images for upcoming collections.', priority: false, category: 'content' },
+      { icon: 'camera', title: 'Tops — Blank Garment Photos', description: 'Photos of blank garments (no designs) for 6 styles: T-Shirt, Long Sleeve, Hoodie, Crewneck, Tank Top, Polo. 2-3 colors each, consistent styling like jacket photos. ~12-18 photos total.', priority: true, category: 'photos', subcategory: 'tops-garments' },
+      { icon: 'camera', title: 'Hats — Style Photos', description: 'Photos of 5 hat styles: Dad Cap, Snapback, Beanie, Visor, Bucket Hat. At least 2 colors per style. ~10 photos.', priority: true, category: 'photos', subcategory: 'hats-styles' },
+      { icon: 'camera', title: 'Accessories & Greek Items — Photos', description: 'Duffel, Blanket, Stoles (printed + embroidered), Keychain, Plaque, Garden Flag, Fan, Button Set, Notebook, Umbrella + Greek-branded versions. ~15-20 photos.', priority: false, category: 'photos', subcategory: 'accessories-extra' },
+      { icon: 'palette', title: 'Color Options Per Hat Style', description: 'List of colors you offer per hat type (Dad Cap, Snapback, Beanie, Visor, Bucket Hat).', priority: false, category: 'documents', subcategory: 'hat-colors' },
     ],
   },
   'shariels-lashes': {

@@ -8,6 +8,7 @@ import { getClientConfig } from '@/lib/client-portal-config'
 interface UploadedFile {
   name: string
   category: string
+  subcategory: string | null
   size: number
   created_at: string
   path: string
@@ -57,6 +58,8 @@ export default function AssetsPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const perCardInputRef = useRef<HTMLInputElement>(null)
+  const [perCardTarget, setPerCardTarget] = useState<{ category: string; subcategory?: string; title: string } | null>(null)
 
   // Load project
   useEffect(() => {
@@ -89,7 +92,7 @@ export default function AssetsPage() {
     }
   }
 
-  const handleUpload = useCallback(async (fileList: FileList) => {
+  const handleUpload = useCallback(async (fileList: FileList, override?: { category: string; subcategory?: string }) => {
     if (!projectId || fileList.length === 0) return
 
     setUploading(true)
@@ -97,6 +100,8 @@ export default function AssetsPage() {
     setSuccess(null)
 
     const results: string[] = []
+    const uploadCategory = override?.category || selectedCategory
+    const uploadSubcategory = override?.subcategory
 
     for (let i = 0; i < fileList.length; i++) {
       const file = fileList[i]
@@ -105,7 +110,8 @@ export default function AssetsPage() {
       const formData = new FormData()
       formData.append('file', file)
       formData.append('projectId', projectId)
-      formData.append('category', selectedCategory)
+      formData.append('category', uploadCategory)
+      if (uploadSubcategory) formData.append('subcategory', uploadSubcategory)
 
       try {
         const res = await fetch('/api/assets', {
@@ -131,8 +137,9 @@ export default function AssetsPage() {
       await loadFiles(projectId)
     }
 
-    // Reset file input
+    // Reset file inputs
     if (fileInputRef.current) fileInputRef.current.value = ''
+    if (perCardInputRef.current) perCardInputRef.current.value = ''
   }, [projectId, selectedCategory])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -195,44 +202,118 @@ export default function AssetsPage() {
         </p>
       </div>
 
-      {/* What We Need Banner */}
-      <div
-        style={{
-          padding: 24,
-          background: `linear-gradient(135deg, ${config.primaryColor}15, ${config.accentColor}10)`,
-          border: `1px solid ${config.primaryColor}33`,
-          borderRadius: 16,
-          marginBottom: 32,
+      {/* Hidden per-card file input */}
+      <input
+        ref={perCardInputRef}
+        type="file"
+        multiple
+        accept="image/*,.pdf,.zip,.svg,.ai,.psd,.eps"
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          if (e.target.files && perCardTarget) {
+            handleUpload(e.target.files, { category: perCardTarget.category, subcategory: perCardTarget.subcategory })
+            setPerCardTarget(null)
+          }
         }}
-      >
-        <h3 style={{ margin: '0 0 12px', fontSize: 15, fontWeight: 600, color: '#FAFAFA' }}>
-          What we need from you:
-        </h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 12 }}>
-          {config.assetRequests.map((item, i) => (
-            <div
-              key={i}
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 8,
-                padding: '8px 12px',
-                background: item.priority ? 'rgba(255,255,255,0.05)' : 'transparent',
-                borderRadius: 8,
-                border: item.priority ? `1px solid ${config.primaryColor}22` : '1px solid transparent',
-              }}
-            >
-              <span style={{ fontSize: 16 }}>{item.icon === 'palette' ? '\u{1F3A8}' : item.icon === 'camera' ? '\u{1F4F8}' : item.icon === 'file' ? '\u{1F4C4}' : item.icon === 'image' ? '\u{1F5BC}\uFE0F' : item.icon === 'box' ? '\u{1F4E6}' : item.icon === 'pen' ? '\u{270D}\uFE0F' : '\u{1F4CB}'}</span>
-              <span style={{ fontSize: 13, color: item.priority ? '#CCC' : '#888', lineHeight: 1.4 }}>
-                {item.title}: {item.description}
-                {item.priority && (
-                  <span style={{ color: config.primaryColor, fontSize: 11, marginLeft: 6 }}>PRIORITY</span>
-                )}
+      />
+
+      {/* What We Need Banner — fulfillment-aware (matches on subcategory when present) */}
+      {(() => {
+        const isFulfilled = (r: typeof config.assetRequests[number]) => r.subcategory
+          ? files.some(f => f.category === r.category && f.subcategory === r.subcategory)
+          : files.some(f => f.category === r.category)
+        const pending = config.assetRequests.filter(r => !isFulfilled(r))
+        const fulfilled = config.assetRequests.filter(r => isFulfilled(r))
+        if (pending.length === 0 && fulfilled.length === 0) return null
+        return (
+          <div
+            style={{
+              padding: 24,
+              background: `linear-gradient(135deg, ${config.primaryColor}15, ${config.accentColor}10)`,
+              border: `1px solid ${config.primaryColor}33`,
+              borderRadius: 16,
+              marginBottom: 32,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#FAFAFA' }}>
+                {pending.length > 0 ? 'What we still need from you:' : 'All assets received — thank you!'}
+              </h3>
+              <span style={{ fontSize: 12, color: '#888' }}>
+                {fulfilled.length} of {config.assetRequests.length} received
               </span>
             </div>
-          ))}
-        </div>
-      </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 12 }}>
+              {pending.map((item, i) => (
+                <div
+                  key={`pending-${i}`}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8,
+                    padding: '10px 12px',
+                    background: item.priority ? 'rgba(255,255,255,0.05)' : 'transparent',
+                    borderRadius: 8,
+                    border: item.priority ? `1px solid ${config.primaryColor}22` : '1px solid transparent',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                    <span style={{ fontSize: 16 }}>{item.icon === 'palette' ? '\u{1F3A8}' : item.icon === 'camera' ? '\u{1F4F8}' : item.icon === 'file' ? '\u{1F4C4}' : item.icon === 'image' ? '\u{1F5BC}\uFE0F' : item.icon === 'box' ? '\u{1F4E6}' : item.icon === 'pen' ? '\u{270D}\uFE0F' : '\u{1F4CB}'}</span>
+                    <span style={{ fontSize: 13, color: item.priority ? '#CCC' : '#888', lineHeight: 1.4, flex: 1 }}>
+                      {item.title}: {item.description}
+                      {item.priority && (
+                        <span style={{ color: config.primaryColor, fontSize: 11, marginLeft: 6 }}>PRIORITY</span>
+                      )}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setPerCardTarget({ category: item.category, subcategory: item.subcategory, title: item.title })
+                      perCardInputRef.current?.click()
+                    }}
+                    disabled={uploading}
+                    style={{
+                      alignSelf: 'flex-start',
+                      padding: '6px 12px',
+                      background: `${config.primaryColor}15`,
+                      border: `1px solid ${config.primaryColor}44`,
+                      borderRadius: 6,
+                      color: config.primaryColor,
+                      fontSize: 11,
+                      fontWeight: 500,
+                      cursor: uploading ? 'not-allowed' : 'pointer',
+                      opacity: uploading ? 0.5 : 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4,
+                    }}
+                  >
+                    <span>{'\u{2191}'}</span> Upload for this
+                  </button>
+                </div>
+              ))}
+              {fulfilled.map((item, i) => (
+                <div
+                  key={`done-${i}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '8px 12px',
+                    opacity: 0.5,
+                    borderRadius: 8,
+                  }}
+                >
+                  <span style={{ fontSize: 14, color: '#22C55E' }}>✓</span>
+                  <span style={{ fontSize: 13, color: '#888', lineHeight: 1.4, textDecoration: 'line-through' }}>
+                    {item.title}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Category Selector */}
       <div style={{ marginBottom: 16 }}>

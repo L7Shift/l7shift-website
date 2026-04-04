@@ -15,6 +15,7 @@ export async function POST(req: NextRequest) {
     const file = formData.get('file') as File | null
     const projectId = formData.get('projectId') as string | null
     const category = formData.get('category') as string | null
+    const subcategory = formData.get('subcategory') as string | null
     const description = formData.get('description') as string | null
 
     if (!file || !projectId) {
@@ -39,11 +40,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
     }
 
-    // Generate storage path
-    const ext = file.name.split('.').pop() || 'bin'
+    // Generate storage path — subcategory (if present) encoded as filename prefix: `{subcategory}__{timestamp}_{safename}`
     const timestamp = Date.now()
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-    const storagePath = `${projectId}/${category || 'general'}/${timestamp}_${safeName}`
+    const safeSubcategory = subcategory ? subcategory.replace(/[^a-zA-Z0-9-]/g, '') : ''
+    const filenamePart = safeSubcategory
+      ? `${safeSubcategory}__${timestamp}_${safeName}`
+      : `${timestamp}_${safeName}`
+    const storagePath = `${projectId}/${category || 'general'}/${filenamePart}`
 
     // Upload to Supabase storage
     const buffer = Buffer.from(await file.arrayBuffer())
@@ -71,6 +75,7 @@ export async function POST(req: NextRequest) {
         file_size: file.size,
         storage_path: storagePath,
         category: category || 'general',
+        subcategory: safeSubcategory || null,
       },
     })
 
@@ -147,11 +152,21 @@ export async function GET(req: NextRequest) {
     const allFiles: Array<{
       name: string
       category: string
+      subcategory: string | null
       size: number
       created_at: string
       path: string
       url: string | null
     }> = []
+
+    // Parse subcategory from filename prefix: `{subcategory}__{timestamp}_{safename}`
+    const parseFilename = (raw: string): { display: string; subcategory: string | null } => {
+      const subMatch = raw.match(/^([a-zA-Z0-9-]+)__(\d+_.+)$/)
+      if (subMatch) {
+        return { display: subMatch[2].replace(/^\d+_/, ''), subcategory: subMatch[1] }
+      }
+      return { display: raw.replace(/^\d+_/, ''), subcategory: null }
+    }
 
     // List category folders
     const categories = (files || []).filter(f => !f.name.includes('.'))
@@ -163,9 +178,11 @@ export async function GET(req: NextRequest) {
         .from('client-uploads')
         .createSignedUrl(`${projectId}/${f.name}`, 3600)
 
+      const parsed = parseFilename(f.name)
       allFiles.push({
-        name: f.name,
+        name: parsed.display,
         category: 'general',
+        subcategory: parsed.subcategory,
         size: (f.metadata as Record<string, unknown>)?.size as number || 0,
         created_at: f.created_at || '',
         path: `${projectId}/${f.name}`,
@@ -186,9 +203,11 @@ export async function GET(req: NextRequest) {
           .from('client-uploads')
           .createSignedUrl(fullPath, 3600)
 
+        const parsed = parseFilename(f.name)
         allFiles.push({
-          name: f.name.replace(/^\d+_/, ''), // Strip timestamp prefix
+          name: parsed.display,
           category: cat.name,
+          subcategory: parsed.subcategory,
           size: (f.metadata as Record<string, unknown>)?.size as number || 0,
           created_at: f.created_at || '',
           path: fullPath,
