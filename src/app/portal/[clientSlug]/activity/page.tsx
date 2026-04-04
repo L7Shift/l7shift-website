@@ -59,7 +59,7 @@ function formatFullDate(date: Date): string {
   })
 }
 
-type FilterType = 'all' | 'shipped' | 'approvals' | 'feedback'
+type FilterType = 'all' | 'shipped' | 'feedback'
 
 export default function ActivityPage() {
   const params = useParams()
@@ -154,7 +154,6 @@ export default function ActivityPage() {
   const filteredActivity = activity.filter((item) => {
     if (filter === 'all') return true
     if (filter === 'shipped') return item.type === 'task_shipped' || item.type === 'milestone_reached'
-    if (filter === 'approvals') return item.type.includes('approved') || item.type === 'requirement_approved'
     if (filter === 'feedback') return item.type === 'feedback_received' || item.type === 'bug_reported' || item.type === 'bug_updated' || item.type === 'bug_resolved' || item.type === 'client_request'
     return true
   })
@@ -248,7 +247,6 @@ export default function ActivityPage() {
         {([
           { key: 'all', label: 'All Activity' },
           { key: 'shipped', label: 'Shipped' },
-          { key: 'approvals', label: 'Approvals' },
           { key: 'feedback', label: 'Feedback' },
         ] as const).map(({ key, label }) => (
           <button

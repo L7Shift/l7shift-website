@@ -28,11 +28,32 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
   const [userName, setUserName] = useState('User')
   const [showDropdown, setShowDropdown] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({})
 
   useEffect(() => {
     const name = getCookie('l7_user_name')
     if (name) setUserName(decodeURIComponent(name))
   }, [])
+
+  // Fetch badge counts
+  useEffect(() => {
+    async function fetchBadgeCounts() {
+      try {
+        const res = await fetch(`/api/client/project?slug=${clientSlug}`)
+        if (!res.ok) return
+        const data = await res.json()
+        setBadgeCounts({
+          deliverables: data.pendingDeliverables || 0,
+          bugs: data.openBugs || 0,
+          requests: data.openRequests || 0,
+          requirements: data.pendingApprovals || 0,
+        })
+      } catch {
+        // Silently fail — badges are non-critical
+      }
+    }
+    fetchBadgeCounts()
+  }, [clientSlug])
 
   // Close mobile menu on navigation
   useEffect(() => {
@@ -47,10 +68,10 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
   const navItems = [
     { href: `/portal/${clientSlug}`, icon: '📊', label: 'Dashboard' },
     { href: `/portal/${clientSlug}/plan`, icon: '📄', label: 'Build Plan' },
-    { href: `/portal/${clientSlug}/deliverables`, icon: '📁', label: 'Deliverables' },
-    { href: `/portal/${clientSlug}/requirements`, icon: '📝', label: 'Requirements' },
-    { href: `/portal/${clientSlug}/bugs`, icon: '🐛', label: 'Bugs' },
-    { href: `/portal/${clientSlug}/requests`, icon: '✨', label: 'Requests' },
+    { href: `/portal/${clientSlug}/deliverables`, icon: '📁', label: 'Deliverables', badgeKey: 'deliverables' },
+    { href: `/portal/${clientSlug}/requirements`, icon: '📝', label: 'Requirements', badgeKey: 'requirements' },
+    { href: `/portal/${clientSlug}/bugs`, icon: '🐛', label: 'Bugs', badgeKey: 'bugs' },
+    { href: `/portal/${clientSlug}/requests`, icon: '✨', label: 'Requests', badgeKey: 'requests' },
     { href: `/portal/${clientSlug}/activity`, icon: '🕐', label: 'Activity' },
     { href: `/portal/${clientSlug}/assets`, icon: '📤', label: 'Upload Assets' },
   ]
@@ -117,6 +138,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
         <nav className="portal-desktop-nav" style={{ display: 'flex', gap: 2 }}>
           {navItems.map((item) => {
             const isActive = pathname === item.href
+            const count = item.badgeKey ? (badgeCounts[item.badgeKey] || 0) : 0
             return (
               <Link
                 key={item.href}
@@ -141,6 +163,26 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
               >
                 <span style={{ fontSize: 14 }}>{item.icon}</span>
                 <span>{item.label}</span>
+                {count > 0 && (
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 16,
+                      height: 16,
+                      borderRadius: '50%',
+                      background: config.primaryColor,
+                      color: '#060608',
+                      fontSize: 10,
+                      fontWeight: 700,
+                      lineHeight: 1,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {count}
+                  </span>
+                )}
               </Link>
             )
           })}
@@ -252,6 +294,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
         >
           {navItems.map((item) => {
             const isActive = pathname === item.href
+            const count = item.badgeKey ? (badgeCounts[item.badgeKey] || 0) : 0
             return (
               <Link
                 key={item.href}
@@ -271,7 +314,27 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                 }}
               >
                 <span style={{ fontSize: 20 }}>{item.icon}</span>
-                <span>{item.label}</span>
+                <span style={{ flex: 1 }}>{item.label}</span>
+                {count > 0 && (
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 16,
+                      height: 16,
+                      borderRadius: '50%',
+                      background: config.primaryColor,
+                      color: '#060608',
+                      fontSize: 10,
+                      fontWeight: 700,
+                      lineHeight: 1,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {count}
+                  </span>
+                )}
               </Link>
             )
           })}

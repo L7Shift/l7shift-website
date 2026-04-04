@@ -354,26 +354,33 @@ function BugSubmitModal({
   )
 }
 
-// ─── Note Modal ─────────────────────────────────────────────
-function NoteModal({
+// ─── Inline Comment Thread ──────────────────────────────────
+function CommentThread({
   bug,
   clientName,
+  reportedBy,
   primaryColor,
-  onClose,
-  onSubmitted,
+  onCommentAdded,
 }: {
   bug: BugReport
   clientName: string
+  reportedBy: string
   primaryColor: string
-  onClose: () => void
-  onSubmitted: () => void
+  onCommentAdded: () => void
 }) {
   const [content, setContent] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
+  const threadEndRef = useRef<HTMLDivElement>(null)
 
-  async function handleSubmit() {
-    if (!content.trim()) return
+  function isClientNote(author: string): boolean {
+    const authorLower = author.toLowerCase()
+    const clientLower = clientName.toLowerCase()
+    const reporterLower = reportedBy.toLowerCase()
+    return authorLower === clientLower || authorLower === reporterLower || authorLower === 'client'
+  }
+
+  async function handleSend() {
+    if (!content.trim() || submitting) return
     setSubmitting(true)
     try {
       const res = await fetch('/api/client/bugs', {
@@ -385,70 +392,133 @@ function NoteModal({
         }),
       })
       if (res.ok) {
-        setSubmitted(true)
-        setTimeout(() => { onSubmitted(); onClose() }, 1200)
+        setContent('')
+        onCommentAdded()
       }
     } catch (err) {
-      console.error('Error adding note:', err)
+      console.error('Error sending comment:', err)
     } finally {
       setSubmitting(false)
     }
   }
 
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
+  }
+
+  useEffect(() => {
+    threadEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [bug.notes])
+
+  const notes = bug.notes || []
+
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 1000,
-      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-    }}>
-      <div onClick={onClose} style={{
-        position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
-      }} />
-      <div style={{
-        position: 'relative', width: '100%', maxWidth: 480,
-        background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)',
-        borderRadius: 16, padding: 24,
-      }}>
-        {submitted ? (
-          <div style={{ textAlign: 'center', padding: '24px 0' }}>
-            <div style={{ fontSize: 36, marginBottom: 8 }}>✅</div>
-            <p style={{ color: '#FAFAFA', fontSize: 15, margin: 0 }}>Note added!</p>
-          </div>
-        ) : (
-          <>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-              <div>
-                <h3 style={{ color: '#FAFAFA', fontSize: 16, margin: '0 0 4px' }}>Add Update</h3>
-                <p style={{ color: '#888', fontSize: 12, margin: 0 }}>{bug.bug_number}: {bug.title}</p>
+    <div style={{ margin: '12px 0 0' }}>
+      <div style={{ fontSize: 11, color: '#666', fontWeight: 600, marginBottom: 10 }}>
+        Conversation {notes.length > 0 && `(${notes.length})`}
+      </div>
+
+      {/* Thread messages */}
+      {notes.length > 0 ? (
+        <div style={{
+          maxHeight: 320, overflowY: 'auto', marginBottom: 12,
+          display: 'flex', flexDirection: 'column', gap: 8,
+          paddingRight: 4,
+        }}>
+          {notes.map((note, i) => {
+            const fromClient = isClientNote(note.author)
+            return (
+              <div
+                key={i}
+                style={{
+                  maxWidth: '85%',
+                  alignSelf: fromClient ? 'flex-start' : 'flex-end',
+                }}
+              >
+                <div style={{
+                  padding: '10px 14px',
+                  background: fromClient
+                    ? 'rgba(168,85,247,0.12)'
+                    : 'rgba(34,211,238,0.10)',
+                  border: `1px solid ${fromClient ? 'rgba(168,85,247,0.25)' : 'rgba(34,211,238,0.20)'}`,
+                  borderRadius: fromClient ? '4px 12px 12px 12px' : '12px 4px 12px 12px',
+                }}>
+                  <div style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    gap: 12, marginBottom: 4,
+                  }}>
+                    <span style={{
+                      fontSize: 11, fontWeight: 700,
+                      color: fromClient ? '#A855F7' : '#22D3EE',
+                    }}>
+                      {note.author}
+                    </span>
+                    <span style={{ fontSize: 10, color: '#555', flexShrink: 0 }}>
+                      {formatDate(note.created_at)}
+                    </span>
+                  </div>
+                  <p style={{
+                    margin: 0, fontSize: 13, color: '#DDD', lineHeight: 1.5,
+                    whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                  }}>
+                    {note.content}
+                  </p>
+                </div>
               </div>
-              <button onClick={onClose} style={{
-                background: 'none', border: 'none', color: '#666', fontSize: 18, cursor: 'pointer',
-              }}>x</button>
-            </div>
-            <textarea
-              value={content}
-              onChange={e => setContent(e.target.value)}
-              placeholder="Add more details, a workaround you found, or any update..."
-              style={{
-                width: '100%', minHeight: 80, padding: 12, background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#FAFAFA',
-                fontSize: 14, resize: 'vertical', outline: 'none', fontFamily: 'inherit',
-                boxSizing: 'border-box',
-              }}
-            />
-            <button
-              onClick={handleSubmit}
-              disabled={submitting || !content.trim()}
-              style={{
-                width: '100%', marginTop: 12, padding: '12px 20px',
-                background: !content.trim() ? 'rgba(255,255,255,0.1)' : primaryColor,
-                border: 'none', borderRadius: 10, color: '#0A0A0A', fontSize: 13,
-                fontWeight: 600, cursor: submitting ? 'not-allowed' : 'pointer',
-              }}
-            >
-              {submitting ? 'Adding...' : 'Add Note'}
-            </button>
-          </>
-        )}
+            )
+          })}
+          <div ref={threadEndRef} />
+        </div>
+      ) : (
+        <div style={{
+          padding: '16px 0', textAlign: 'center',
+          color: '#555', fontSize: 12, marginBottom: 12,
+        }}>
+          No comments yet. Start the conversation below.
+        </div>
+      )}
+
+      {/* Input area */}
+      <div
+        style={{
+          display: 'flex', gap: 8, alignItems: 'flex-end',
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        <input
+          value={content}
+          onChange={e => setContent(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Type a comment..."
+          style={{
+            flex: 1, padding: '10px 14px',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: 10, color: '#FAFAFA', fontSize: 13,
+            outline: 'none', fontFamily: 'inherit',
+          }}
+        />
+        <button
+          onClick={handleSend}
+          disabled={submitting || !content.trim()}
+          style={{
+            padding: '10px 18px',
+            background: submitting || !content.trim()
+              ? 'rgba(255,255,255,0.08)'
+              : primaryColor,
+            border: 'none', borderRadius: 10,
+            color: submitting || !content.trim() ? '#555' : '#0A0A0A',
+            fontSize: 13, fontWeight: 600,
+            cursor: submitting || !content.trim() ? 'default' : 'pointer',
+            transition: 'all 0.15s ease',
+            flexShrink: 0,
+          }}
+        >
+          {submitting ? '...' : 'Send'}
+        </button>
       </div>
     </div>
   )
@@ -466,7 +536,6 @@ export default function BugsPage() {
   const [bugs, setBugs] = useState<BugReport[]>([])
   const [filter, setFilter] = useState<FilterType>('all')
   const [showSubmitForm, setShowSubmitForm] = useState(false)
-  const [noteTarget, setNoteTarget] = useState<BugReport | null>(null)
   const [expandedBug, setExpandedBug] = useState<string | null>(null)
   const [userName, setUserName] = useState('Client')
 
@@ -543,16 +612,6 @@ export default function BugsPage() {
           onSubmitted={() => loadBugs()}
         />
       )}
-      {noteTarget && (
-        <NoteModal
-          bug={noteTarget}
-          clientName={userName}
-          primaryColor={config.primaryColor}
-          onClose={() => setNoteTarget(null)}
-          onSubmitted={() => loadBugs()}
-        />
-      )}
-
       {/* Header */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
@@ -740,41 +799,14 @@ export default function BugsPage() {
                       </div>
                     )}
 
-                    {/* Notes thread */}
-                    {bug.notes && bug.notes.length > 0 && (
-                      <div style={{ margin: '12px 0 8px' }}>
-                        <div style={{ fontSize: 11, color: '#666', fontWeight: 600, marginBottom: 8 }}>Updates</div>
-                        {bug.notes.map((note, i) => (
-                          <div key={i} style={{
-                            padding: '10px 12px', marginBottom: 6,
-                            background: 'rgba(255,255,255,0.03)',
-                            borderLeft: `2px solid ${config.primaryColor}44`,
-                            borderRadius: '0 6px 6px 0',
-                          }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                              <span style={{ fontSize: 11, color: config.primaryColor, fontWeight: 600 }}>{note.author}</span>
-                              <span style={{ fontSize: 10, color: '#555' }}>{formatDate(note.created_at)}</span>
-                            </div>
-                            <p style={{ margin: 0, fontSize: 13, color: '#CCC' }}>{note.content}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Actions */}
-                    <div style={{ display: 'flex', gap: 8, paddingTop: 8 }}>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setNoteTarget(bug) }}
-                        style={{
-                          padding: '8px 14px', background: 'rgba(255,255,255,0.05)',
-                          border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6,
-                          color: '#CCC', fontSize: 12, cursor: 'pointer',
-                          display: 'flex', alignItems: 'center', gap: 4,
-                        }}
-                      >
-                        💬 Add Note
-                      </button>
-                    </div>
+                    {/* Comment thread */}
+                    <CommentThread
+                      bug={bug}
+                      clientName={userName}
+                      reportedBy={bug.reported_by}
+                      primaryColor={config.primaryColor}
+                      onCommentAdded={() => loadBugs()}
+                    />
                   </div>
                 )}
               </div>

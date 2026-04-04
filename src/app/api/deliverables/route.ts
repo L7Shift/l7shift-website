@@ -252,3 +252,74 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+/**
+ * PATCH /api/deliverables
+ * Update a deliverable (approve, reject, add feedback)
+ *
+ * Required: deliverable_id
+ * Optional: status, approved_by, feedback
+ */
+export async function PATCH(request: NextRequest) {
+  try {
+    const supabase = createServerClient()
+    const body = await request.json()
+    const { deliverable_id, status, approved_by, feedback } = body
+
+    if (!deliverable_id || !UUID_REGEX.test(deliverable_id)) {
+      return NextResponse.json({ error: 'Valid deliverable_id is required' }, { status: 400 })
+    }
+
+    const updates: Record<string, unknown> = { updated_at: new Date().toISOString() }
+
+    if (status === 'approved') {
+      updates.status = 'approved'
+      updates.client_approved = true
+      updates.approved_at = new Date().toISOString()
+      updates.approved_by = approved_by || 'Client'
+    } else if (status === 'rejected') {
+      updates.status = 'rejected'
+      updates.client_approved = false
+    } else if (status) {
+      updates.status = status
+    }
+
+    if (feedback) {
+      updates.client_feedback = feedback
+    }
+
+    const { data, error } = await (supabase
+      .from('deliverables') as any)
+      .update(updates)
+      .eq('id', deliverable_id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error updating deliverable:', error)
+      return NextResponse.json({ error: 'Failed to update deliverable' }, { status: 500 })
+    }
+
+    // Log to activity
+    if (status === 'approved' || status === 'rejected') {
+      await (supabase.from('activity_log') as any).insert({
+        project_id: data.project_id,
+        entity_type: 'deliverable',
+        entity_id: deliverable_id,
+        action: status === 'approved' ? 'approved' : 'rejected',
+        actor: approved_by || 'Client',
+        actor_type: 'client',
+        metadata: {
+          title: data.name,
+          type: data.type,
+          feedback: feedback || null,
+        },
+      })
+    }
+
+    return NextResponse.json({ success: true, data })
+  } catch (error) {
+    console.error('Error updating deliverable:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}

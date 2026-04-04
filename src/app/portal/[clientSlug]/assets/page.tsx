@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams } from 'next/navigation'
-import { getProjectBySlug } from '@/lib/portal-utils'
+// Project lookup via API route (no direct Supabase)
 import { getClientConfig } from '@/lib/client-portal-config'
 
 interface UploadedFile {
@@ -16,12 +16,23 @@ interface UploadedFile {
 
 const CATEGORIES = [
   { value: 'logos', label: 'Logos & Brand Files', icon: '🎨', desc: 'Logo files, brand guide, fonts' },
-  { value: 'photos', label: 'Product Photography', icon: '📸', desc: 'Product shots, lifestyle images' },
-  { value: 'packaging', label: 'Packaging & Labels', icon: '📦', desc: 'Box designs, label files, mockups' },
-  { value: 'content', label: 'Social & Marketing', icon: '📱', desc: 'Social media assets, marketing copy' },
+  { value: 'photos', label: 'Photos', icon: '📷', desc: 'Product shots, lifestyle images' },
+  { value: 'packaging', label: 'Packaging', icon: '📦', desc: 'Box designs, label files, mockups' },
+  { value: 'content', label: 'Content & Copy', icon: '✍️', desc: 'Social media assets, marketing copy' },
   { value: 'documents', label: 'Documents', icon: '📄', desc: 'Business docs, specs, notes' },
-  { value: 'general', label: 'Other', icon: '📎', desc: 'Anything else' },
+  { value: 'general', label: 'General', icon: '📁', desc: 'Anything else' },
 ]
+
+// All display categories including non-uploadable ones (request attachments come from the request form)
+const DISPLAY_CATEGORIES: Record<string, { label: string; icon: string }> = {
+  logos: { label: 'Logos & Brand Files', icon: '🎨' },
+  photos: { label: 'Photos', icon: '📷' },
+  packaging: { label: 'Packaging', icon: '📦' },
+  content: { label: 'Content & Copy', icon: '✍️' },
+  documents: { label: 'Documents', icon: '📄' },
+  general: { label: 'General', icon: '📁' },
+  request: { label: 'Request Attachments', icon: '📎' },
+}
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 B'
@@ -51,11 +62,11 @@ export default function AssetsPage() {
   useEffect(() => {
     async function load() {
       try {
-        const data = await getProjectBySlug(clientSlug)
-        if (data) {
-          setProjectId(data.project.id)
-          await loadFiles(data.project.id)
-        }
+        const res = await fetch(`/api/client/project?slug=${clientSlug}`)
+        if (!res.ok) { setError('Project not found'); setLoading(false); return }
+        const projectData = await res.json()
+        setProjectId(projectData.project.id)
+        await loadFiles(projectData.project.id)
       } catch (err) {
         console.error('Failed to load project:', err)
         setError('Failed to load project data')
@@ -165,9 +176,11 @@ export default function AssetsPage() {
     )
   }
 
-  const groupedFiles = CATEGORIES.map(cat => ({
-    ...cat,
-    files: files.filter(f => f.category === cat.value),
+  const groupedFiles = Object.entries(DISPLAY_CATEGORIES).map(([value, { label, icon }]) => ({
+    value,
+    label,
+    icon,
+    files: files.filter(f => f.category === value),
   })).filter(cat => cat.files.length > 0)
 
   return (

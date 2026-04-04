@@ -581,6 +581,81 @@ export default function RequestsPage() {
                       </div>
                     )}
 
+                    {/* Status Timeline */}
+                    {(() => {
+                      const timelineSteps = [
+                        { key: 'open', label: 'Open' },
+                        { key: 'in_review', label: 'In Review' },
+                        { key: 'in_progress', label: 'In Progress' },
+                        { key: 'completed', label: 'Completed' },
+                      ]
+                      const statusOrder = ['open', 'in_review', 'accepted', 'in_progress', 'completed']
+                      const currentIndex = statusOrder.indexOf(request.status)
+                      // Map accepted → in_review step (accepted is between in_review and in_progress)
+                      const effectiveIndex = request.status === 'accepted' ? 1 : currentIndex
+                      const isTerminal = request.status === 'declined' || request.status === 'withdrawn'
+
+                      if (isTerminal) return null
+
+                      return (
+                        <div style={{ margin: '12px 0', padding: '14px 0' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+                            {/* Connecting line (background) */}
+                            <div style={{
+                              position: 'absolute',
+                              top: '50%',
+                              left: 16,
+                              right: 16,
+                              height: 2,
+                              background: 'rgba(255,255,255,0.08)',
+                              transform: 'translateY(-50%)',
+                              zIndex: 0,
+                            }} />
+                            {/* Connecting line (progress) */}
+                            <div style={{
+                              position: 'absolute',
+                              top: '50%',
+                              left: 16,
+                              width: `${(Math.min(effectiveIndex, timelineSteps.length - 1) / (timelineSteps.length - 1)) * (100 - (32 / 3))}%`,
+                              height: 2,
+                              background: config.primaryColor,
+                              transform: 'translateY(-50%)',
+                              zIndex: 1,
+                              transition: 'width 0.4s ease',
+                            }} />
+                            {timelineSteps.map((step, si) => {
+                              const isCompleted = effectiveIndex > si || (effectiveIndex >= 3 && si <= 3)
+                              const isCurrent = (step.key === 'in_review' && (request.status === 'in_review' || request.status === 'accepted'))
+                                || (step.key === request.status)
+
+                              return (
+                                <div key={step.key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, zIndex: 2 }}>
+                                  <div style={{
+                                    width: isCurrent ? 14 : 10,
+                                    height: isCurrent ? 14 : 10,
+                                    borderRadius: '50%',
+                                    background: isCompleted || isCurrent ? config.primaryColor : 'rgba(255,255,255,0.1)',
+                                    border: isCurrent ? `2px solid ${config.primaryColor}` : isCompleted ? 'none' : '2px solid rgba(255,255,255,0.15)',
+                                    boxShadow: isCurrent ? `0 0 8px ${config.primaryColor}60` : 'none',
+                                    transition: 'all 0.3s ease',
+                                  }} />
+                                  <span style={{
+                                    fontSize: 9,
+                                    fontWeight: isCurrent ? 700 : 500,
+                                    color: isCompleted || isCurrent ? config.primaryColor : '#555',
+                                    letterSpacing: '0.03em',
+                                    whiteSpace: 'nowrap',
+                                  }}>
+                                    {step.label}
+                                  </span>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )
+                    })()}
+
                     {/* Response notes */}
                     {request.response_notes && (
                       <div style={{

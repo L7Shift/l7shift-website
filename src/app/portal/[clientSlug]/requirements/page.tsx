@@ -5,8 +5,6 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { StatusPill } from '@/components/dashboard'
 import {
-  getProjectBySlug,
-  getProjectRequirements,
   signOffRequirement,
 } from '@/lib/portal-utils'
 import { getClientConfig } from '@/lib/client-portal-config'
@@ -102,17 +100,15 @@ export default function RequirementsPage() {
     setError(null)
 
     try {
-      const projectData = await getProjectBySlug(clientSlug)
-      if (!projectData) {
-        setError('Project not found')
-        setLoading(false)
-        return
-      }
+      const res = await fetch(`/api/client/project?slug=${clientSlug}`)
+      if (!res.ok) { setError('Project not found'); setLoading(false); return }
+      const projectData = await res.json()
 
       setProjectId(projectData.project.id)
 
-      const reqs = await getProjectRequirements(projectData.project.id)
-      setRequirements(reqs)
+      const reqsRes = await fetch(`/api/requirements?project_id=${projectData.project.id}`)
+      const reqsData = reqsRes.ok ? await reqsRes.json() : { data: [] }
+      setRequirements(reqsData.data || [])
     } catch (err) {
       console.error('Error loading requirements:', err)
       setError('Failed to load requirements')
@@ -453,7 +449,7 @@ export default function RequirementsPage() {
                   Response Submitted
                 </h2>
                 <p style={{ margin: 0, fontSize: 14, color: '#888' }}>
-                  Your response has been recorded. Ken has been notified.
+                  Your response has been recorded. Your team has been notified.
                 </p>
               </div>
             ) : (
@@ -613,7 +609,7 @@ export default function RequirementsPage() {
 
                     <p style={{ margin: '0 0 16px', fontSize: 12, color: '#666', lineHeight: 1.6 }}>
                       By clicking &quot;Submit & Approve&quot;, your response and approval will be recorded
-                      with a timestamp. Ken will be notified.
+                      with a timestamp. Your team will be notified.
                     </p>
 
                     <div style={{ display: 'flex', gap: 12 }}>

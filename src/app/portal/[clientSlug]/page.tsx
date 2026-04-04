@@ -4,10 +4,6 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import {
-  getProjectBySlug,
-  getProjectActivity,
-  getProjectRequirements,
-  getProjectDeliverables,
   transformActivityEntry,
   type PortalProject,
 } from '@/lib/portal-utils'
@@ -55,25 +51,43 @@ export default function ClientPortalDashboard() {
     setError(null)
 
     try {
-      const projectData = await getProjectBySlug(clientSlug)
+      const res = await fetch(`/api/client/project?slug=${clientSlug}`)
+      if (!res.ok) { setError('Project not found'); setLoading(false); return }
+      const projectData = await res.json()
 
-      if (!projectData) {
-        setError('Project not found')
-        setLoading(false)
-        return
+      // Adapt API response to PortalProject shape
+      const portalProject: PortalProject = {
+        project: projectData.project,
+        tasks: projectData.tasks,
+        completion: projectData.completion,
+        shiftHours: projectData.shiftHours,
+        traditionalEstimate: projectData.traditionalEstimate,
+        phases: [],
+        pendingApprovals: projectData.pendingApprovals || 0,
+        pendingFeedback: projectData.pendingDeliverables || 0,
+        newDeliverables: 0,
+        primaryColor: config.primaryColor,
+        accentColor: config.accentColor,
+        discoveryRequired: false,
       }
 
-      setPortalData(projectData)
+      setPortalData(portalProject)
 
-      const [reqs, dels, activity] = await Promise.all([
-        getProjectRequirements(projectData.project.id),
-        getProjectDeliverables(projectData.project.id),
-        getProjectActivity(projectData.project.id, 10),
+      const projectId = projectData.project.id
+
+      const [reqsRes, delsRes, activityRes] = await Promise.all([
+        fetch(`/api/requirements?project_id=${projectId}`),
+        fetch(`/api/deliverables?project_id=${projectId}`),
+        fetch(`/api/client/activity?projectId=${projectId}&limit=10`),
       ])
 
-      setRequirements(reqs)
-      setDeliverables(dels)
-      setActivityItems(activity.map(transformActivityEntry))
+      const reqsData = reqsRes.ok ? await reqsRes.json() : { data: [] }
+      const delsData = delsRes.ok ? await delsRes.json() : { data: [] }
+      const activityData = activityRes.ok ? await activityRes.json() : { activity: [] }
+
+      setRequirements(reqsData.data || [])
+      setDeliverables(delsData.data || [])
+      setActivityItems((activityData.activity || []).map(transformActivityEntry))
     } catch (err) {
       console.error('Error loading portal data:', err)
       setError('Failed to load project data')
@@ -542,6 +556,77 @@ export default function ClientPortalDashboard() {
           </div>
         </div>
       )}
+
+      {/* Your Investment */}
+      <div
+        style={{
+          background: `linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))`,
+          border: `1px solid ${primaryColor}20`,
+          borderRadius: 16,
+          padding: 24,
+          marginBottom: 24,
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Accent glow */}
+        <div style={{
+          position: 'absolute',
+          bottom: -30,
+          left: -30,
+          width: 160,
+          height: 160,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${primaryColor}10, transparent 70%)`,
+          pointerEvents: 'none',
+        }} />
+        <div style={{ marginBottom: 20, position: 'relative' }}>
+          <h2 style={{
+            margin: 0, fontSize: 16, fontWeight: 600, color: '#FAFAFA', letterSpacing: '-0.01em',
+          }}>
+            Your Investment
+          </h2>
+          <p style={{ margin: '4px 0 0', fontSize: 12, color: '#555', fontStyle: 'italic' }}>
+            The SymbAIotic Shift&trade; in action
+          </p>
+        </div>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: 12,
+          position: 'relative',
+        }}>
+          {[
+            { value: shippedTasks.length, label: 'Tasks Shipped', color: primaryColor },
+            { value: `${shiftHours}h`, label: 'Shift Hours', color: accentColor },
+            { value: `${traditionalEstimate}h`, label: 'Industry Estimate', color: '#888' },
+            { value: `${completion}%`, label: 'Completion', color: '#4ADE80' },
+            { value: timeSaved > 0 ? `${Math.round(timeSaved)}h` : '--', label: 'Time Saved', color: '#4ADE80' },
+            { value: shiftHours > 0 ? `${(traditionalEstimate / shiftHours).toFixed(1)}x` : '--', label: 'Speed Multiplier', color: primaryColor },
+          ].map((stat, i) => (
+            <div key={i} style={{
+              padding: '16px 14px',
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              borderRadius: 10,
+              textAlign: 'center',
+            }}>
+              <div style={{
+                fontSize: 22, fontWeight: 700, color: stat.color,
+                letterSpacing: '-0.02em', lineHeight: 1,
+              }}>
+                {stat.value}
+              </div>
+              <div style={{
+                fontSize: 10, color: '#555', letterSpacing: '0.08em',
+                fontWeight: 500, marginTop: 6, textTransform: 'uppercase',
+              }}>
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Contact */}
       <div

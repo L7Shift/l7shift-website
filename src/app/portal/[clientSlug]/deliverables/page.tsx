@@ -4,13 +4,16 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { StatusPill } from '@/components/dashboard'
-import {
-  getProjectBySlug,
-  getProjectDeliverables,
-  approveDeliverable,
-} from '@/lib/portal-utils'
 import { getClientConfig } from '@/lib/client-portal-config'
 import type { Deliverable, DeliverableStatus } from '@/lib/database.types'
+
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null
+  return null
+}
 
 const typeIcons: Record<string, string> = {
   design: '🎨',
@@ -280,8 +283,14 @@ export default function DeliverablesPage() {
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved'>('all')
   const [approvingId, setApprovingId] = useState<string | null>(null)
   const [feedbackTarget, setFeedbackTarget] = useState<Deliverable | null>(null)
+  const [userName, setUserName] = useState('Client')
 
   const config = getClientConfig(clientSlug)
+
+  useEffect(() => {
+    const name = getCookie('l7_user_name')
+    if (name) setUserName(decodeURIComponent(name))
+  }, [])
 
   useEffect(() => {
     loadData()
@@ -292,8 +301,14 @@ export default function DeliverablesPage() {
     setError(null)
 
     try {
-      const projectData = await getProjectBySlug(clientSlug)
-      if (!projectData) {
+      const projectRes = await fetch(`/api/client/project?slug=${clientSlug}`)
+      if (!projectRes.ok) {
+        setError('Project not found')
+        setLoading(false)
+        return
+      }
+      const projectData = await projectRes.json()
+      if (!projectData.project) {
         setError('Project not found')
         setLoading(false)
         return
@@ -302,8 +317,9 @@ export default function DeliverablesPage() {
       setProjectId(projectData.project.id)
       setClientId(projectData.project.client_id)
 
-      const items = await getProjectDeliverables(projectData.project.id)
-      setDeliverables(items)
+      const delRes = await fetch(`/api/deliverables?project_id=${projectData.project.id}`)
+      const delData = await delRes.json()
+      setDeliverables(delData.data || [])
     } catch (err) {
       console.error('Error loading deliverables:', err)
       setError('Failed to load deliverables')
@@ -317,8 +333,16 @@ export default function DeliverablesPage() {
 
     setApprovingId(deliverableId)
     try {
-      const success = await approveDeliverable(deliverableId, 'Client')
-      if (success) {
+      const res = await fetch('/api/deliverables', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          deliverable_id: deliverableId,
+          status: 'approved',
+          approved_by: userName,
+        }),
+      })
+      if (res.ok) {
         await loadData()
       }
     } catch (err) {
