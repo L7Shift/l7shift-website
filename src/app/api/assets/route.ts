@@ -153,17 +153,6 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to list files' }, { status: 500 })
     }
 
-    // Get files from subfolders too
-    const allFiles: Array<{
-      name: string
-      category: string
-      subcategory: string | null
-      size: number
-      created_at: string
-      path: string
-      url: string | null
-    }> = []
-
     // Parse subcategory from filename prefix: `{subcategory}__{timestamp}_{safename}`
     const parseFilename = (raw: string): { display: string; subcategory: string | null } => {
       const subMatch = raw.match(/^([a-zA-Z0-9-]+)__(\d+_.+)$/)
@@ -173,55 +162,80 @@ export async function GET(req: NextRequest) {
       return { display: raw.replace(/^\d+_/, ''), subcategory: null }
     }
 
-    // List category folders
+    // Split top-level entries: folders (no dot) vs direct files (with dot)
     const categories = (files || []).filter(f => !f.name.includes('.'))
     const directFiles = (files || []).filter(f => f.name.includes('.'))
 
-    // Add direct files
-    for (const f of directFiles) {
-      const { data: urlData } = await db.storage
-        .from('client-uploads')
-        .createSignedUrl(`${projectId}/${f.name}`, 3600)
+    // Parallelize: list every category folder at once instead of sequentially
+    const categoryListings = await Promise.all(
+      categories.map(cat =>
+        db.storage
+          .from('client-uploads')
+          .list(`${projectId}/${cat.name}`)
+          .then(res => ({ category: cat.name, files: res.data || [] }))
+      )
+    )
 
+    // Flatten into a single descriptor list (path + metadata). Signed URLs come later in ONE batch call.
+    type FileRow = {
+      name: string
+      category: string
+      subcategory: string | null
+      size: number
+      created_at: string
+      path: string
+      url: string | null
+    }
+    const rows: FileRow[] = []
+
+    for (const f of directFiles) {
       const parsed = parseFilename(f.name)
-      allFiles.push({
+      rows.push({
         name: parsed.display,
         category: 'general',
         subcategory: parsed.subcategory,
         size: (f.metadata as Record<string, unknown>)?.size as number || 0,
         created_at: f.created_at || '',
         path: `${projectId}/${f.name}`,
-        url: urlData?.signedUrl || null,
+        url: null,
       })
     }
 
-    // List files in each category folder
-    for (const cat of categories) {
-      const { data: catFiles } = await db.storage
-        .from('client-uploads')
-        .list(`${projectId}/${cat.name}`)
-
-      for (const f of catFiles || []) {
+    for (const { category, files: catFiles } of categoryListings) {
+      for (const f of catFiles) {
         if (!f.name.includes('.')) continue
-        const fullPath = `${projectId}/${cat.name}/${f.name}`
-        const { data: urlData } = await db.storage
-          .from('client-uploads')
-          .createSignedUrl(fullPath, 3600)
-
         const parsed = parseFilename(f.name)
-        allFiles.push({
+        rows.push({
           name: parsed.display,
-          category: cat.name,
+          category,
           subcategory: parsed.subcategory,
           size: (f.metadata as Record<string, unknown>)?.size as number || 0,
           created_at: f.created_at || '',
-          path: fullPath,
-          url: urlData?.signedUrl || null,
+          path: `${projectId}/${category}/${f.name}`,
+          url: null,
         })
       }
     }
 
-    return NextResponse.json({ files: allFiles })
+    // Batch: sign every path in ONE round trip instead of N sequential calls.
+    // This is the main perf fix — replaces N+1 createSignedUrl calls with a single createSignedUrls.
+    if (rows.length > 0) {
+      const { data: signed } = await db.storage
+        .from('client-uploads')
+        .createSignedUrls(rows.map(r => r.path), 3600)
+
+      if (signed) {
+        const urlByPath = new Map<string, string>()
+        for (const s of signed) {
+          if (s.path && s.signedUrl) urlByPath.set(s.path, s.signedUrl)
+        }
+        for (const r of rows) {
+          r.url = urlByPath.get(r.path) || null
+        }
+      }
+    }
+
+    return NextResponse.json({ files: rows })
   } catch (err) {
     console.error('Asset list error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
