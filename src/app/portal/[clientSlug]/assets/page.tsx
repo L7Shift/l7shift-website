@@ -24,7 +24,14 @@ const CATEGORIES = [
   { value: 'general', label: 'General', icon: '📁', desc: 'Anything else' },
 ]
 
-// All display categories including non-uploadable ones (request attachments come from the request form)
+// All display categories for the Assets page.
+// EXCLUDED ON PURPOSE:
+//   - `feedback`  → screenshots attached to deliverable feedback. Live on the Deliverables page with the deliverable they're about.
+//   - `bugs`      → screenshots attached to bug reports. Live on the Bugs page with the bug they're about.
+// Both still flow through /api/assets and the client-uploads bucket, but they're
+// not surfaced here because they aren't "project materials" the client uploaded
+// for us to use. If the architecture ever splits inbound vs feedback via bucket
+// prefix, this allowlist can go away.
 const DISPLAY_CATEGORIES: Record<string, { label: string; icon: string }> = {
   logos: { label: 'Logos & Brand Files', icon: '🎨' },
   photos: { label: 'Photos', icon: '📷' },

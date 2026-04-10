@@ -63,13 +63,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Upload failed: ' + uploadError.message }, { status: 500 })
     }
 
-    // Log to activity_log
+    // Log to activity_log. entity_id is NOT NULL on activity_log, and uploads
+    // don't have a primary record id yet, so anchor to the project itself.
     await db.from('activity_log').insert({
       project_id: projectId,
-      event_type: 'asset_uploaded',
-      title: `${project.client_name} uploaded: ${file.name}`,
-      description: description || `File: ${file.name} (${(file.size / 1024).toFixed(1)}KB) — Category: ${category || 'general'}`,
+      entity_type: 'upload',
+      entity_id: projectId,
+      action: 'file_uploaded',
+      actor: project.client_name || 'Client',
+      actor_type: 'client',
       metadata: {
+        title: `${project.client_name} uploaded: ${file.name}`,
+        description: description || `File: ${file.name} (${(file.size / 1024).toFixed(1)}KB) — Category: ${category || 'general'}`,
         file_name: file.name,
         file_type: file.type,
         file_size: file.size,

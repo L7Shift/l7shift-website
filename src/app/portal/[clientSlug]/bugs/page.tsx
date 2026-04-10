@@ -110,12 +110,15 @@ function BugSubmitModal({
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || [])
-    const imageFiles = files.filter(f => f.type.startsWith('image/'))
-    setScreenshots(prev => [...prev, ...imageFiles])
-    imageFiles.forEach(file => {
-      const reader = new FileReader()
-      reader.onload = (ev) => setPreviews(prev => [...prev, ev.target?.result as string])
-      reader.readAsDataURL(file)
+    setScreenshots(prev => [...prev, ...files])
+    files.forEach(file => {
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader()
+        reader.onload = (ev) => setPreviews(prev => [...prev, ev.target?.result as string])
+        reader.readAsDataURL(file)
+      } else {
+        setPreviews(prev => [...prev, ''])
+      }
     })
   }
 
@@ -294,9 +297,9 @@ function BugSubmitModal({
               </div>
             </div>
 
-            {/* Screenshots */}
+            {/* Screenshots / attachments */}
             <div style={{ marginBottom: 20 }}>
-              <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleFileSelect} style={{ display: 'none' }} />
+              <input ref={fileInputRef} type="file" accept="image/*,.pdf,.zip,.svg,.ai,.psd,.eps" multiple onChange={handleFileSelect} style={{ display: 'none' }} />
               <button
                 onClick={() => fileInputRef.current?.click()}
                 style={{
@@ -307,27 +310,47 @@ function BugSubmitModal({
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 }}
               >
-                <span style={{ fontSize: 18 }}>📸</span>
-                Add screenshots
+                <span style={{ fontSize: 18 }}>📎</span>
+                Add screenshots or files
               </button>
               {previews.length > 0 && (
                 <div style={{
                   display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))',
                   gap: 8, marginTop: 10,
                 }}>
-                  {previews.map((preview, i) => (
-                    <div key={i} style={{ position: 'relative', borderRadius: 8, overflow: 'hidden' }}>
-                      <img src={preview} alt={`Screenshot ${i + 1}`} style={{
-                        width: '100%', height: 60, objectFit: 'cover', display: 'block',
-                      }} />
-                      <button onClick={() => removeScreenshot(i)} style={{
-                        position: 'absolute', top: 2, right: 2, width: 18, height: 18,
-                        background: 'rgba(0,0,0,0.7)', border: 'none', borderRadius: '50%',
-                        color: 'white', fontSize: 10, cursor: 'pointer', display: 'flex',
-                        alignItems: 'center', justifyContent: 'center',
-                      }}>x</button>
-                    </div>
-                  ))}
+                  {previews.map((preview, i) => {
+                    const file = screenshots[i]
+                    return (
+                      <div key={i} style={{ position: 'relative', borderRadius: 8, overflow: 'hidden' }}>
+                        {preview ? (
+                          <img src={preview} alt={`Screenshot ${i + 1}`} style={{
+                            width: '100%', height: 60, objectFit: 'cover', display: 'block',
+                          }} />
+                        ) : (
+                          <div style={{
+                            width: '100%', height: 60,
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            display: 'flex', flexDirection: 'column',
+                            alignItems: 'center', justifyContent: 'center', gap: 1,
+                            fontSize: 9, color: '#888', padding: 2, boxSizing: 'border-box',
+                          }}>
+                            <span style={{ fontSize: 16 }}>📄</span>
+                            <span style={{
+                              maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}>{file?.name}</span>
+                          </div>
+                        )}
+                        <button onClick={() => removeScreenshot(i)} style={{
+                          position: 'absolute', top: 2, right: 2, width: 18, height: 18,
+                          background: 'rgba(0,0,0,0.7)', border: 'none', borderRadius: '50%',
+                          color: 'white', fontSize: 10, cursor: 'pointer', display: 'flex',
+                          alignItems: 'center', justifyContent: 'center',
+                        }}>x</button>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </div>
