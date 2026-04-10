@@ -270,7 +270,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Valid deliverable_id is required' }, { status: 400 })
     }
 
-    const updates: Record<string, unknown> = { updated_at: new Date().toISOString() }
+    const updates: Record<string, unknown> = {}
 
     if (status === 'approved') {
       updates.status = 'approved'
